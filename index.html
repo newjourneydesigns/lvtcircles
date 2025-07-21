@@ -294,7 +294,7 @@ if (phoneLink) {
 
       setStatus('Resetting database...', true)
 
-      const { error: deleteError } = await client.from('circle_leaders').delete().neq('id', 0)
+      const { error: deleteError } = await client.from('circle_leaders').delete().neq('id', '00000000-0000-0000-0000-000000000000')
       if (deleteError) {
         console.error('Error deleting leaders:', deleteError)
         clearStatus()
