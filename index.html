@@ -63,7 +63,7 @@
 
   <form id="add-leader-form">
     <h2>Add New Leader</h2>
-    <input type="text" id="name" placeholder="Name" required />
+    <input type="text" id="full_name" placeholder="Full Name" required />
     <input type="text" id="phone" placeholder="Phone" required />
     <input type="email" id="email" placeholder="Email" required />
     <select id="status">
@@ -136,7 +136,7 @@
       data.forEach(leader => {
         const row = document.createElement('tr')
         row.innerHTML = `
-          <td>${leader.name || ''}</td>
+          <td>${leader.full_name || ''}</td>
           <td>${leader.phone || ''}</td>
           <td>${leader.email || ''}</td>
           <td>${leader.status || ''}</td>
@@ -150,13 +150,13 @@
     async function addCircleLeader(event) {
       event.preventDefault()
 
-      const name = document.getElementById('name').value
+      const full_name = document.getElementById('full_name').value
       const phone = document.getElementById('phone').value
       const email = document.getElementById('email').value
       const status = document.getElementById('status').value
 
       const { error } = await client.from('circle_leaders').insert([
-        { name, phone, email, status }
+        { full_name, phone, email, status }
       ])
 
       if (error) {
