@@ -47,6 +47,16 @@
     <button id="reset-button">Reset Data</button>
   </div>
 
+  <div id="filter-container" style="margin-bottom: 1rem;">
+    <label for="filter-status">Filter by Status:</label>
+    <select id="filter-status">
+      <option value="">All</option>
+      <option value="invite">Invite</option>
+      <option value="pipeline">Pipeline</option>
+      <option value="leader">Leader</option>
+    </select>
+  </div>
+
   <table id="leaders-table">
     <thead>
       <tr>
@@ -121,7 +131,12 @@
 
     async function loadCircleLeaders() {
       setStatus('Loading leaders...', true)
-      const { data, error } = await client.from('circle_leaders').select('*')
+      const statusFilter = document.getElementById('filter-status').value
+      let query = client.from('circle_leaders').select('*')
+      if (statusFilter) {
+        query = query.eq('status', statusFilter)
+      }
+      const { data, error } = await query
       clearStatus()
 
       if (error) {
@@ -169,6 +184,8 @@
     }
 
     document.getElementById('add-leader-form').addEventListener('submit', addCircleLeader)
+
+    document.getElementById('filter-status').addEventListener('change', loadCircleLeaders)
 
     document.getElementById('seed-button').addEventListener('click', async () => {
       await seedDatabaseFromJson()
