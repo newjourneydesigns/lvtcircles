@@ -47,6 +47,16 @@
     <button id="reset-button">Reset Data</button>
   </div>
 
+  <div id="filter-container" style="margin-bottom: 1rem;">
+    <label for="filter-status">Filter by Status:</label>
+    <select id="filter-status">
+      <option value="">All</option>
+      <option value="invite">Invite</option>
+      <option value="pipeline">Pipeline</option>
+      <option value="leader">Leader</option>
+    </select>
+  </div>
+
   <table id="leaders-table">
     <thead>
       <tr>
@@ -137,7 +147,12 @@
 
     async function loadCircleLeaders() {
       setStatus('Loading leaders...', true)
-      const { data, error } = await client.from('circle_leaders').select('*')
+      const statusFilter = document.getElementById('filter-status').value
+      let query = client.from('circle_leaders').select('*')
+      if (statusFilter) {
+        query = query.eq('status', statusFilter)
+      }
+      const { data, error } = await query
       clearStatus()
 
       if (error) {
@@ -153,12 +168,24 @@
         const row = document.createElement('tr')
         row.innerHTML = `
           <td>${leader.full_name || ''}</td>
-          <td>${leader.phone || ''}</td>
-          <td>${leader.email || ''}</td>
+          <td><a href="#" class="phone-link" data-phone="${leader.phone || ''}">${leader.phone || ''}</a></td>
+          <td><a href="mailto:${leader.email || ''}">${leader.email || ''}</a></td>
           <td>${leader.status || ''}</td>
           <td><button class="edit-btn" data-id="${leader.id}">Edit</button></td>
         `
-        row.querySelector('.edit-btn').addEventListener('click', () => openEditForm(leader))
+// Add Edit button click handler
+row.querySelector('.edit-btn').addEventListener('click', () => openEditForm(leader))
+
+// Add Phone number interaction handler
+const phoneLink = row.querySelector('.phone-link')
+if (phoneLink) {
+  phoneLink.addEventListener('click', (e) => {
+    e.preventDefault()
+    const phone = e.currentTarget.dataset.phone
+    const call = confirm('Would you like to call this number? Press Cancel to text instead.')
+    window.location.href = (call ? 'tel:' : 'sms:') + phone
+  })
+} main
         tbody.appendChild(row)
       })
 
@@ -225,6 +252,8 @@
       document.getElementById('edit-leader-form').style.display = 'none'
       document.getElementById('edit-leader-form').reset()
     })
+
+    document.getElementById('filter-status').addEventListener('change', loadCircleLeaders)
 
     document.getElementById('seed-button').addEventListener('click', async () => {
       await seedDatabaseFromJson()
