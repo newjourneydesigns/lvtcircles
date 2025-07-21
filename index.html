@@ -1,79 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Circle Leaders</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 2rem;
-      background: #f4f4f4;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.5rem;
-      text-align: left;
-    }
-    th {
-      background: #eee;
-    }
-    form {
-      margin-top: 2rem;
-      background: #fff;
-      padding: 1rem;
-      border: 1px solid #ccc;
-    }
-    input, button {
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      width: 100%;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Circle Leader Tracker</h1>
-  <div id="status-container" style="margin-bottom: 1rem;">
-    <span id="status-message"></span>
-    <span id="spinner" style="display: none; margin-left: 10px;">⏳</span>
+  <div class="container">
+    <header>
+      <h1>Circle Leader Tracker</h1>
+    </header>
+    <div id="status-container">
+      <span id="status-message"></span>
+      <span id="spinner" style="display: none; margin-left: 10px;">⏳</span>
+    </div>
+    <div id="seed-button-container">
+      <button id="seed-button">Seed Data</button>
+      <button id="reset-button">Reset Data</button>
+    </div>
+    <div class="table-responsive">
+      <table id="leaders-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Data will be populated here -->
+        </tbody>
+      </table>
+    </div>
+    <form id="add-leader-form">
+      <h2>Add New Leader</h2>
+      <input type="text" id="full_name" placeholder="Full Name" required />
+      <input type="text" id="phone" placeholder="Phone" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <select id="status">
+        <option value="invite">Invite</option>
+        <option value="pipeline">Pipeline</option>
+        <option value="leader">Leader</option>
+      </select>
+      <button type="submit">Add Leader</button>
+    </form>
   </div>
-  <div id="seed-button-container" style="margin-bottom: 1rem;">
-    <button id="seed-button">Seed Data</button>
-    <button id="reset-button">Reset Data</button>
-  </div>
-
-  <table id="leaders-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Phone</th>
-        <th>Email</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Data will be populated here -->
-    </tbody>
-  </table>
-
-  <form id="add-leader-form">
-    <h2>Add New Leader</h2>
-    <input type="text" id="full_name" placeholder="Full Name" required />
-    <input type="text" id="phone" placeholder="Phone" required />
-    <input type="email" id="email" placeholder="Email" required />
-    <select id="status">
-      <option value="invite">Invite</option>
-      <option value="pipeline">Pipeline</option>
-      <option value="leader">Leader</option>
-    </select>
-    <button type="submit">Add Leader</button>
-  </form>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script type="application/json" id="circle-data">
 [
@@ -104,129 +77,129 @@
 ]
   </script>
   <script type="module">
-    const supabaseUrl = 'https://eruboulvrgrodccmjjbe.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVydWJvdWx2cmdyb2RjY21qamJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMzOTUsImV4cCI6MjA2ODY2OTM5NX0.FJ0nu1Ov8jbAdZy8SX9qs2gJ60_qdROsIkwRg8k9GK0'
+    const supabaseUrl = 'https://eruboulvrgrodccmjjbe.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVydWJvdWx2cmdyb2RjY21qamJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMzOTUsImV4cCI6MjA2ODY2OTM5NX0.FJ0nu1Ov8jbAdZy8SX9qs2gJ60_qdROsIkwRg8k9GK0';
 
-    const client = supabase.createClient(supabaseUrl, supabaseKey)
+    const client = supabase.createClient(supabaseUrl, supabaseKey);
 
     function setStatus(message, loading = false) {
-      document.getElementById('status-message').textContent = message
-      document.getElementById('spinner').style.display = loading ? 'inline' : 'none'
+      document.getElementById('status-message').textContent = message;
+      document.getElementById('spinner').style.display = loading ? 'inline' : 'none';
     }
 
     function clearStatus() {
-      document.getElementById('status-message').textContent = ''
-      document.getElementById('spinner').style.display = 'none'
+      document.getElementById('status-message').textContent = '';
+      document.getElementById('spinner').style.display = 'none';
     }
 
     async function loadCircleLeaders() {
-      setStatus('Loading leaders...', true)
-      const { data, error } = await client.from('circle_leaders').select('*')
-      clearStatus()
+      setStatus('Loading leaders...', true);
+      const { data, error } = await client.from('circle_leaders').select('*');
+      clearStatus();
 
       if (error) {
-        console.error('Error fetching circle leaders:', error)
-        setStatus('Failed to load leaders.')
-        return
+        console.error('Error fetching circle leaders:', error);
+        setStatus('Failed to load leaders.');
+        return;
       }
 
-      const tbody = document.querySelector('#leaders-table tbody')
-      tbody.innerHTML = ''
+      const tbody = document.querySelector('#leaders-table tbody');
+      tbody.innerHTML = '';
 
       data.forEach(leader => {
-        const row = document.createElement('tr')
+        const row = document.createElement('tr');
         row.innerHTML = `
           <td>${leader.full_name || ''}</td>
           <td>${leader.phone || ''}</td>
           <td>${leader.email || ''}</td>
           <td>${leader.status || ''}</td>
-        `
-        tbody.appendChild(row)
-      })
+        `;
+        tbody.appendChild(row);
+      });
 
-      setStatus(`Loaded ${data.length} leaders.`)
+      setStatus(`Loaded ${data.length} leaders.`);
     }
 
     async function addCircleLeader(event) {
-      event.preventDefault()
+      event.preventDefault();
 
-      const full_name = document.getElementById('full_name').value
-      const phone = document.getElementById('phone').value
-      const email = document.getElementById('email').value
-      const status = document.getElementById('status').value
+      const full_name = document.getElementById('full_name').value;
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('email').value;
+      const status = document.getElementById('status').value;
 
       const { error } = await client.from('circle_leaders').insert([
         { full_name, phone, email, status }
-      ])
+      ]);
 
       if (error) {
-        console.error('Error adding leader:', error)
-        return
+        console.error('Error adding leader:', error);
+        return;
       }
 
-      document.getElementById('add-leader-form').reset()
-      loadCircleLeaders()
+      document.getElementById('add-leader-form').reset();
+      loadCircleLeaders();
     }
 
-    document.getElementById('add-leader-form').addEventListener('submit', addCircleLeader)
+    document.getElementById('add-leader-form').addEventListener('submit', addCircleLeader);
 
     document.getElementById('seed-button').addEventListener('click', async () => {
-      await seedDatabaseFromJson()
-      document.getElementById('seed-button-container').style.display = 'none'
-    })
+      await seedDatabaseFromJson();
+      document.getElementById('seed-button-container').style.display = 'none';
+    });
 
-    loadCircleLeaders()
+    loadCircleLeaders();
 
     async function seedDatabaseFromJson() {
-      setStatus('Seeding data...', true)
-      const jsonScript = document.getElementById('circle-data')
+      setStatus('Seeding data...', true);
+      const jsonScript = document.getElementById('circle-data');
       if (!jsonScript) {
-        clearStatus()
-        return
+        clearStatus();
+        return;
       }
 
-      const data = JSON.parse(jsonScript.textContent)
+      const data = JSON.parse(jsonScript.textContent);
 
-      const { error } = await client.from('circle_leaders').insert(data)
+      const { error } = await client.from('circle_leaders').insert(data);
 
       if (error) {
-        console.error('Error seeding data:', error)
-        clearStatus()
-        setStatus('Failed to seed data.')
+        console.error('Error seeding data:', error);
+        clearStatus();
+        setStatus('Failed to seed data.');
       } else {
-        console.log('Seeded circle leaders successfully!')
-        clearStatus()
-        setStatus('Seeded successfully!')
-        loadCircleLeaders()
+        console.log('Seeded circle leaders successfully!');
+        clearStatus();
+        setStatus('Seeded successfully!');
+        loadCircleLeaders();
       }
     }
 
-    // seedDatabaseFromJson()
+    // seedDatabaseFromJson();
 
     async function resetDatabase() {
-      const confirmed = confirm('Are you sure you want to reset the database? This will delete all current data and reload the default set.')
-      if (!confirmed) return
+      const confirmed = confirm('Are you sure you want to reset the database? This will delete all current data and reload the default set.');
+      if (!confirmed) return;
 
-      setStatus('Resetting database...', true)
+      setStatus('Resetting database...', true);
 
-      const { error: deleteError } = await client.from('circle_leaders').delete().neq('id', 0)
+      const { error: deleteError } = await client.from('circle_leaders').delete().neq('id', 0);
       if (deleteError) {
-        console.error('Error deleting leaders:', deleteError)
-        clearStatus()
-        setStatus('Failed to reset database.')
-        return
+        console.error('Error deleting leaders:', deleteError);
+        clearStatus();
+        setStatus('Failed to reset database.');
+        return;
       }
 
-      console.log('All data deleted. Reseeding...')
-      await seedDatabaseFromJson()
+      console.log('All data deleted. Reseeding...');
+      await seedDatabaseFromJson();
 
-      clearStatus()
-      setStatus('Database reset and seeded successfully!')
+      clearStatus();
+      setStatus('Database reset and seeded successfully!');
 
-      alert('Circle leaders reset successfully!')
+      alert('Circle leaders reset successfully!');
     }
 
-    document.getElementById('reset-button').addEventListener('click', resetDatabase)
+    document.getElementById('reset-button').addEventListener('click', resetDatabase);
   </script>
 </body>
 </html>
