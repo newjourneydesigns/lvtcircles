@@ -54,6 +54,7 @@
         <th>Phone</th>
         <th>Email</th>
         <th>Status</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -72,6 +73,21 @@
       <option value="leader">Leader</option>
     </select>
     <button type="submit">Add Leader</button>
+  </form>
+
+  <form id="edit-leader-form" style="display:none;">
+    <h2>Edit Leader</h2>
+    <input type="hidden" id="edit-id" />
+    <input type="text" id="edit_full_name" placeholder="Full Name" required />
+    <input type="text" id="edit_phone" placeholder="Phone" required />
+    <input type="email" id="edit_email" placeholder="Email" required />
+    <select id="edit_status">
+      <option value="invite">Invite</option>
+      <option value="pipeline">Pipeline</option>
+      <option value="leader">Leader</option>
+    </select>
+    <button type="submit">Update Leader</button>
+    <button type="button" id="cancel-edit">Cancel</button>
   </form>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
@@ -140,7 +156,9 @@
           <td>${leader.phone || ''}</td>
           <td>${leader.email || ''}</td>
           <td>${leader.status || ''}</td>
+          <td><button class="edit-btn" data-id="${leader.id}">Edit</button></td>
         `
+        row.querySelector('.edit-btn').addEventListener('click', () => openEditForm(leader))
         tbody.appendChild(row)
       })
 
@@ -168,7 +186,45 @@
       loadCircleLeaders()
     }
 
+    function openEditForm(leader) {
+      document.getElementById('edit-id').value = leader.id
+      document.getElementById('edit_full_name').value = leader.full_name || ''
+      document.getElementById('edit_phone').value = leader.phone || ''
+      document.getElementById('edit_email').value = leader.email || ''
+      document.getElementById('edit_status').value = leader.status || 'invite'
+      document.getElementById('edit-leader-form').style.display = 'block'
+      document.getElementById('edit-leader-form').scrollIntoView({ behavior: 'smooth' })
+    }
+
+    async function updateCircleLeader(event) {
+      event.preventDefault()
+
+      const id = document.getElementById('edit-id').value
+      const full_name = document.getElementById('edit_full_name').value
+      const phone = document.getElementById('edit_phone').value
+      const email = document.getElementById('edit_email').value
+      const status = document.getElementById('edit_status').value
+
+      const { error } = await client.from('circle_leaders').update({
+        full_name, phone, email, status
+      }).eq('id', id)
+
+      if (error) {
+        console.error('Error updating leader:', error)
+        return
+      }
+
+      document.getElementById('edit-leader-form').reset()
+      document.getElementById('edit-leader-form').style.display = 'none'
+      loadCircleLeaders()
+    }
+
     document.getElementById('add-leader-form').addEventListener('submit', addCircleLeader)
+    document.getElementById('edit-leader-form').addEventListener('submit', updateCircleLeader)
+    document.getElementById('cancel-edit').addEventListener('click', () => {
+      document.getElementById('edit-leader-form').style.display = 'none'
+      document.getElementById('edit-leader-form').reset()
+    })
 
     document.getElementById('seed-button').addEventListener('click', async () => {
       await seedDatabaseFromJson()
