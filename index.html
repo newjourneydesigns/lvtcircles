@@ -65,7 +65,6 @@
         <th>Email</th>
         <th>Status</th>
         <th>Last Comm</th>
-        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -198,11 +197,7 @@
           <td><a href="mailto:${leader.email || ''}">${leader.email || ''}</a></td>
           <td>${leader.status || ''}</td>
           <td>${formatDateTime(leader.last_comm_date)}${leader.last_comm_type ? ` (${leader.last_comm_type})` : ''}</td>
-          <td><button class="edit-btn" data-id="${leader.id}">Edit</button></td>
         `
-// Add Edit button click handler
-row.querySelector('.edit-btn').addEventListener('click', () => openEditForm(leader))
-
 // Make name clickable to open edit form
 const nameLink = row.querySelector('.name-link')
 if (nameLink) {
