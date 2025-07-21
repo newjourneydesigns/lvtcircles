@@ -104,10 +104,10 @@
 ]
   </script>
   <script type="module">
-    const supabaseUrl = 'https://ylvtcircles.supabase.co'
+    const supabaseUrl = 'https://lvtcircles.supabase.co'
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVydWJvdWx2cmdyb2RjY21qamJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMzOTUsImV4cCI6MjA2ODY2OTM5NX0.FJ0nu1Ov8jbAdZy8SX9qs2gJ60_qdROsIkwRg8k9GK0'
 
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey)
+    const client = supabase.createClient(supabaseUrl, supabaseKey)
 
     function setStatus(message, loading = false) {
       document.getElementById('status-message').textContent = message
@@ -121,7 +121,7 @@
 
     async function loadCircleLeaders() {
       setStatus('Loading leaders...', true)
-      const { data, error } = await supabase.from('circle_leaders').select('*')
+      const { data, error } = await client.from('circle_leaders').select('*')
       clearStatus()
 
       if (error) {
@@ -155,7 +155,7 @@
       const email = document.getElementById('email').value
       const status = document.getElementById('status').value
 
-      const { error } = await supabase.from('circle_leaders').insert([
+      const { error } = await client.from('circle_leaders').insert([
         { name, phone, email, status }
       ])
 
@@ -187,7 +187,7 @@
 
       const data = JSON.parse(jsonScript.textContent)
 
-      const { error } = await supabase.from('circle_leaders').insert(data)
+      const { error } = await client.from('circle_leaders').insert(data)
 
       if (error) {
         console.error('Error seeding data:', error)
@@ -209,7 +209,7 @@
 
       setStatus('Resetting database...', true)
 
-      const { error: deleteError } = await supabase.from('circle_leaders').delete().neq('id', 0)
+      const { error: deleteError } = await client.from('circle_leaders').delete().neq('id', 0)
       if (deleteError) {
         console.error('Error deleting leaders:', deleteError)
         clearStatus()
