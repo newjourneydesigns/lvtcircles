@@ -65,6 +65,7 @@
         <th>Email</th>
         <th>Status</th>
         <th>Last Comm</th>
+        <th>Follow Up</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -97,6 +98,14 @@
       <option value="pipeline">Pipeline</option>
       <option value="leader">Leader</option>
     </select>
+    <label><input type="checkbox" id="edit_follow_up" /> Needs Follow Up</label>
+
+    <div id="comments-section">
+      <h3>Comments</h3>
+      <ul id="comments-list"></ul>
+      <input type="text" id="new-comment" placeholder="Add a comment" />
+      <button type="button" id="add-comment-btn">Add Comment</button>
+    </div>
     <button type="submit">Update Leader</button>
     <button type="button" id="cancel-edit">Cancel</button>
   </form>
@@ -180,6 +189,7 @@
           <td><a href="mailto:${leader.email || ''}">${leader.email || ''}</a></td>
           <td>${leader.status || ''}</td>
           <td>${formatDateTime(leader.last_comm_date)}</td>
+          <td>${leader.follow_up_needed ? 'Yes' : ''}</td>
           <td><button class="edit-btn" data-id="${leader.id}">Edit</button></td>
         `
 // Add Edit button click handler
@@ -237,6 +247,8 @@ if (phoneLink) {
       document.getElementById('edit_phone').value = leader.phone || ''
       document.getElementById('edit_email').value = leader.email || ''
       document.getElementById('edit_status').value = leader.status || 'invite'
+      document.getElementById('edit_follow_up').checked = !!leader.follow_up_needed
+      loadComments(leader.id)
       document.getElementById('edit-leader-form').style.display = 'block'
       document.getElementById('edit-leader-form').scrollIntoView({ behavior: 'smooth' })
     }
@@ -249,9 +261,10 @@ if (phoneLink) {
       const phone = document.getElementById('edit_phone').value
       const email = document.getElementById('edit_email').value
       const status = document.getElementById('edit_status').value
+      const follow_up_needed = document.getElementById('edit_follow_up').checked
 
       const { error } = await client.from('circle_leaders').update({
-        full_name, phone, email, status
+        full_name, phone, email, status, follow_up_needed
       }).eq('id', id)
 
       if (error) {
@@ -264,8 +277,46 @@ if (phoneLink) {
       loadCircleLeaders()
     }
 
+    async function loadComments(leaderId) {
+      const list = document.getElementById('comments-list')
+      list.innerHTML = ''
+      const { data, error } = await client
+        .from('circle_comments')
+        .select('*')
+        .eq('leader_id', leaderId)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error loading comments:', error)
+        return
+      }
+
+      data.forEach(c => {
+        const li = document.createElement('li')
+        li.textContent = `${new Date(c.created_at).toLocaleDateString()}: ${c.comment}`
+        list.appendChild(li)
+      })
+    }
+
+    async function addComment() {
+      const leaderId = document.getElementById('edit-id').value
+      const comment = document.getElementById('new-comment').value.trim()
+      if (!comment) return
+      const { error } = await client.from('circle_comments').insert({
+        leader_id: leaderId,
+        comment
+      })
+      if (error) {
+        console.error('Error adding comment:', error)
+        return
+      }
+      document.getElementById('new-comment').value = ''
+      loadComments(leaderId)
+    }
+
     document.getElementById('add-leader-form').addEventListener('submit', addCircleLeader)
     document.getElementById('edit-leader-form').addEventListener('submit', updateCircleLeader)
+    document.getElementById('add-comment-btn').addEventListener('click', addComment)
     document.getElementById('cancel-edit').addEventListener('click', () => {
       document.getElementById('edit-leader-form').style.display = 'none'
       document.getElementById('edit-leader-form').reset()
