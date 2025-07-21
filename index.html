@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circle Leaders</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f4f4f4;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    th {
+      background: #eee;
+    }
+    form {
+      margin-top: 2rem;
+      background: #fff;
+      padding: 1rem;
+      border: 1px solid #ccc;
+    }
+    input, button {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Circle Leader Tracker</h1>
+
+  <table id="leaders-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Data will be populated here -->
+    </tbody>
+  </table>
+
+  <form id="add-leader-form">
+    <h2>Add New Leader</h2>
+    <input type="text" id="name" placeholder="Name" required />
+    <input type="text" id="phone" placeholder="Phone" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <select id="status">
+      <option value="invite">Invite</option>
+      <option value="pipeline">Pipeline</option>
+      <option value="leader">Leader</option>
+    </select>
+    <button type="submit">Add Leader</button>
+  </form>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
+  <script type="module">
+    const supabaseUrl = 'https://ylvtcircles.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVydWJvdWx2cmdyb2RjY21qamJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMzOTUsImV4cCI6MjA2ODY2OTM5NX0.FJ0nu1Ov8jbAdZy8SX9qs2gJ60_qdROsIkwRg8k9GK0'
+
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+    async function loadCircleLeaders() {
+      const { data, error } = await supabase.from('circle_leaders').select('*')
+      if (error) {
+        console.error('Error fetching circle leaders:', error)
+        return
+      }
+
+      const tbody = document.querySelector('#leaders-table tbody')
+      tbody.innerHTML = ''
+
+      data.forEach(leader => {
+        const row = document.createElement('tr')
+        row.innerHTML = `
+          <td>${leader.name || ''}</td>
+          <td>${leader.phone || ''}</td>
+          <td>${leader.email || ''}</td>
+          <td>${leader.status || ''}</td>
+        `
+        tbody.appendChild(row)
+      })
+    }
+
+    async function addCircleLeader(event) {
+      event.preventDefault()
+
+      const name = document.getElementById('name').value
+      const phone = document.getElementById('phone').value
+      const email = document.getElementById('email').value
+      const status = document.getElementById('status').value
+
+      const { error } = await supabase.from('circle_leaders').insert([
+        { name, phone, email, status }
+      ])
+
+      if (error) {
+        console.error('Error adding leader:', error)
+        return
+      }
+
+      document.getElementById('add-leader-form').reset()
+      loadCircleLeaders()
+    }
+
+    document.getElementById('add-leader-form').addEventListener('submit', addCircleLeader)
+
+    loadCircleLeaders()
+  </script>
+</body>
+</html>
