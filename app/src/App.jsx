@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { supabase } from './supabaseClient'
 import './index.css'
 
@@ -13,6 +13,12 @@ function App() {
   const [comments, setComments] = useState([])
   const [showCommModal, setShowCommModal] = useState(false)
   const [commForm, setCommForm] = useState({ leader_id: null, date: '', type: '' })
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [showAdminMenu, setShowAdminMenu] = useState(false)
+  const [expandedId, setExpandedId] = useState(null)
+  const [commentText, setCommentText] = useState('')
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editingText, setEditingText] = useState('')
 
   useEffect(() => {
     loadLeaders()
@@ -39,6 +45,7 @@ function App() {
   function openEdit(leader) {
     setEditForm({ id: leader.id, full_name: leader.full_name || '', phone: leader.phone || '', email: leader.email || '', status: leader.status || 'invite' })
     fetchComments(leader.id)
+    setExpandedId(leader.id)
   }
 
   async function fetchComments(id) {
@@ -82,9 +89,75 @@ function App() {
     }
   }
 
+  const seedData = [
+    { full_name: 'Mike Swan', phone: '555-123-4567', email: 'mike@example.com', status: 'leader' },
+    { full_name: 'Linsey Shields', phone: '555-987-6543', email: 'linsey@example.com', status: 'pipeline' },
+    { full_name: 'Jimmy McAfee', phone: '555-333-1212', email: 'jimmy@example.com', status: 'invite' },
+    { full_name: 'Pat Bowles', phone: '555-777-8888', email: 'pat@example.com', status: 'leader' },
+  ]
+
+  async function seedDatabase() {
+    await supabase.from('circle_leaders').insert(seedData)
+    loadLeaders()
+  }
+
+  async function resetDatabase() {
+    await supabase.from('circle_leaders').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    await seedDatabase()
+  }
+
+  async function addComment(e) {
+    e.preventDefault()
+    if (!commentText || !expandedId) return
+    const { data, error } = await supabase
+      .from('circle_comments')
+      .insert({ leader_id: expandedId, comment: commentText })
+      .select()
+      .single()
+    if (!error && data) {
+      setComments([data, ...comments])
+      setCommentText('')
+    }
+  }
+
+  function startEditComment(c) {
+    setEditingCommentId(c.id)
+    setEditingText(c.comment)
+  }
+
+  async function saveEditComment(id) {
+    const { data, error } = await supabase
+      .from('circle_comments')
+      .update({ comment: editingText })
+      .eq('id', id)
+      .select()
+      .single()
+    if (!error && data) {
+      setComments(comments.map(c => (c.id === id ? data : c)))
+      setEditingCommentId(null)
+      setEditingText('')
+    }
+  }
+
+  async function deleteComment(id) {
+    const { error } = await supabase.from('circle_comments').delete().eq('id', id)
+    if (!error) {
+      setComments(comments.filter(c => c.id !== id))
+    }
+  }
+
   return (
     <div className="p-4 space-y-6">
       <h1 className="text-2xl font-bold">Circle Leader Tracker</h1>
+      <div className="dropdown">
+        <button tabIndex={0} className="btn" onClick={() => setShowAdminMenu(!showAdminMenu)}>Menu</button>
+        {showAdminMenu && (
+          <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+            <li><button onClick={seedDatabase}>Seed Database</button></li>
+            <li><button onClick={resetDatabase}>Reset Database</button></li>
+          </ul>
+        )}
+      </div>
 
       <div className="form-control w-full max-w-xs">
         <label className="label" htmlFor="filter-status">
@@ -112,50 +185,80 @@ function App() {
           </thead>
           <tbody>
             {leaders.map(l => (
-              <tr key={l.id}>
-                <td><a href="#" onClick={e => { e.preventDefault(); openEdit(l) }}>{l.full_name}</a></td>
-                <td><a href={`tel:${l.phone}`}>{l.phone}</a></td>
-                <td><a href={`mailto:${l.email}`}>{l.email}</a></td>
-                <td>{l.status}</td>
-                <td>
-                  {l.last_comm_date ? (
-                    <button className="link" onClick={() => openCommModal(l)}>
-                      {new Date(l.last_comm_date).toLocaleDateString()} {l.last_comm_type ? `(${l.last_comm_type})` : ''}
-                    </button>
-                  ) : (
-                    <button className="link" onClick={() => openCommModal(l)}>Add</button>
-                  )}
-                </td>
-                <td><button className="btn btn-sm" onClick={() => openEdit(l)}>Edit</button></td>
-              </tr>
+              <Fragment key={l.id}>
+                <tr>
+                  <td><a href="#" onClick={e => { e.preventDefault(); openEdit(l) }}>{l.full_name}</a></td>
+                  <td><a href={`tel:${l.phone}`}>{l.phone}</a></td>
+                  <td><a href={`mailto:${l.email}`}>{l.email}</a></td>
+                  <td>{l.status}</td>
+                  <td>
+                    {l.last_comm_date ? (
+                      <button className="link" onClick={() => openCommModal(l)}>
+                        {new Date(l.last_comm_date).toLocaleDateString()} {l.last_comm_type ? `(${l.last_comm_type})` : ''}
+                      </button>
+                    ) : (
+                      <button className="link" onClick={() => openCommModal(l)}>Add</button>
+                    )}
+                  </td>
+                  <td><button className="btn btn-sm" onClick={() => openEdit(l)}>Edit</button></td>
+                </tr>
+                {expandedId === l.id && (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="space-y-2">
+                        <h3 className="font-semibold">Comments</h3>
+                        <ul className="list-disc pl-5 space-y-1">
+                          {comments.map(c => (
+                            <li key={c.id} className="flex gap-2 items-start">
+                              {editingCommentId === c.id ? (
+                                <>
+                                  <input className="input input-bordered flex-grow" value={editingText} onChange={e => setEditingText(e.target.value)} />
+                                  <button className="btn btn-xs" onClick={() => saveEditComment(c.id)}>Save</button>
+                                  <button className="btn btn-xs" onClick={() => { setEditingCommentId(null); setEditingText('') }}>Cancel</button>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="flex-grow">{c.comment} ({new Date(c.created_at).toLocaleDateString()})</span>
+                                  <button className="btn btn-xs" onClick={() => startEditComment(c)}>Edit</button>
+                                  <button className="btn btn-xs" onClick={() => deleteComment(c.id)}>Delete</button>
+                                </>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                        <form onSubmit={addComment} className="flex gap-2">
+                          <input className="input input-bordered flex-grow" value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="New comment" />
+                          <button className="btn btn-primary btn-sm" type="submit">Add</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
           </tbody>
         </table>
         {loading && <span className="loading loading-spinner"></span>}
       </div>
 
-      <form onSubmit={addLeader} className="space-y-2 max-w-md">
-        <h2 className="text-xl font-semibold">Add New Leader</h2>
-        <input className="input input-bordered w-full" placeholder="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required />
-        <input className="input input-bordered w-full" placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
-        <input type="email" className="input input-bordered w-full" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
-        <select className="select select-bordered w-full" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-          {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <button className="btn btn-primary" type="submit">Add Leader</button>
-      </form>
+      <button className="btn" onClick={() => setShowAddForm(!showAddForm)}>Add User</button>
+
+      {showAddForm && (
+        <form onSubmit={addLeader} className="space-y-2 max-w-md">
+          <h2 className="text-xl font-semibold">Add New Leader</h2>
+          <input className="input input-bordered w-full" placeholder="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required />
+          <input className="input input-bordered w-full" placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
+          <input type="email" className="input input-bordered w-full" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+          <select className="select select-bordered w-full" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+            {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <button className="btn btn-primary" type="submit">Add Leader</button>
+        </form>
+      )}
 
       {editForm.id && (
         <form onSubmit={updateLeader} className="space-y-2 max-w-md">
           <h2 className="text-xl font-semibold">Edit Leader</h2>
-          <div>
-            <h3 className="font-semibold">Comments</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              {comments.map(c => (
-                <li key={c.id}>{c.comment} ({new Date(c.created_at).toLocaleDateString()})</li>
-              ))}
-            </ul>
-          </div>
           <input className="input input-bordered w-full" placeholder="Full Name" value={editForm.full_name} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} required />
           <input className="input input-bordered w-full" placeholder="Phone" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} required />
           <input type="email" className="input input-bordered w-full" placeholder="Email" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} required />
