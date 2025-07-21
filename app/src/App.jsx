@@ -10,6 +10,9 @@ function App() {
   const [statusFilter, setStatusFilter] = useState('')
   const [form, setForm] = useState({ full_name: '', phone: '', email: '', status: 'invite' })
   const [editForm, setEditForm] = useState({ id: null, full_name: '', phone: '', email: '', status: 'invite' })
+  const [comments, setComments] = useState([])
+  const [showCommModal, setShowCommModal] = useState(false)
+  const [commForm, setCommForm] = useState({ leader_id: null, date: '', type: '' })
 
   useEffect(() => {
     loadLeaders()
@@ -35,6 +38,38 @@ function App() {
 
   function openEdit(leader) {
     setEditForm({ id: leader.id, full_name: leader.full_name || '', phone: leader.phone || '', email: leader.email || '', status: leader.status || 'invite' })
+    fetchComments(leader.id)
+  }
+
+  async function fetchComments(id) {
+    const { data, error } = await supabase
+      .from('circle_comments')
+      .select('id, comment, created_at')
+      .eq('leader_id', id)
+      .order('created_at', { ascending: false })
+    if (!error && data) setComments(data)
+  }
+
+  function openCommModal(leader) {
+    const today = new Date().toISOString().split('T')[0]
+    setCommForm({ leader_id: leader.id, date: today, type: leader.last_comm_type || '' })
+    setShowCommModal(true)
+  }
+
+  async function logCommunication(e) {
+    e.preventDefault()
+    const { leader_id, date, type } = commForm
+    const commentText = `Meeting: ${type} on ${date}`
+    await supabase.from('leader_meetings').insert({ leader_id, type, date })
+    await supabase.from('circle_comments').insert({ leader_id, comment: commentText })
+    await supabase
+      .from('circle_leaders')
+      .update({ last_comm_date: date, last_comm_type: type })
+      .eq('id', leader_id)
+    setShowCommModal(false)
+    setCommForm({ leader_id: null, date: '', type: '' })
+    loadLeaders()
+    if (editForm.id === leader_id) fetchComments(leader_id)
   }
 
   async function updateLeader(e) {
@@ -82,7 +117,15 @@ function App() {
                 <td><a href={`tel:${l.phone}`}>{l.phone}</a></td>
                 <td><a href={`mailto:${l.email}`}>{l.email}</a></td>
                 <td>{l.status}</td>
-                <td>{l.last_comm_date ? new Date(l.last_comm_date).toLocaleString() : ''}</td>
+                <td>
+                  {l.last_comm_date ? (
+                    <button className="link" onClick={() => openCommModal(l)}>
+                      {new Date(l.last_comm_date).toLocaleDateString()} {l.last_comm_type ? `(${l.last_comm_type})` : ''}
+                    </button>
+                  ) : (
+                    <button className="link" onClick={() => openCommModal(l)}>Add</button>
+                  )}
+                </td>
                 <td><button className="btn btn-sm" onClick={() => openEdit(l)}>Edit</button></td>
               </tr>
             ))}
@@ -105,6 +148,14 @@ function App() {
       {editForm.id && (
         <form onSubmit={updateLeader} className="space-y-2 max-w-md">
           <h2 className="text-xl font-semibold">Edit Leader</h2>
+          <div>
+            <h3 className="font-semibold">Comments</h3>
+            <ul className="list-disc pl-5 space-y-1">
+              {comments.map(c => (
+                <li key={c.id}>{c.comment} ({new Date(c.created_at).toLocaleDateString()})</li>
+              ))}
+            </ul>
+          </div>
           <input className="input input-bordered w-full" placeholder="Full Name" value={editForm.full_name} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} required />
           <input className="input input-bordered w-full" placeholder="Phone" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} required />
           <input type="email" className="input input-bordered w-full" placeholder="Email" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} required />
@@ -116,6 +167,34 @@ function App() {
             <button className="btn" type="button" onClick={() => setEditForm({ id: null, full_name: '', phone: '', email: '', status: 'invite' })}>Cancel</button>
           </div>
         </form>
+      )}
+
+      {showCommModal && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">Log Communication</h3>
+            <form onSubmit={logCommunication} className="space-y-2 mt-4">
+              <input
+                type="date"
+                className="input input-bordered w-full"
+                value={commForm.date}
+                onChange={e => setCommForm({ ...commForm, date: e.target.value })}
+                required
+              />
+              <input
+                className="input input-bordered w-full"
+                placeholder="Type"
+                value={commForm.type}
+                onChange={e => setCommForm({ ...commForm, type: e.target.value })}
+                required
+              />
+              <div className="modal-action">
+                <button type="submit" className="btn btn-primary">Save</button>
+                <button type="button" className="btn" onClick={() => setShowCommModal(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   )
