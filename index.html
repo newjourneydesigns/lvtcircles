@@ -137,10 +137,19 @@
         const row = document.createElement('tr')
         row.innerHTML = `
           <td>${leader.full_name || ''}</td>
-          <td>${leader.phone || ''}</td>
-          <td>${leader.email || ''}</td>
+          <td><a href="#" class="phone-link" data-phone="${leader.phone || ''}">${leader.phone || ''}</a></td>
+          <td><a href="mailto:${leader.email || ''}">${leader.email || ''}</a></td>
           <td>${leader.status || ''}</td>
         `
+        const phoneLink = row.querySelector('.phone-link')
+        if (phoneLink) {
+          phoneLink.addEventListener('click', e => {
+            e.preventDefault()
+            const phone = e.currentTarget.dataset.phone
+            const call = confirm('Would you like to call this number? Press Cancel to text instead.')
+            window.location.href = (call ? 'tel:' : 'sms:') + phone
+          })
+        }
         tbody.appendChild(row)
       })
 
