@@ -83,6 +83,15 @@
       <option value="pipeline">Pipeline</option>
       <option value="leader">Leader</option>
     </select>
+    <input type="date" id="last_comm_date" />
+    <select id="last_comm_type">
+      <option value="">Communication Type</option>
+      <option value="Atrium">Atrium</option>
+      <option value="Meeting">Meeting</option>
+      <option value="Zoom">Zoom</option>
+      <option value="Text">Text</option>
+      <option value="Phone">Phone</option>
+    </select>
     <button type="submit">Add Leader</button>
   </form>
 
@@ -96,6 +105,15 @@
       <option value="invite">Invite</option>
       <option value="pipeline">Pipeline</option>
       <option value="leader">Leader</option>
+    </select>
+    <input type="date" id="edit_last_comm_date" />
+    <select id="edit_last_comm_type">
+      <option value="">Communication Type</option>
+      <option value="Atrium">Atrium</option>
+      <option value="Meeting">Meeting</option>
+      <option value="Zoom">Zoom</option>
+      <option value="Text">Text</option>
+      <option value="Phone">Phone</option>
     </select>
     <button type="submit">Update Leader</button>
     <button type="button" id="cancel-edit">Cancel</button>
@@ -179,7 +197,7 @@
           <td><a href="#" class="phone-link" data-phone="${leader.phone || ''}">${leader.phone || ''}</a></td>
           <td><a href="mailto:${leader.email || ''}">${leader.email || ''}</a></td>
           <td>${leader.status || ''}</td>
-          <td>${formatDateTime(leader.last_comm_date)}</td>
+          <td>${formatDateTime(leader.last_comm_date)}${leader.last_comm_type ? ` (${leader.last_comm_type})` : ''}</td>
           <td><button class="edit-btn" data-id="${leader.id}">Edit</button></td>
         `
 // Add Edit button click handler
@@ -217,9 +235,11 @@ if (phoneLink) {
       const phone = document.getElementById('phone').value
       const email = document.getElementById('email').value
       const status = document.getElementById('status').value
+      const last_comm_date = document.getElementById('last_comm_date').value || null
+      const last_comm_type = document.getElementById('last_comm_type').value || null
 
       const { error } = await client.from('circle_leaders').insert([
-        { full_name, phone, email, status }
+        { full_name, phone, email, status, last_comm_date, last_comm_type }
       ])
 
       if (error) {
@@ -237,6 +257,8 @@ if (phoneLink) {
       document.getElementById('edit_phone').value = leader.phone || ''
       document.getElementById('edit_email').value = leader.email || ''
       document.getElementById('edit_status').value = leader.status || 'invite'
+      document.getElementById('edit_last_comm_date').value = leader.last_comm_date || ''
+      document.getElementById('edit_last_comm_type').value = leader.last_comm_type || ''
       document.getElementById('edit-leader-form').style.display = 'block'
       document.getElementById('edit-leader-form').scrollIntoView({ behavior: 'smooth' })
     }
@@ -249,9 +271,11 @@ if (phoneLink) {
       const phone = document.getElementById('edit_phone').value
       const email = document.getElementById('edit_email').value
       const status = document.getElementById('edit_status').value
+      const last_comm_date = document.getElementById('edit_last_comm_date').value || null
+      const last_comm_type = document.getElementById('edit_last_comm_type').value || null
 
       const { error } = await client.from('circle_leaders').update({
-        full_name, phone, email, status
+        full_name, phone, email, status, last_comm_date, last_comm_type
       }).eq('id', id)
 
       if (error) {
