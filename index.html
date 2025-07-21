@@ -167,7 +167,7 @@
       data.forEach(leader => {
         const row = document.createElement('tr')
         row.innerHTML = `
-          <td>${leader.full_name || ''}</td>
+          <td><a href="#" class="name-link">${leader.full_name || ''}</a></td>
           <td><a href="#" class="phone-link" data-phone="${leader.phone || ''}">${leader.phone || ''}</a></td>
           <td><a href="mailto:${leader.email || ''}">${leader.email || ''}</a></td>
           <td>${leader.status || ''}</td>
@@ -175,6 +175,15 @@
         `
 // Add Edit button click handler
 row.querySelector('.edit-btn').addEventListener('click', () => openEditForm(leader))
+
+// Make name clickable to open edit form
+const nameLink = row.querySelector('.name-link')
+if (nameLink) {
+  nameLink.addEventListener('click', (e) => {
+    e.preventDefault()
+    openEditForm(leader)
+  })
+}
 
 // Add Phone number interaction handler
 const phoneLink = row.querySelector('.phone-link')
