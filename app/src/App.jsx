@@ -14,7 +14,6 @@ function App() {
   const [showCommModal, setShowCommModal] = useState(false)
   const [commForm, setCommForm] = useState({ leader_id: null, date: '', type: '' })
   const [showAddForm, setShowAddForm] = useState(false)
-  const [showAdminMenu, setShowAdminMenu] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
   const [commentText, setCommentText] = useState('')
   const [editingCommentId, setEditingCommentId] = useState(null)
@@ -147,16 +146,12 @@ function App() {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="container mx-auto px-4 py-8 space-y-6">
       <h1 className="text-2xl font-bold">Circle Leader Tracker</h1>
-      <div className="dropdown">
-        <button tabIndex={0} className="btn" onClick={() => setShowAdminMenu(!showAdminMenu)}>Menu</button>
-        {showAdminMenu && (
-          <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-            <li><button onClick={seedDatabase}>Seed Database</button></li>
-            <li><button onClick={resetDatabase}>Reset Database</button></li>
-          </ul>
-        )}
+      <p className="mt-2 font-semibold">Loaded {leaders.length} leaders</p>
+      <div className="flex gap-2">
+        <button className="btn btn-secondary" onClick={seedDatabase}>Seed Data</button>
+        <button className="btn btn-secondary" onClick={resetDatabase}>Reset Data</button>
       </div>
 
       <div className="form-control w-full max-w-xs">
@@ -241,35 +236,39 @@ function App() {
         {loading && <span className="loading loading-spinner"></span>}
       </div>
 
-      <button className="btn" onClick={() => setShowAddForm(!showAddForm)}>Add User</button>
+      <button className="btn" onClick={() => setShowAddForm(!showAddForm)}>Add Leader</button>
 
       {showAddForm && (
-        <form onSubmit={addLeader} className="space-y-2 max-w-md">
-          <h2 className="text-xl font-semibold">Add New Leader</h2>
-          <input className="input input-bordered w-full" placeholder="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required />
-          <input className="input input-bordered w-full" placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
-          <input type="email" className="input input-bordered w-full" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
-          <select className="select select-bordered w-full" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-            {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <button className="btn btn-primary" type="submit">Add Leader</button>
-        </form>
+        <div className="card w-full max-w-md bg-base-100 shadow">
+          <form onSubmit={addLeader} className="card-body space-y-2">
+            <h2 className="card-title">Add New Leader</h2>
+            <input className="input input-bordered w-full" placeholder="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required />
+            <input className="input input-bordered w-full" placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
+            <input type="email" className="input input-bordered w-full" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+            <select className="select select-bordered w-full" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+              {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <button className="btn btn-primary" type="submit">Add Leader</button>
+          </form>
+        </div>
       )}
 
       {editForm.id && (
-        <form onSubmit={updateLeader} className="space-y-2 max-w-md">
-          <h2 className="text-xl font-semibold">Edit Leader</h2>
-          <input className="input input-bordered w-full" placeholder="Full Name" value={editForm.full_name} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} required />
-          <input className="input input-bordered w-full" placeholder="Phone" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} required />
-          <input type="email" className="input input-bordered w-full" placeholder="Email" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} required />
-          <select className="select select-bordered w-full" value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
-            {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <div className="flex gap-2">
-            <button className="btn btn-primary" type="submit">Update Leader</button>
-            <button className="btn" type="button" onClick={() => setEditForm({ id: null, full_name: '', phone: '', email: '', status: 'invite' })}>Cancel</button>
-          </div>
-        </form>
+        <div className="card w-full max-w-md bg-base-100 shadow">
+          <form onSubmit={updateLeader} className="card-body space-y-2">
+            <h2 className="card-title">Edit Leader</h2>
+            <input className="input input-bordered w-full" placeholder="Full Name" value={editForm.full_name} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} required />
+            <input className="input input-bordered w-full" placeholder="Phone" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} required />
+            <input type="email" className="input input-bordered w-full" placeholder="Email" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} required />
+            <select className="select select-bordered w-full" value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
+              {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <div className="flex gap-2">
+              <button className="btn btn-primary" type="submit">Update Leader</button>
+              <button className="btn" type="button" onClick={() => setEditForm({ id: null, full_name: '', phone: '', email: '', status: 'invite' })}>Cancel</button>
+            </div>
+          </form>
+        </div>
       )}
 
       {showCommModal && (
