@@ -3,13 +3,37 @@ import { supabase } from './supabaseClient'
 import './index.css'
 
 const statuses = ['invite', 'pipeline', 'leader']
+const frequencies = ['Weekly', '1st & 3rd', '1st & 4th', 'Other']
 
 function App() {
   const [leaders, setLeaders] = useState([])
   const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState('')
-  const [form, setForm] = useState({ full_name: '', phone: '', email: '', status: 'invite' })
-  const [editForm, setEditForm] = useState({ id: null, full_name: '', phone: '', email: '', status: 'invite' })
+  const [form, setForm] = useState({
+    full_name: '',
+    phone: '',
+    email: '',
+    status: 'invite',
+    campus: '',
+    meeting_day: '',
+    meeting_time: '',
+    meeting_frequency: 'Weekly',
+    circle_type: '',
+    circle_location: '',
+  })
+  const [editForm, setEditForm] = useState({
+    id: null,
+    full_name: '',
+    phone: '',
+    email: '',
+    status: 'invite',
+    campus: '',
+    meeting_day: '',
+    meeting_time: '',
+    meeting_frequency: 'Weekly',
+    circle_type: '',
+    circle_location: '',
+  })
   const [comments, setComments] = useState([])
   const [showCommModal, setShowCommModal] = useState(false)
   const [commForm, setCommForm] = useState({ leader_id: null, date: '', type: '' })
@@ -18,6 +42,9 @@ function App() {
   const [commentText, setCommentText] = useState('')
   const [editingCommentId, setEditingCommentId] = useState(null)
   const [editingText, setEditingText] = useState('')
+  const [meetings, setMeetings] = useState([])
+  const [showMeetingModal, setShowMeetingModal] = useState(false)
+  const [meetingForm, setMeetingForm] = useState({ leader_id: null, date: '', type: '', notes: '' })
 
   useEffect(() => {
     loadLeaders()
@@ -36,18 +63,42 @@ function App() {
     e.preventDefault()
     const { error } = await supabase.from('circle_leaders').insert([form])
     if (!error) {
-      setForm({ full_name: '', phone: '', email: '', status: 'invite' })
+      setForm({
+        full_name: '',
+        phone: '',
+        email: '',
+        status: 'invite',
+        campus: '',
+        meeting_day: '',
+        meeting_time: '',
+        meeting_frequency: 'Weekly',
+        circle_type: '',
+        circle_location: '',
+      })
       loadLeaders()
     }
   }
 
   function openDetails(leader) {
     fetchComments(leader.id)
+    fetchMeetings(leader.id)
     setExpandedId(expandedId === leader.id ? null : leader.id)
   }
 
   function openEdit(leader) {
-    setEditForm({ id: leader.id, full_name: leader.full_name || '', phone: leader.phone || '', email: leader.email || '', status: leader.status || 'invite' })
+    setEditForm({
+      id: leader.id,
+      full_name: leader.full_name || '',
+      phone: leader.phone || '',
+      email: leader.email || '',
+      status: leader.status || 'invite',
+      campus: leader.campus || '',
+      meeting_day: leader.meeting_day || '',
+      meeting_time: leader.meeting_time || '',
+      meeting_frequency: leader.meeting_frequency || 'Weekly',
+      circle_type: leader.circle_type || '',
+      circle_location: leader.circle_location || '',
+    })
     openDetails(leader)
   }
 
@@ -60,10 +111,25 @@ function App() {
     if (!error && data) setComments(data)
   }
 
+  async function fetchMeetings(id) {
+    const { data, error } = await supabase
+      .from('leader_meetings')
+      .select('id, type, date, notes')
+      .eq('leader_id', id)
+      .order('date', { ascending: false })
+    if (!error && data) setMeetings(data)
+  }
+
   function openCommModal(leader) {
     const today = new Date().toISOString().split('T')[0]
     setCommForm({ leader_id: leader.id, date: today, type: leader.last_comm_type || '' })
     setShowCommModal(true)
+  }
+
+  function openMeetingModal(leader) {
+    const today = new Date().toISOString().split('T')[0]
+    setMeetingForm({ leader_id: leader.id, date: today, type: '', notes: '' })
+    setShowMeetingModal(true)
   }
 
   async function logCommunication(e) {
@@ -82,12 +148,35 @@ function App() {
     if (editForm.id === leader_id) fetchComments(leader_id)
   }
 
+  async function addMeeting(e) {
+    e.preventDefault()
+    const { leader_id, date, type, notes } = meetingForm
+    const { error } = await supabase.from('leader_meetings').insert({ leader_id, date, type, notes })
+    if (!error) {
+      setShowMeetingModal(false)
+      setMeetingForm({ leader_id: null, date: '', type: '', notes: '' })
+      fetchMeetings(leader_id)
+    }
+  }
+
   async function updateLeader(e) {
     e.preventDefault()
-    const { id, full_name, phone, email, status } = editForm
-    const { error } = await supabase.from('circle_leaders').update({ full_name, phone, email, status }).eq('id', id)
+    const { id, ...rest } = editForm
+    const { error } = await supabase.from('circle_leaders').update(rest).eq('id', id)
     if (!error) {
-      setEditForm({ id: null, full_name: '', phone: '', email: '', status: 'invite' })
+      setEditForm({
+        id: null,
+        full_name: '',
+        phone: '',
+        email: '',
+        status: 'invite',
+        campus: '',
+        meeting_day: '',
+        meeting_time: '',
+        meeting_frequency: 'Weekly',
+        circle_type: '',
+        circle_location: '',
+      })
       loadLeaders()
     }
   }
@@ -176,6 +265,8 @@ function App() {
             <tr>
               <th>Name</th>
               <th>Status</th>
+              <th>Campus</th>
+              <th>Meeting</th>
               <th>Last Comm</th>
             </tr>
           </thead>
@@ -185,6 +276,8 @@ function App() {
                 <tr>
                   <td><a href="#" onClick={e => { e.preventDefault(); openDetails(l) }}>{l.full_name}</a></td>
                   <td>{l.status}</td>
+                  <td>{l.campus}</td>
+                  <td>{[l.meeting_day, l.meeting_time].filter(Boolean).join(' ')}</td>
                   <td>
                     {l.last_comm_date ? (
                       <button className="link" onClick={() => openCommModal(l)}>
@@ -197,12 +290,28 @@ function App() {
                 </tr>
                 {expandedId === l.id && (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={5}>
                       <div className="space-y-4">
                         <div className="space-y-1">
                           <p><strong>Phone:</strong> <a className="link" href={`tel:${l.phone}`}>{l.phone}</a></p>
                           <p><strong>Email:</strong> <a className="link" href={`mailto:${l.email}`}>{l.email}</a></p>
+                          {l.campus && <p><strong>Campus:</strong> {l.campus}</p>}
+                          {(l.meeting_day || l.meeting_time) && (
+                            <p><strong>Meeting:</strong> {[l.meeting_day, l.meeting_time].filter(Boolean).join(' ')}</p>
+                          )}
+                          {l.meeting_frequency && <p><strong>Frequency:</strong> {l.meeting_frequency}</p>}
+                          {l.circle_type && <p><strong>Type:</strong> {l.circle_type}</p>}
+                          {l.circle_location && <p><strong>Location:</strong> {l.circle_location}</p>}
                           <button className="btn btn-sm" onClick={() => openEdit(l)}>Edit</button>
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="font-semibold">Meetings</h3>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {meetings.map(m => (
+                              <li key={m.id}>{new Date(m.date).toLocaleDateString()} - {m.type}{m.notes ? `: ${m.notes}` : ''}</li>
+                            ))}
+                          </ul>
+                          <button className="btn btn-xs" onClick={() => openMeetingModal(l)}>Add Meeting</button>
                         </div>
                         <div className="space-y-2">
                           <h3 className="font-semibold">Comments</h3>
@@ -250,6 +359,14 @@ function App() {
             <input className="input input-bordered w-full" placeholder="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required />
             <input className="input input-bordered w-full" placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
             <input type="email" className="input input-bordered w-full" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+            <input className="input input-bordered w-full" placeholder="Campus" value={form.campus} onChange={e => setForm({ ...form, campus: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Meeting Day" value={form.meeting_day} onChange={e => setForm({ ...form, meeting_day: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Meeting Time" value={form.meeting_time} onChange={e => setForm({ ...form, meeting_time: e.target.value })} />
+            <select className="select select-bordered w-full" value={form.meeting_frequency} onChange={e => setForm({ ...form, meeting_frequency: e.target.value })}>
+              {frequencies.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
+            <input className="input input-bordered w-full" placeholder="Circle Type" value={form.circle_type} onChange={e => setForm({ ...form, circle_type: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Location" value={form.circle_location} onChange={e => setForm({ ...form, circle_location: e.target.value })} />
             <select className="select select-bordered w-full" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
               {statuses.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -265,14 +382,68 @@ function App() {
             <input className="input input-bordered w-full" placeholder="Full Name" value={editForm.full_name} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} required />
             <input className="input input-bordered w-full" placeholder="Phone" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} required />
             <input type="email" className="input input-bordered w-full" placeholder="Email" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} required />
+            <input className="input input-bordered w-full" placeholder="Campus" value={editForm.campus} onChange={e => setEditForm({ ...editForm, campus: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Meeting Day" value={editForm.meeting_day} onChange={e => setEditForm({ ...editForm, meeting_day: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Meeting Time" value={editForm.meeting_time} onChange={e => setEditForm({ ...editForm, meeting_time: e.target.value })} />
+            <select className="select select-bordered w-full" value={editForm.meeting_frequency} onChange={e => setEditForm({ ...editForm, meeting_frequency: e.target.value })}>
+              {frequencies.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
+            <input className="input input-bordered w-full" placeholder="Circle Type" value={editForm.circle_type} onChange={e => setEditForm({ ...editForm, circle_type: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Location" value={editForm.circle_location} onChange={e => setEditForm({ ...editForm, circle_location: e.target.value })} />
             <select className="select select-bordered w-full" value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
               {statuses.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
             <div className="flex gap-2">
               <button className="btn btn-primary" type="submit">Update Leader</button>
-              <button className="btn" type="button" onClick={() => setEditForm({ id: null, full_name: '', phone: '', email: '', status: 'invite' })}>Cancel</button>
+              <button className="btn" type="button" onClick={() => setEditForm({
+                id: null,
+                full_name: '',
+                phone: '',
+                email: '',
+                status: 'invite',
+                campus: '',
+                meeting_day: '',
+                meeting_time: '',
+                meeting_frequency: 'Weekly',
+                circle_type: '',
+                circle_location: '',
+              })}>Cancel</button>
             </div>
           </form>
+        </div>
+      )}
+
+      {showMeetingModal && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">Add Meeting</h3>
+            <form onSubmit={addMeeting} className="space-y-2 mt-4">
+              <input
+                type="date"
+                className="input input-bordered w-full"
+                value={meetingForm.date}
+                onChange={e => setMeetingForm({ ...meetingForm, date: e.target.value })}
+                required
+              />
+              <input
+                className="input input-bordered w-full"
+                placeholder="Type"
+                value={meetingForm.type}
+                onChange={e => setMeetingForm({ ...meetingForm, type: e.target.value })}
+                required
+              />
+              <input
+                className="input input-bordered w-full"
+                placeholder="Notes"
+                value={meetingForm.notes}
+                onChange={e => setMeetingForm({ ...meetingForm, notes: e.target.value })}
+              />
+              <div className="modal-action">
+                <button type="submit" className="btn btn-primary">Save</button>
+                <button type="button" className="btn" onClick={() => setShowMeetingModal(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
