@@ -41,10 +41,14 @@ function App() {
     }
   }
 
+  function openDetails(leader) {
+    fetchComments(leader.id)
+    setExpandedId(expandedId === leader.id ? null : leader.id)
+  }
+
   function openEdit(leader) {
     setEditForm({ id: leader.id, full_name: leader.full_name || '', phone: leader.phone || '', email: leader.email || '', status: leader.status || 'invite' })
-    fetchComments(leader.id)
-    setExpandedId(leader.id)
+    openDetails(leader)
   }
 
   async function fetchComments(id) {
@@ -171,20 +175,15 @@ function App() {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Phone</th>
-              <th>Email</th>
               <th>Status</th>
               <th>Last Comm</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
             {leaders.map(l => (
               <Fragment key={l.id}>
                 <tr>
-                  <td><a href="#" onClick={e => { e.preventDefault(); openEdit(l) }}>{l.full_name}</a></td>
-                  <td><a href={`tel:${l.phone}`}>{l.phone}</a></td>
-                  <td><a href={`mailto:${l.email}`}>{l.email}</a></td>
+                  <td><a href="#" onClick={e => { e.preventDefault(); openDetails(l) }}>{l.full_name}</a></td>
                   <td>{l.status}</td>
                   <td>
                     {l.last_comm_date ? (
@@ -195,16 +194,21 @@ function App() {
                       <button className="link" onClick={() => openCommModal(l)}>Add</button>
                     )}
                   </td>
-                  <td><button className="btn btn-sm" onClick={() => openEdit(l)}>Edit</button></td>
                 </tr>
                 {expandedId === l.id && (
                   <tr>
                     <td colSpan={6}>
-                      <div className="space-y-2">
-                        <h3 className="font-semibold">Comments</h3>
-                        <ul className="list-disc pl-5 space-y-1">
-                          {comments.map(c => (
-                            <li key={c.id} className="flex gap-2 items-start">
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <p><strong>Phone:</strong> <a className="link" href={`tel:${l.phone}`}>{l.phone}</a></p>
+                          <p><strong>Email:</strong> <a className="link" href={`mailto:${l.email}`}>{l.email}</a></p>
+                          <button className="btn btn-sm" onClick={() => openEdit(l)}>Edit</button>
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="font-semibold">Comments</h3>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {comments.map(c => (
+                              <li key={c.id} className="flex gap-2 items-start">
                               {editingCommentId === c.id ? (
                                 <>
                                   <input className="input input-bordered flex-grow" value={editingText} onChange={e => setEditingText(e.target.value)} />
@@ -225,6 +229,7 @@ function App() {
                           <input className="input input-bordered flex-grow" value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="New comment" />
                           <button className="btn btn-primary btn-sm" type="submit">Add</button>
                         </form>
+                        </div>
                       </div>
                     </td>
                   </tr>
