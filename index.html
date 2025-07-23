@@ -53,6 +53,9 @@
       border: 1px solid #ccc;
       padding: 0.5rem 0.25rem;
       text-align: left;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 200px;
     }
     
     @media (min-width: 768px) {
@@ -62,6 +65,15 @@
       }
       th, td {
         padding: 0.5rem;
+        max-width: none;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      th, td {
+        padding: 0.4rem 0.2rem;
+        font-size: 0.8rem;
+        max-width: 120px;
       }
     }
     /* Prevent time column from wrapping */
@@ -211,6 +223,25 @@
       border-radius: 4px;
       font-weight: bold;
       min-height: 44px; /* Minimum touch target for mobile */
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    @media (max-width: 768px) {
+      .action-buttons button {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.75rem;
+        min-width: 100px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .action-buttons button {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.5rem;
+        min-width: 80px;
+      }
     }
     .btn-primary, .action-buttons .btn-primary {
       background: #007bff !important;
@@ -534,12 +565,24 @@
       max-width: 400px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       margin: 0.5rem;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     
     @media (min-width: 768px) {
       .modal-content {
         padding: 2rem;
         width: 90%;
+        max-height: 80vh;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .modal-content {
+        width: 98%;
+        margin: 0.25rem;
+        padding: 0.75rem;
+        max-height: 95vh;
       }
     }
     .modal-header {
@@ -563,6 +606,19 @@
       margin-bottom: 0.5rem;
       font-weight: bold;
       color: #555;
+      font-size: 0.9rem;
+      word-wrap: break-word;
+    }
+    
+    @media (max-width: 768px) {
+      .form-group {
+        margin-bottom: 0.75rem;
+      }
+      
+      .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+      }
     }
     .form-group input,
     .form-group select {
@@ -572,6 +628,25 @@
       border-radius: 4px;
       font-size: 1rem;
       box-sizing: border-box;
+    }
+    
+    /* Specific styling for date inputs to prevent overflow */
+    .form-group input[type="date"] {
+      font-size: 0.9rem;
+      padding: 0.6rem;
+    }
+    
+    @media (max-width: 768px) {
+      .form-group input,
+      .form-group select {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+      }
+      
+      .form-group input[type="date"] {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+      }
     }
     .modal-buttons {
       display: flex;
@@ -597,6 +672,24 @@
       min-width: auto;
       width: auto;
       min-height: 44px; /* Minimum touch target for mobile */
+      flex: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    @media (max-width: 768px) {
+      .modal-buttons button {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.75rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .modal-buttons button {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.5rem;
+      }
     }
     .overdue-comm {
       background-color: #ffebee !important;
