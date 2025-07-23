@@ -1,6 +1,7 @@
 # lvtcircles
 
 This project is a simple circle leader tracker built with React and Vite. It uses Tailwind CSS with daisyUI for styling and connects to Supabase for data storage.
+The legacy HTML demo has been removed in favour of a single React application located in the `app` directory.
 
 ## Development
 
@@ -13,4 +14,6 @@ This project is a simple circle leader tracker built with React and Vite. It use
    npm run dev --prefix app
    ```
 
-The application is served at `http://localhost:5173` by default.
+The application is served at `http://localhost:5173` by default. If you build for
+production with `npm run build --prefix app`, open `app/dist/index.html` in a
+browser to see the styled UI.

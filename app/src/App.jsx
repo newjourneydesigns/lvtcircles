@@ -1,15 +1,50 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { supabase } from './supabaseClient'
 import './index.css'
 
 const statuses = ['invite', 'pipeline', 'leader']
+const frequencies = ['Weekly', '1st & 3rd', '1st & 4th', 'Other']
 
 function App() {
   const [leaders, setLeaders] = useState([])
   const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState('')
-  const [form, setForm] = useState({ full_name: '', phone: '', email: '', status: 'invite' })
-  const [editForm, setEditForm] = useState({ id: null, full_name: '', phone: '', email: '', status: 'invite' })
+  const [form, setForm] = useState({
+    full_name: '',
+    phone: '',
+    email: '',
+    status: 'invite',
+    campus: '',
+    meeting_day: '',
+    meeting_time: '',
+    meeting_frequency: 'Weekly',
+    circle_type: '',
+    circle_location: '',
+  })
+  const [editForm, setEditForm] = useState({
+    id: null,
+    full_name: '',
+    phone: '',
+    email: '',
+    status: 'invite',
+    campus: '',
+    meeting_day: '',
+    meeting_time: '',
+    meeting_frequency: 'Weekly',
+    circle_type: '',
+    circle_location: '',
+  })
+  const [comments, setComments] = useState([])
+  const [showCommModal, setShowCommModal] = useState(false)
+  const [commForm, setCommForm] = useState({ leader_id: null, date: '', type: '' })
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [expandedId, setExpandedId] = useState(null)
+  const [commentText, setCommentText] = useState('')
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editingText, setEditingText] = useState('')
+  const [meetings, setMeetings] = useState([])
+  const [showMeetingModal, setShowMeetingModal] = useState(false)
+  const [meetingForm, setMeetingForm] = useState({ leader_id: null, date: '', type: '', notes: '' })
 
   useEffect(() => {
     loadLeaders()
@@ -28,28 +63,189 @@ function App() {
     e.preventDefault()
     const { error } = await supabase.from('circle_leaders').insert([form])
     if (!error) {
-      setForm({ full_name: '', phone: '', email: '', status: 'invite' })
+      setForm({
+        full_name: '',
+        phone: '',
+        email: '',
+        status: 'invite',
+        campus: '',
+        meeting_day: '',
+        meeting_time: '',
+        meeting_frequency: 'Weekly',
+        circle_type: '',
+        circle_location: '',
+      })
       loadLeaders()
     }
   }
 
+  function openDetails(leader) {
+    fetchComments(leader.id)
+    fetchMeetings(leader.id)
+    setExpandedId(expandedId === leader.id ? null : leader.id)
+  }
+
   function openEdit(leader) {
-    setEditForm({ id: leader.id, full_name: leader.full_name || '', phone: leader.phone || '', email: leader.email || '', status: leader.status || 'invite' })
+    setEditForm({
+      id: leader.id,
+      full_name: leader.full_name || '',
+      phone: leader.phone || '',
+      email: leader.email || '',
+      status: leader.status || 'invite',
+      campus: leader.campus || '',
+      meeting_day: leader.meeting_day || '',
+      meeting_time: leader.meeting_time || '',
+      meeting_frequency: leader.meeting_frequency || 'Weekly',
+      circle_type: leader.circle_type || '',
+      circle_location: leader.circle_location || '',
+    })
+    openDetails(leader)
+  }
+
+  async function fetchComments(id) {
+    const { data, error } = await supabase
+      .from('circle_comments')
+      .select('id, comment, created_at')
+      .eq('leader_id', id)
+      .order('created_at', { ascending: false })
+    if (!error && data) setComments(data)
+  }
+
+  async function fetchMeetings(id) {
+    const { data, error } = await supabase
+      .from('leader_meetings')
+      .select('id, type, date, notes')
+      .eq('leader_id', id)
+      .order('date', { ascending: false })
+    if (!error && data) setMeetings(data)
+  }
+
+  function openCommModal(leader) {
+    const today = new Date().toISOString().split('T')[0]
+    setCommForm({ leader_id: leader.id, date: today, type: leader.last_comm_type || '' })
+    setShowCommModal(true)
+  }
+
+  function openMeetingModal(leader) {
+    const today = new Date().toISOString().split('T')[0]
+    setMeetingForm({ leader_id: leader.id, date: today, type: '', notes: '' })
+    setShowMeetingModal(true)
+  }
+
+  async function logCommunication(e) {
+    e.preventDefault()
+    const { leader_id, date, type } = commForm
+    const commentText = `Meeting: ${type} on ${date}`
+    await supabase.from('leader_meetings').insert({ leader_id, type, date })
+    await supabase.from('circle_comments').insert({ leader_id, comment: commentText })
+    await supabase
+      .from('circle_leaders')
+      .update({ last_comm_date: date, last_comm_type: type })
+      .eq('id', leader_id)
+    setShowCommModal(false)
+    setCommForm({ leader_id: null, date: '', type: '' })
+    loadLeaders()
+    if (editForm.id === leader_id) fetchComments(leader_id)
+  }
+
+  async function addMeeting(e) {
+    e.preventDefault()
+    const { leader_id, date, type, notes } = meetingForm
+    const { error } = await supabase.from('leader_meetings').insert({ leader_id, date, type, notes })
+    if (!error) {
+      setShowMeetingModal(false)
+      setMeetingForm({ leader_id: null, date: '', type: '', notes: '' })
+      fetchMeetings(leader_id)
+    }
   }
 
   async function updateLeader(e) {
     e.preventDefault()
-    const { id, full_name, phone, email, status } = editForm
-    const { error } = await supabase.from('circle_leaders').update({ full_name, phone, email, status }).eq('id', id)
+    const { id, ...rest } = editForm
+    const { error } = await supabase.from('circle_leaders').update(rest).eq('id', id)
     if (!error) {
-      setEditForm({ id: null, full_name: '', phone: '', email: '', status: 'invite' })
+      setEditForm({
+        id: null,
+        full_name: '',
+        phone: '',
+        email: '',
+        status: 'invite',
+        campus: '',
+        meeting_day: '',
+        meeting_time: '',
+        meeting_frequency: 'Weekly',
+        circle_type: '',
+        circle_location: '',
+      })
       loadLeaders()
     }
   }
 
+  const seedData = [
+    { full_name: 'Mike Swan', phone: '555-123-4567', email: 'mike@example.com', status: 'leader' },
+    { full_name: 'Linsey Shields', phone: '555-987-6543', email: 'linsey@example.com', status: 'pipeline' },
+    { full_name: 'Jimmy McAfee', phone: '555-333-1212', email: 'jimmy@example.com', status: 'invite' },
+    { full_name: 'Pat Bowles', phone: '555-777-8888', email: 'pat@example.com', status: 'leader' },
+  ]
+
+  async function seedDatabase() {
+    await supabase.from('circle_leaders').insert(seedData)
+    loadLeaders()
+  }
+
+  async function resetDatabase() {
+    await supabase.from('circle_leaders').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    await seedDatabase()
+  }
+
+  async function addComment(e) {
+    e.preventDefault()
+    if (!commentText || !expandedId) return
+    const { data, error } = await supabase
+      .from('circle_comments')
+      .insert({ leader_id: expandedId, comment: commentText })
+      .select()
+      .single()
+    if (!error && data) {
+      setComments([data, ...comments])
+      setCommentText('')
+    }
+  }
+
+  function startEditComment(c) {
+    setEditingCommentId(c.id)
+    setEditingText(c.comment)
+  }
+
+  async function saveEditComment(id) {
+    const { data, error } = await supabase
+      .from('circle_comments')
+      .update({ comment: editingText })
+      .eq('id', id)
+      .select()
+      .single()
+    if (!error && data) {
+      setComments(comments.map(c => (c.id === id ? data : c)))
+      setEditingCommentId(null)
+      setEditingText('')
+    }
+  }
+
+  async function deleteComment(id) {
+    const { error } = await supabase.from('circle_comments').delete().eq('id', id)
+    if (!error) {
+      setComments(comments.filter(c => c.id !== id))
+    }
+  }
+
   return (
-    <div className="p-4 space-y-6">
+    <div className="container mx-auto px-4 py-8 space-y-6">
       <h1 className="text-2xl font-bold">Circle Leader Tracker</h1>
+      <p className="mt-2 font-semibold">Loaded {leaders.length} leaders</p>
+      <div className="flex gap-2">
+        <button className="btn btn-secondary" onClick={seedDatabase}>Seed Data</button>
+        <button className="btn btn-secondary" onClick={resetDatabase}>Reset Data</button>
+      </div>
 
       <div className="form-control w-full max-w-xs">
         <label className="label" htmlFor="filter-status">
@@ -68,54 +264,215 @@ function App() {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Phone</th>
-              <th>Email</th>
               <th>Status</th>
+              <th>Campus</th>
+              <th>Meeting</th>
               <th>Last Comm</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
             {leaders.map(l => (
-              <tr key={l.id}>
-                <td><a href="#" onClick={e => { e.preventDefault(); openEdit(l) }}>{l.full_name}</a></td>
-                <td><a href={`tel:${l.phone}`}>{l.phone}</a></td>
-                <td><a href={`mailto:${l.email}`}>{l.email}</a></td>
-                <td>{l.status}</td>
-                <td>{l.last_comm_date ? new Date(l.last_comm_date).toLocaleString() : ''}</td>
-                <td><button className="btn btn-sm" onClick={() => openEdit(l)}>Edit</button></td>
-              </tr>
+              <Fragment key={l.id}>
+                <tr>
+                  <td><a href="#" onClick={e => { e.preventDefault(); openDetails(l) }}>{l.full_name}</a></td>
+                  <td>{l.status}</td>
+                  <td>{l.campus}</td>
+                  <td>{[l.meeting_day, l.meeting_time].filter(Boolean).join(' ')}</td>
+                  <td>
+                    {l.last_comm_date ? (
+                      <button className="link" onClick={() => openCommModal(l)}>
+                        {new Date(l.last_comm_date).toLocaleDateString()} {l.last_comm_type ? `(${l.last_comm_type})` : ''}
+                      </button>
+                    ) : (
+                      <button className="link" onClick={() => openCommModal(l)}>Add</button>
+                    )}
+                  </td>
+                </tr>
+                {expandedId === l.id && (
+                  <tr>
+                    <td colSpan={5}>
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <p><strong>Phone:</strong> <a className="link" href={`tel:${l.phone}`}>{l.phone}</a></p>
+                          <p><strong>Email:</strong> <a className="link" href={`mailto:${l.email}`}>{l.email}</a></p>
+                          {l.campus && <p><strong>Campus:</strong> {l.campus}</p>}
+                          {(l.meeting_day || l.meeting_time) && (
+                            <p><strong>Meeting:</strong> {[l.meeting_day, l.meeting_time].filter(Boolean).join(' ')}</p>
+                          )}
+                          {l.meeting_frequency && <p><strong>Frequency:</strong> {l.meeting_frequency}</p>}
+                          {l.circle_type && <p><strong>Type:</strong> {l.circle_type}</p>}
+                          {l.circle_location && <p><strong>Location:</strong> {l.circle_location}</p>}
+                          <button className="btn btn-sm" onClick={() => openEdit(l)}>Edit</button>
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="font-semibold">Meetings</h3>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {meetings.map(m => (
+                              <li key={m.id}>{new Date(m.date).toLocaleDateString()} - {m.type}{m.notes ? `: ${m.notes}` : ''}</li>
+                            ))}
+                          </ul>
+                          <button className="btn btn-xs" onClick={() => openMeetingModal(l)}>Add Meeting</button>
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="font-semibold">Comments</h3>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {comments.map(c => (
+                              <li key={c.id} className="flex gap-2 items-start">
+                              {editingCommentId === c.id ? (
+                                <>
+                                  <input className="input input-bordered flex-grow" value={editingText} onChange={e => setEditingText(e.target.value)} />
+                                  <button className="btn btn-xs" onClick={() => saveEditComment(c.id)}>Save</button>
+                                  <button className="btn btn-xs" onClick={() => { setEditingCommentId(null); setEditingText('') }}>Cancel</button>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="flex-grow">{c.comment} ({new Date(c.created_at).toLocaleDateString()})</span>
+                                  <button className="btn btn-xs" onClick={() => startEditComment(c)}>Edit</button>
+                                  <button className="btn btn-xs" onClick={() => deleteComment(c.id)}>Delete</button>
+                                </>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                        <form onSubmit={addComment} className="flex gap-2">
+                          <input className="input input-bordered flex-grow" value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="New comment" />
+                          <button className="btn btn-primary btn-sm" type="submit">Add</button>
+                        </form>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
           </tbody>
         </table>
         {loading && <span className="loading loading-spinner"></span>}
       </div>
 
-      <form onSubmit={addLeader} className="space-y-2 max-w-md">
-        <h2 className="text-xl font-semibold">Add New Leader</h2>
-        <input className="input input-bordered w-full" placeholder="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required />
-        <input className="input input-bordered w-full" placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
-        <input type="email" className="input input-bordered w-full" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
-        <select className="select select-bordered w-full" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
-          {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <button className="btn btn-primary" type="submit">Add Leader</button>
-      </form>
+      <button className="btn" onClick={() => setShowAddForm(!showAddForm)}>Add Leader</button>
+
+      {showAddForm && (
+        <div className="card w-full max-w-md bg-base-100 shadow">
+          <form onSubmit={addLeader} className="card-body space-y-2">
+            <h2 className="card-title">Add New Leader</h2>
+            <input className="input input-bordered w-full" placeholder="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required />
+            <input className="input input-bordered w-full" placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
+            <input type="email" className="input input-bordered w-full" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+            <input className="input input-bordered w-full" placeholder="Campus" value={form.campus} onChange={e => setForm({ ...form, campus: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Meeting Day" value={form.meeting_day} onChange={e => setForm({ ...form, meeting_day: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Meeting Time" value={form.meeting_time} onChange={e => setForm({ ...form, meeting_time: e.target.value })} />
+            <select className="select select-bordered w-full" value={form.meeting_frequency} onChange={e => setForm({ ...form, meeting_frequency: e.target.value })}>
+              {frequencies.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
+            <input className="input input-bordered w-full" placeholder="Circle Type" value={form.circle_type} onChange={e => setForm({ ...form, circle_type: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Location" value={form.circle_location} onChange={e => setForm({ ...form, circle_location: e.target.value })} />
+            <select className="select select-bordered w-full" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+              {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <button className="btn btn-primary" type="submit">Add Leader</button>
+          </form>
+        </div>
+      )}
 
       {editForm.id && (
-        <form onSubmit={updateLeader} className="space-y-2 max-w-md">
-          <h2 className="text-xl font-semibold">Edit Leader</h2>
-          <input className="input input-bordered w-full" placeholder="Full Name" value={editForm.full_name} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} required />
-          <input className="input input-bordered w-full" placeholder="Phone" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} required />
-          <input type="email" className="input input-bordered w-full" placeholder="Email" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} required />
-          <select className="select select-bordered w-full" value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
-            {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <div className="flex gap-2">
-            <button className="btn btn-primary" type="submit">Update Leader</button>
-            <button className="btn" type="button" onClick={() => setEditForm({ id: null, full_name: '', phone: '', email: '', status: 'invite' })}>Cancel</button>
+        <div className="card w-full max-w-md bg-base-100 shadow">
+          <form onSubmit={updateLeader} className="card-body space-y-2">
+            <h2 className="card-title">Edit Leader</h2>
+            <input className="input input-bordered w-full" placeholder="Full Name" value={editForm.full_name} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} required />
+            <input className="input input-bordered w-full" placeholder="Phone" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} required />
+            <input type="email" className="input input-bordered w-full" placeholder="Email" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} required />
+            <input className="input input-bordered w-full" placeholder="Campus" value={editForm.campus} onChange={e => setEditForm({ ...editForm, campus: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Meeting Day" value={editForm.meeting_day} onChange={e => setEditForm({ ...editForm, meeting_day: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Meeting Time" value={editForm.meeting_time} onChange={e => setEditForm({ ...editForm, meeting_time: e.target.value })} />
+            <select className="select select-bordered w-full" value={editForm.meeting_frequency} onChange={e => setEditForm({ ...editForm, meeting_frequency: e.target.value })}>
+              {frequencies.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
+            <input className="input input-bordered w-full" placeholder="Circle Type" value={editForm.circle_type} onChange={e => setEditForm({ ...editForm, circle_type: e.target.value })} />
+            <input className="input input-bordered w-full" placeholder="Location" value={editForm.circle_location} onChange={e => setEditForm({ ...editForm, circle_location: e.target.value })} />
+            <select className="select select-bordered w-full" value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
+              {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <div className="flex gap-2">
+              <button className="btn btn-primary" type="submit">Update Leader</button>
+              <button className="btn" type="button" onClick={() => setEditForm({
+                id: null,
+                full_name: '',
+                phone: '',
+                email: '',
+                status: 'invite',
+                campus: '',
+                meeting_day: '',
+                meeting_time: '',
+                meeting_frequency: 'Weekly',
+                circle_type: '',
+                circle_location: '',
+              })}>Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {showMeetingModal && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">Add Meeting</h3>
+            <form onSubmit={addMeeting} className="space-y-2 mt-4">
+              <input
+                type="date"
+                className="input input-bordered w-full"
+                value={meetingForm.date}
+                onChange={e => setMeetingForm({ ...meetingForm, date: e.target.value })}
+                required
+              />
+              <input
+                className="input input-bordered w-full"
+                placeholder="Type"
+                value={meetingForm.type}
+                onChange={e => setMeetingForm({ ...meetingForm, type: e.target.value })}
+                required
+              />
+              <input
+                className="input input-bordered w-full"
+                placeholder="Notes"
+                value={meetingForm.notes}
+                onChange={e => setMeetingForm({ ...meetingForm, notes: e.target.value })}
+              />
+              <div className="modal-action">
+                <button type="submit" className="btn btn-primary">Save</button>
+                <button type="button" className="btn" onClick={() => setShowMeetingModal(false)}>Cancel</button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
+      )}
+
+      {showCommModal && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">Log Communication</h3>
+            <form onSubmit={logCommunication} className="space-y-2 mt-4">
+              <input
+                type="date"
+                className="input input-bordered w-full"
+                value={commForm.date}
+                onChange={e => setCommForm({ ...commForm, date: e.target.value })}
+                required
+              />
+              <input
+                className="input input-bordered w-full"
+                placeholder="Type"
+                value={commForm.type}
+                onChange={e => setCommForm({ ...commForm, type: e.target.value })}
+                required
+              />
+              <div className="modal-action">
+                <button type="submit" className="btn btn-primary">Save</button>
+                <button type="button" className="btn" onClick={() => setShowCommModal(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   )
