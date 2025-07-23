@@ -623,17 +623,22 @@
     .form-group input,
     .form-group select {
       width: 100%;
+      max-width: 100%;
       padding: 0.75rem;
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 1rem;
       box-sizing: border-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     /* Specific styling for date inputs to prevent overflow */
     .form-group input[type="date"] {
       font-size: 0.9rem;
       padding: 0.6rem;
+      -webkit-appearance: none;
+      appearance: none;
     }
     
     @media (max-width: 768px) {
@@ -644,8 +649,39 @@
       }
       
       .form-group input[type="date"] {
-        font-size: 0.85rem;
-        padding: 0.5rem;
+        font-size: 0.8rem;
+        padding: 0.4rem;
+        -webkit-appearance: none;
+        appearance: none;
+        min-height: 44px;
+        box-sizing: border-box;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .form-group input[type="date"] {
+        font-size: 0.75rem;
+        padding: 0.3rem;
+        min-height: 40px;
+      }
+    }
+    
+    /* iOS Safari date input specific fixes */
+    @supports (-webkit-touch-callout: none) {
+      .form-group input[type="date"] {
+        font-size: 0.8rem !important;
+        padding: 0.4rem !important;
+        min-height: 44px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      
+      @media (max-width: 480px) {
+        .form-group input[type="date"] {
+          font-size: 0.7rem !important;
+          padding: 0.3rem !important;
+          min-height: 40px !important;
+        }
       }
     }
     .modal-buttons {
@@ -2902,6 +2938,12 @@
     async function addCircleLeader(event) {
       event.preventDefault()
 
+      // Test connection first
+      if (!client) {
+        await showAlert('Database connection not available', 'Connection Error')
+        return
+      }
+
       const full_name = document.getElementById('full_name').value
       const phone = document.getElementById('phone').value
       const email = document.getElementById('email').value
@@ -2913,22 +2955,64 @@
       const meeting_time = document.getElementById('meeting_time').value || null
       const meeting_frequency = document.getElementById('meeting_frequency').value || null
 
-      const { error } = await client.from('circle_leaders').insert([
-        { full_name, phone, email, status, last_comm_date, last_comm_type,
-          circle_type, meeting_day, meeting_time, meeting_frequency }
-      ])
-
-      if (error) {
-        console.error('Error adding leader:', error)
-        await showAlert('Error adding leader', 'Error')
+      // Validate required fields
+      if (!full_name || !phone || !email) {
+        await showAlert('Please fill in all required fields (Name, Phone, Email)', 'Validation Error')
         return
       }
 
-      document.getElementById('add-leader-form').reset()
-      loadCircleLeaders()
-      loadCommunicationSummaries()
-      hideAddLeaderPage()
-      setStatus('Leader added successfully!')
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        await showAlert('Please enter a valid email address', 'Validation Error')
+        return
+      }
+
+      try {
+        setStatus('Adding leader...', true)
+        
+        console.log('Attempting to add leader:', { full_name, phone, email, status })
+        
+        const { data, error } = await client.from('circle_leaders').insert([
+          { full_name, phone, email, status, last_comm_date, last_comm_type,
+            circle_type, meeting_day, meeting_time, meeting_frequency }
+        ])
+
+        console.log('Insert result:', { data, error })
+
+        if (error) {
+          console.error('Database error:', error)
+          let errorMessage = 'Error adding leader'
+          
+          // Provide more specific error messages
+          if (error.code === '23505') {
+            errorMessage = 'A leader with this email or phone already exists'
+          } else if (error.code === '23502') {
+            errorMessage = 'Missing required field'
+          } else if (error.code === '42501') {
+            errorMessage = 'Permission denied. Please check database permissions.'
+          } else if (error.message) {
+            errorMessage = `Database error: ${error.message}`
+          }
+          
+          await showAlert(errorMessage, 'Error')
+          setStatus('Error adding leader')
+          return
+        }
+
+        document.getElementById('add-leader-form').reset()
+        setStatus('Leader added successfully!')
+        setTimeout(() => clearStatus(), 3000)
+        
+        loadCircleLeaders()
+        loadCommunicationSummaries()
+        hideAddLeaderPage()
+        
+      } catch (error) {
+        console.error('Unexpected error:', error)
+        await showAlert(`An unexpected error occurred: ${error.message}`, 'Error')
+        setStatus('Error adding leader')
+      }
     }
 
     function openEditForm(leader) {

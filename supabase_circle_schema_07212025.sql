@@ -10,7 +10,7 @@ create table if not exists circle_leaders (
   photo_url text,
   email text,
   phone text,
-  status text check (status in ('invite', 'pipeline', 'leader')) default 'invite',
+  status text check (status in ('invite', 'pipeline', 'active', 'paused')) default 'invite',
 
   campus text,
   ccb_group_id text,
