@@ -3,7 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle Leaders</title>
+  <title>Radius</title>
+  
+  <!-- iOS App Icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/aofM4G4.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="https://i.imgur.com/aofM4G4.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="https://i.imgur.com/aofM4G4.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="https://i.imgur.com/aofM4G4.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="https://i.imgur.com/aofM4G4.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://i.imgur.com/aofM4G4.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="https://i.imgur.com/aofM4G4.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="https://i.imgur.com/aofM4G4.png">
+  <link rel="apple-touch-icon" sizes="57x57" href="https://i.imgur.com/aofM4G4.png">
+  
+  <!-- Standard favicon -->
+  <link rel="icon" type="image/png" href="https://i.imgur.com/aofM4G4.png">
+  
+  <!-- iOS Safari specific -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Radius">
   <style>
     body {
       font-family: sans-serif;
@@ -20,8 +39,32 @@
       padding: 0.5rem;
       text-align: left;
     }
+    /* Prevent time column from wrapping */
+    #meeting-today-table td:nth-child(2),
+    #meeting-today-table th:nth-child(2) {
+      white-space: nowrap;
+      min-width: 80px;
+    }
     th {
       background: #eee;
+    }
+    .sortable {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+    .sortable:hover {
+      background: #ddd;
+    }
+    .sort-indicator {
+      margin-left: 5px;
+      font-size: 0.8em;
+    }
+    .sort-asc::after {
+      content: "▲";
+    }
+    .sort-desc::after {
+      content: "▼";
     }
     form {
       margin-top: 2rem;
@@ -31,92 +74,1241 @@
     }
     input, button {
       margin: 0.5rem 0;
-      padding: 0.5rem;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-weight: bold;
       width: 100%;
+      min-height: 44px; /* Minimum touch target for mobile */
+    }
+    .hidden {
+      display: none !important;
+    }
+    .profile-container {
+      background: #fff;
+      padding: 2rem;
+      border: 1px solid #ccc;
+      margin: 1rem 0;
+      border-radius: 8px;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+      gap: 1rem;
+    }
+    .profile-info {
+      flex: 1;
+    }
+    .profile-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin: 0;
+    }
+    .profile-details {
+      color: #666;
+      margin: 0.5rem 0;
+    }
+    .profile-phone-link, .profile-email-link {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .profile-phone-link:hover, .profile-email-link:hover {
+      text-decoration: underline;
+    }
+    .profile-status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-size: 0.875rem;
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+    .status-active {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-pipeline {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-invite {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .status-paused {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .action-buttons button {
+      flex: 1;
+      min-width: 120px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+      min-height: 44px; /* Minimum touch target for mobile */
+    }
+    .btn-primary, .action-buttons .btn-primary {
+      background: #007bff !important;
+      color: white !important;
+      border-color: #007bff !important;
+    }
+    .btn-secondary, .action-buttons .btn-secondary {
+      background: #6c757d !important;
+      color: white !important;
+      border-color: #6c757d !important;
+    }
+    .btn-success, .action-buttons .btn-success {
+      background: #28a745 !important;
+      color: white !important;
+      border-color: #28a745 !important;
+    }
+    .btn-warning, .action-buttons .btn-warning {
+      background: #ffc107 !important;
+      color: #212529 !important;
+      border-color: #ffc107 !important;
+    }
+    .btn-danger, .action-buttons .btn-danger {
+      background: #dc3545 !important;
+      color: white !important;
+      border-color: #dc3545 !important;
+    }
+    .btn-sm {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+      min-width: auto;
+      width: auto;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+      min-height: 44px; /* Minimum touch target for mobile */
+    }
+    .action-menu {
+      position: relative;
+      display: inline-block;
+    }
+    .action-menu-btn {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 0.5rem 0.75rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #6c757d;
+      min-height: 44px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .action-menu-btn:hover {
+      background: #e9ecef;
+      color: #495057;
+    }
+    .action-menu-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      min-width: 120px;
+      display: none;
+    }
+    .action-menu-dropdown.show {
+      display: block;
+    }
+    .action-menu-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-size: 0.9rem;
+      color: #495057;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+    .action-menu-item:hover {
+      background: #f8f9fa;
+    }
+    .action-menu-item.danger:hover {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .main-action-menu {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .main-action-menu-btn {
+      background: #007bff;
+      color: white;
+      border: 1px solid #007bff;
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: bold;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .main-action-menu-btn:hover {
+      background: #0056b3;
+      border-color: #0056b3;
+    }
+    .main-action-menu-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      min-width: 180px;
+      display: none;
+    }
+    .main-action-menu-dropdown.show {
+      display: block;
+    }
+    .main-action-menu-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-size: 0.9rem;
+      color: #495057;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .main-action-menu-item:hover {
+      background: #f8f9fa;
+    }
+    .notes-section {
+      margin-top: 2rem;
+    }
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .note-item {
+      background: #f8f9fa;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-left: 4px solid #007bff;
+      border-radius: 4px;
+    }
+    .note-date {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+    .note-text {
+      margin: 0;
+    }
+    .note-actions {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .note-edit-form {
+      margin-top: 0.5rem;
+    }
+    .note-edit-form textarea {
+      width: 100%;
+      min-height: 60px;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: inherit;
+      resize: vertical;
+    }
+    .add-note-form {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    .add-note-form textarea {
+      width: 100%;
+      min-height: 80px;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: vertical;
+    }
+    .wysiwyg-editor {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+    .wysiwyg-toolbar {
+      background: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+      padding: 0.5rem;
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
+    .wysiwyg-toolbar button {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      border-radius: 3px;
+      font-weight: bold;
+      min-width: auto;
+      width: auto;
+      margin: 0;
+      min-height: 44px; /* Minimum touch target for mobile */
+    }
+    .wysiwyg-toolbar button:hover {
+      background: #e9ecef;
+    }
+    .wysiwyg-toolbar button.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    .wysiwyg-content {
+      min-height: 80px;
+      padding: 0.5rem;
+      outline: none;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: 1.5;
+    }
+    .wysiwyg-content:focus {
+      background: #fff;
+    }
+    .wysiwyg-content:empty:before {
+      content: attr(data-placeholder);
+      color: #999;
+      font-style: italic;
+    }
+    .wysiwyg-content:focus:empty:before {
+      content: "";
+    }
+    .wysiwyg-content ul, .wysiwyg-content ol {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+    .wysiwyg-content li {
+      margin-bottom: 0.25rem;
+    }
+    .note-text ul, .note-text ol {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+    .note-text li {
+      margin-bottom: 0.25rem;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .modal-header {
+      margin-bottom: 1.5rem;
+    }
+    .modal-header h3 {
+      margin: 0;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: #555;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .modal-buttons button {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      min-width: auto;
+      width: auto;
+      min-height: 44px; /* Minimum touch target for mobile */
+    }
+    .overdue-comm {
+      background-color: #ffebee !important;
+      color: #d32f2f;
+    }
+    #communication-summary h2 {
+      color: #333;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    #communication-summary h3 {
+      color: #555;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+    #communication-summary table {
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    #communication-summary .name-link {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    #communication-summary .name-link:hover {
+      text-decoration: underline;
+    }
+    /* Ensure all tables have consistent styling */
+    #leaders-table {
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    .name-link {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .name-link:hover {
+      text-decoration: underline;
+    }
+    
+    /* Progress Bar Styles */
+    .progress-container {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1rem 0 2rem 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .progress-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #333;
+    }
+    .progress-stats {
+      font-size: 1rem;
+      color: #666;
+    }
+    .progress-bar-track {
+      width: 100%;
+      height: 24px;
+      background: #e9ecef;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+      border-radius: 12px;
+      transition: width 0.5s ease-in-out;
+      position: relative;
+    }
+    .progress-percentage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.875rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      z-index: 1;
+    }
+    .progress-bar-fill.low-progress {
+      background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+    }
+    .progress-bar-fill.low-progress .progress-percentage {
+      color: #333;
+      text-shadow: none;
+    }
+    
+    /* Mobile-friendly search results */
+    .mobile-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .mobile-card {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    
+    .mobile-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .mobile-card-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #007bff;
+      text-decoration: none;
+    }
+    
+    .mobile-card-name:hover {
+      text-decoration: underline;
+    }
+    
+    .mobile-card-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .mobile-card-detail {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .mobile-card-label {
+      font-weight: bold;
+      color: #666;
+    }
+    
+    /* Responsive behavior */
+    @media (max-width: 768px) {
+      #search-results-desktop {
+        display: none !important;
+      }
+      #search-results-mobile {
+        display: block !important;
+      }
+      
+      .mobile-card-details {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Circle Leader Tracker</h1>
-  <div id="status-container" style="margin-bottom: 1rem;">
-    <span id="status-message"></span>
-    <span id="spinner" style="display: none; margin-left: 10px;">⏳</span>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div id="home-link" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; text-decoration: none; color: inherit;">
+      <img src="https://i.imgur.com/aofM4G4.png" alt="Radius Logo" style="height: 40px; width: auto;">
+      <h1 style="margin: 0;">Radius</h1>
+    </div>
+    <div class="main-action-menu">
+      <button class="main-action-menu-btn" id="main-actions-btn">
+        Actions ▼
+      </button>
+      <div class="main-action-menu-dropdown" id="main-actions-dropdown">
+        <button class="main-action-menu-item" id="search-circles-btn">🔍 Search Circles</button>
+        <button class="main-action-menu-item" id="add-leader-btn-menu">➕ Add New Leader</button>
+      </div>
+    </div>
   </div>
-  <div id="seed-button-container" style="margin-bottom: 1rem;">
-    <button id="seed-button">Seed Data</button>
-    <button id="reset-button">Reset Data</button>
+  
+  <!-- Monthly Contact Progress Bar -->
+  <div id="monthly-progress" class="progress-container">
+    <div class="progress-header">
+      <div class="progress-title">Monthly Progress</div>
+      <div class="progress-stats">
+        <span id="progress-count">0 of 0</span> leaders contacted
+      </div>
+    </div>
+    <div class="progress-bar-track">
+      <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;">
+        <div id="progress-percentage" class="progress-percentage">0%</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Meeting Today Table -->
+  <div id="meeting-today-section" class="progress-container" style="margin-bottom: 1rem;">
+    <div class="progress-header">
+      <div class="progress-title">Meeting Today</div>
+    </div>
+    <div style="background: white; border-radius: 8px; padding: 1rem;">
+      <table id="meeting-today-table" class="table">
+        <thead>
+          <tr>
+            <th class="sortable" data-column="name" data-table="meeting-today-table">Name <span class="sort-indicator"></span></th>
+            <th class="sortable" data-column="meeting_time" data-table="meeting-today-table">Time <span class="sort-indicator"></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="3" style="text-align: center; color: #666; font-style: italic;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Main List View -->
+  <div id="main-view">
+    <div id="filter-container" style="margin-bottom: 1rem;">
+      <label for="filter-status">Filter by Status:</label>
+      <select id="filter-status">
+        <option value="">All</option>
+        <option value="invite">Invite</option>
+        <option value="pipeline">Pipeline</option>
+        <option value="active">Active</option>
+        <option value="paused">Paused</option>
+      </select>
+    </div>
+
+    <div id="status-container" style="margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; color: #495057; font-size: 0.95rem; font-weight: 500;">
+      <span id="status-message"></span>
+      <span id="spinner" style="display: none; margin-left: 10px;">⏳</span>
+    </div>
+
+    <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Circle Leaders</h2>
+
+    <table id="leaders-table">
+      <thead>
+        <tr>
+          <th class="sortable" data-column="full_name" data-table="leaders-table">Name <span class="sort-indicator"></span></th>
+          <th class="sortable" data-column="status" data-table="leaders-table">Status <span class="sort-indicator"></span></th>
+          <th class="sortable" data-column="last_comm_date" data-table="leaders-table">Last Comm <span class="sort-indicator"></span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data will be populated here -->
+      </tbody>
+    </table>
+
+    <!-- Follow Up Table -->
+    <div style="margin-top: 3rem;">
+      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Marked for Follow Up</h2>
+      <table id="follow-up-table" style="margin-top: 0.5rem;">
+        <thead>
+          <tr>
+            <th class="sortable" data-column="name" data-table="follow-up-table">Name <span class="sort-indicator"></span></th>
+            <th class="sortable" data-column="date" data-table="follow-up-table">Date <span class="sort-indicator"></span></th>
+            <th class="sortable" data-column="status" data-table="follow-up-table">Status <span class="sort-indicator"></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Data will be populated here -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Communication Summary Tables -->
+    <div id="communication-summary" style="margin-top: 3rem;">
+      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Connection Summary</h2>
+      <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+        <select id="summary-month" style="padding: 0.5rem;">
+          <option value="0">January</option>
+          <option value="1">February</option>
+          <option value="2">March</option>
+          <option value="3">April</option>
+          <option value="4">May</option>
+          <option value="5">June</option>
+          <option value="6">July</option>
+          <option value="7">August</option>
+          <option value="8">September</option>
+          <option value="9">October</option>
+          <option value="10">November</option>
+          <option value="11">December</option>
+        </select>
+        <select id="summary-year" style="padding: 0.5rem;">
+          <!-- Years will be populated by JavaScript -->
+        </select>
+        <button id="apply-summary-filter" class="btn-primary" style="padding: 0.75rem 1rem; font-size: 1rem; width: auto; min-height: 44px;">Apply</button>
+      </div>
+      
+      <!-- One-on-One Table -->
+      <div style="margin-bottom: 2rem;">
+        <h3>One-on-One Meetings</h3>
+        <table id="one-on-one-table" style="margin-top: 0.5rem;">
+          <thead>
+            <tr>
+              <th class="sortable" data-column="name" data-table="one-on-one-table">Name <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="date" data-table="one-on-one-table">Date <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="status" data-table="one-on-one-table">Status <span class="sort-indicator"></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Circle Leader Training Table -->
+      <div style="margin-bottom: 2rem;">
+        <h3>Circle Leader Training</h3>
+        <table id="training-table" style="margin-top: 0.5rem;">
+          <thead>
+            <tr>
+              <th class="sortable" data-column="name" data-table="training-table">Name <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="date" data-table="training-table">Date <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="status" data-table="training-table">Status <span class="sort-indicator"></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Circle Leader Lunch Table -->
+      <div style="margin-bottom: 2rem;">
+        <h3>Circle Leader Lunch</h3>
+        <table id="lunch-table" style="margin-top: 0.5rem;">
+          <thead>
+            <tr>
+              <th class="sortable" data-column="name" data-table="lunch-table">Name <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="date" data-table="lunch-table">Date <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="status" data-table="lunch-table">Status <span class="sort-indicator"></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Circle Visit Table -->
+      <div style="margin-bottom: 2rem;">
+        <h3>Circle Visit</h3>
+        <table id="visit-table" style="margin-top: 0.5rem;">
+          <thead>
+            <tr>
+              <th class="sortable" data-column="name" data-table="visit-table">Name <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="date" data-table="visit-table">Date <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="status" data-table="visit-table">Status <span class="sort-indicator"></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <form id="edit-leader-form" style="display:none;">
+      <h2>Edit Leader</h2>
+      <input type="hidden" id="edit-id" />
+      <input type="text" id="edit_full_name" placeholder="Full Name" required />
+      <input type="text" id="edit_phone" placeholder="Phone" required />
+      <input type="email" id="edit_email" placeholder="Email" required />
+      <select id="edit_status">
+        <option value="invite">Invite</option>
+        <option value="pipeline">Pipeline</option>
+        <option value="active">Active</option>
+        <option value="paused">Paused</option>
+      </select>
+      <input type="date" id="edit_last_comm_date" />
+      <select id="edit_last_comm_type">
+        <option value="">Communication Type</option>
+        <option value="Atrium">Atrium</option>
+        <option value="One-on-One">One-on-One</option>
+        <option value="Zoom">Zoom</option>
+        <option value="Text">Text</option>
+        <option value="Phone">Phone</option>
+        <option value="Circle Leader Training">Circle Leader Training</option>
+        <option value="Circle Leader Lunch">Circle Leader Lunch</option>
+        <option value="Circle Visit">Circle Visit</option>
+      </select>
+      <select id="edit_circle_type">
+        <option value="">Circle Type</option>
+        <option value="Men">Men</option>
+        <option value="Women">Women</option>
+        <option value="Mixed">Mixed</option>
+        <option value="Young Adults">Young Adults</option>
+        <option value="Other">Other</option>
+      </select>
+      <select id="edit_meeting_day">
+        <option value="">Meeting Day</option>
+        <option value="Sunday">Sunday</option>
+        <option value="Monday">Monday</option>
+        <option value="Tuesday">Tuesday</option>
+        <option value="Wednesday">Wednesday</option>
+        <option value="Thursday">Thursday</option>
+        <option value="Friday">Friday</option>
+        <option value="Saturday">Saturday</option>
+      </select>
+      <input type="time" id="edit_meeting_time" placeholder="Meeting Time" />
+      <select id="edit_meeting_frequency">
+        <option value="">Meeting Frequency</option>
+        <option value="Weekly">Weekly</option>
+        <option value="1/3/5">1/3/5</option>
+        <option value="2/4">2/4</option>
+        <option value="Other">Other</option>
+      </select>
+      <button type="submit" class="btn-primary">Update Leader</button>
+      <button type="button" id="cancel-edit" class="btn-secondary">Cancel</button>
+    </form>
   </div>
 
-  <div id="filter-container" style="margin-bottom: 1rem;">
-    <label for="filter-status">Filter by Status:</label>
-    <select id="filter-status">
-      <option value="">All</option>
-      <option value="invite">Invite</option>
-      <option value="pipeline">Pipeline</option>
-      <option value="leader">Leader</option>
-    </select>
+  <!-- Leader Profile View -->
+  <div id="profile-view" class="hidden">
+    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.5rem; gap: 0.5rem;">
+      <div class="action-menu">
+        <button class="action-menu-btn" id="profile-actions-btn" title="Actions">Edit</button>
+        <div class="action-menu-dropdown" id="profile-actions-dropdown">
+          <button class="action-menu-item" id="edit-profile-btn-top">Edit Profile</button>
+          <button class="action-menu-item danger" id="delete-leader-btn">Delete Leader</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="profile-container">
+      <div class="profile-header">
+        <div class="profile-info">
+          <h2 class="profile-name" id="profile-name">Chris Linse</h2>
+          <div class="profile-details" id="profile-display">
+            <div style="margin-bottom: 0.5rem;" id="profile-circle-info">Circle info will be displayed here</div>
+            <div style="margin-bottom: 0.5rem;">Last Comm: <span id="profile-last-comm">Sunday 7/13/25</span></div>
+            <div style="margin-bottom: 0.5rem;">Status: <span class="profile-status" id="profile-status">Leader</span></div>
+            <div style="margin-bottom: 0.5rem;">Phone: <a href="#" class="profile-phone-link" id="profile-phone">972-539-8900</a></div>
+            <div style="margin-bottom: 0.5rem;">Email: <a href="mailto:" class="profile-email-link" id="profile-email">cris.linse@gmail.com</a></div>
+          </div>
+          
+          <!-- Inline Edit Form -->
+          <div class="profile-edit-form hidden" id="profile-edit-form">
+            <div style="margin-bottom: 1rem;">
+              <label>Name:</label>
+              <input type="text" id="inline-edit-name" style="width: 100%; margin: 0.25rem 0;" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label>Phone:</label>
+              <input type="text" id="inline-edit-phone" style="width: 100%; margin: 0.25rem 0;" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label>Email:</label>
+              <input type="email" id="inline-edit-email" style="width: 100%; margin: 0.25rem 0;" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label>Status:</label>
+              <select id="inline-edit-status" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;">
+                <option value="invite">Invite</option>
+                <option value="pipeline">Pipeline</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label>Circle Type:</label>
+              <select id="inline-edit-circle-type" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;">
+                <option value="">Select Type</option>
+                <option value="Men">Men</option>
+                <option value="Women">Women</option>
+                <option value="Mixed">Mixed</option>
+                <option value="Young Adults">Young Adults</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label>Meeting Day:</label>
+              <select id="inline-edit-meeting-day" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;">
+                <option value="">Select Day</option>
+                <option value="Sunday">Sunday</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label>Meeting Time:</label>
+              <input type="time" id="inline-edit-meeting-time" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label>Meeting Frequency:</label>
+              <select id="inline-edit-meeting-frequency" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;">
+                <option value="">Select Frequency</option>
+                <option value="Weekly">Weekly</option>
+                <option value="1/3/5">1/3/5</option>
+                <option value="2/4">2/4</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+              <button class="btn-primary" id="save-inline-edit">Save</button>
+              <button class="btn-secondary" id="cancel-inline-edit">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn-primary" id="follow-up-btn">Follow Up</button>
+        <button class="btn-success" id="clear-follow-up-btn">Clear Follow Up</button>
+        <button class="btn-warning" id="update-last-comm-btn">Connection Made</button>
+      </div>
+
+      <div class="notes-section">
+        <div class="notes-header">
+          <button class="btn-primary" id="add-note-btn">Add Note</button>
+        </div>
+        
+        <div id="notes-list">
+          <!-- Notes will be populated here -->
+        </div>
+
+        <div id="add-note-form" class="add-note-form hidden">
+          <div class="wysiwyg-editor">
+            <div class="wysiwyg-toolbar">
+              <button type="button" data-command="bold" title="Bold"><b>B</b></button>
+              <button type="button" data-command="italic" title="Italic"><i>I</i></button>
+              <button type="button" data-command="underline" title="Underline"><u>U</u></button>
+              <button type="button" data-command="strikeThrough" title="Strikethrough"><s>S</s></button>
+              <button type="button" data-command="insertUnorderedList" title="Bullet List">• List</button>
+              <button type="button" data-command="insertOrderedList" title="Numbered List">1. List</button>
+            </div>
+            <div id="note-text" class="wysiwyg-content" contenteditable="true" data-placeholder="Enter your note here..."></div>
+          </div>
+          <button type="button" id="save-note-btn" class="btn-primary">Save Note</button>
+          <button type="button" id="cancel-note-btn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <table id="leaders-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Phone</th>
-        <th>Email</th>
-        <th>Status</th>
-        <th>Last Comm</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Data will be populated here -->
-    </tbody>
-  </table>
+  <!-- Add Leader Page -->
+  <div id="add-leader-view" class="hidden">
+    <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 1rem;">
+      <h2 style="margin: 0;">Add New Leader</h2>
+    </div>
+    
+    <div class="profile-container">
+      <form id="add-leader-form">
+        <div style="margin-bottom: 1rem;">
+          <label>Full Name:</label>
+          <input type="text" id="full_name" placeholder="Full Name" required style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;" />
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Phone:</label>
+          <input type="text" id="phone" placeholder="Phone" required style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;" />
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Email:</label>
+          <input type="email" id="email" placeholder="Email" required style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;" />
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Status:</label>
+          <select id="status" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;">
+            <option value="invite">Invite</option>
+            <option value="pipeline">Pipeline</option>
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Last Communication Date:</label>
+          <input type="date" id="last_comm_date" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;" />
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Last Communication Type:</label>
+          <select id="last_comm_type" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;">
+            <option value="">Communication Type</option>
+            <option value="Atrium">Atrium</option>
+            <option value="One-on-One">One-on-One</option>
+            <option value="Zoom">Zoom</option>
+            <option value="Text">Text</option>
+            <option value="Phone">Phone</option>
+            <option value="Circle Leader Training">Circle Leader Training</option>
+            <option value="Circle Leader Lunch">Circle Leader Lunch</option>
+            <option value="Circle Visit">Circle Visit</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Circle Type:</label>
+          <select id="circle_type" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;">
+            <option value="">Select Type</option>
+            <option value="Men">Men</option>
+            <option value="Women">Women</option>
+            <option value="Mixed">Mixed</option>
+            <option value="Young Adults">Young Adults</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Meeting Day:</label>
+          <select id="meeting_day" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;">
+            <option value="">Select Day</option>
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Meeting Time:</label>
+          <input type="time" id="meeting_time" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;" />
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Meeting Frequency:</label>
+          <select id="meeting_frequency" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;">
+            <option value="">Select Frequency</option>
+            <option value="Weekly">Weekly</option>
+            <option value="1/3/5">1/3/5</option>
+            <option value="2/4">2/4</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-top: 2rem;">
+          <button type="submit" class="btn-primary">Add Leader</button>
+          <button type="button" class="btn-secondary" id="cancel-add-leader">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  <form id="add-leader-form">
-    <h2>Add New Leader</h2>
-    <input type="text" id="full_name" placeholder="Full Name" required />
-    <input type="text" id="phone" placeholder="Phone" required />
-    <input type="email" id="email" placeholder="Email" required />
-    <select id="status">
-      <option value="invite">Invite</option>
-      <option value="pipeline">Pipeline</option>
-      <option value="leader">Leader</option>
-    </select>
-    <input type="date" id="last_comm_date" />
-    <select id="last_comm_type">
-      <option value="">Communication Type</option>
-      <option value="Atrium">Atrium</option>
-      <option value="Meeting">Meeting</option>
-      <option value="Zoom">Zoom</option>
-      <option value="Text">Text</option>
-      <option value="Phone">Phone</option>
-    </select>
-    <button type="submit">Add Leader</button>
-  </form>
+  <!-- Update Communication Modal -->
+  <div id="update-comm-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Update Last Connection</h3>
+      </div>
+      <form id="update-comm-form">
+        <div class="form-group">
+          <label for="comm-date">Communication Date:</label>
+          <input type="date" id="comm-date" required />
+        </div>
+        <div class="form-group">
+          <label for="comm-type">Communication Type:</label>
+          <select id="comm-type" required>
+            <option value="">Select Type</option>
+            <option value="Atrium">Atrium</option>
+            <option value="One-on-One">One-on-One</option>
+            <option value="Zoom">Zoom</option>
+            <option value="Text">Text</option>
+            <option value="Phone">Phone</option>
+            <option value="Circle Leader Training">Circle Leader Training</option>
+            <option value="Circle Leader Lunch">Circle Leader Lunch</option>
+            <option value="Circle Visit">Circle Visit</option>
+            <option value="Email">Email</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="comm-note">Note (Optional):</label>
+          <textarea id="comm-note" placeholder="Add a note about this communication..." style="width: 100%; min-height: 60px; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box; resize: vertical;"></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn-secondary" id="cancel-comm-update">Cancel</button>
+          <button type="submit" class="btn-primary">Update Communication</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  <form id="edit-leader-form" style="display:none;">
-    <h2>Edit Leader</h2>
-    <input type="hidden" id="edit-id" />
-    <input type="text" id="edit_full_name" placeholder="Full Name" required />
-    <input type="text" id="edit_phone" placeholder="Phone" required />
-    <input type="email" id="edit_email" placeholder="Email" required />
-    <select id="edit_status">
-      <option value="invite">Invite</option>
-      <option value="pipeline">Pipeline</option>
-      <option value="leader">Leader</option>
-    </select>
-    <input type="date" id="edit_last_comm_date" />
-    <select id="edit_last_comm_type">
-      <option value="">Communication Type</option>
-      <option value="Atrium">Atrium</option>
-      <option value="Meeting">Meeting</option>
-      <option value="Zoom">Zoom</option>
-      <option value="Text">Text</option>
-      <option value="Phone">Phone</option>
-    </select>
-    <button type="submit">Update Leader</button>
-    <button type="button" id="cancel-edit">Cancel</button>
-  </form>
+  <!-- Follow Up Modal -->
+  <div id="follow-up-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Mark for Follow Up</h3>
+      </div>
+      <form id="follow-up-form">
+        <div class="form-group">
+          <label for="follow-up-date">Follow Up Date:</label>
+          <input type="date" id="follow-up-date" required />
+        </div>
+        <div class="form-group">
+          <label for="follow-up-note">Follow Up Note (Optional):</label>
+          <textarea id="follow-up-note" placeholder="Add a note about why this follow-up is needed..." style="width: 100%; min-height: 60px; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box; resize: vertical;"></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn-secondary" id="cancel-follow-up">Cancel</button>
+          <button type="submit" class="btn-primary">Mark for Follow Up</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom Confirmation Modal -->
+  <div id="confirmation-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="confirmation-title">Confirm Action</h3>
+      </div>
+      <div id="confirmation-message" style="margin-bottom: 1.5rem; color: #555; line-height: 1.4;">
+        Are you sure you want to proceed?
+      </div>
+      <div class="modal-buttons">
+        <button type="button" class="btn-secondary" id="confirmation-cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="confirmation-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="alert-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="alert-title">Notice</h3>
+      </div>
+      <div id="alert-message" style="margin-bottom: 1.5rem; color: #555; line-height: 1.4;">
+        Alert message
+      </div>
+      <div class="modal-buttons">
+        <button type="button" class="btn-primary" id="alert-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Circles View -->
+  <div id="search-circles-view" class="hidden">
+    <div style="max-width: 800px; margin: 0 auto; padding: 1rem;">
+      <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 2rem;">
+        <h2>Search Circles</h2>
+      </div>
+      
+      <!-- Search Filters -->
+      <div class="progress-container" style="margin-bottom: 2rem;">
+        <div class="progress-header">
+          <div class="progress-title">Search Filters</div>
+        </div>
+        <div style="background: white; border-radius: 8px; padding: 1.5rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label for="search-type">Circle Type:</label>
+              <select id="search-type">
+                <option value="">All Types</option>
+                <option value="Women">Women</option>
+                <option value="Men">Men</option>
+                <option value="Mixed">Mixed</option>
+                <option value="Young Adults">Young Adults</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="search-day">Meeting Day:</label>
+              <select id="search-day">
+                <option value="">All Days</option>
+                <option value="Sunday">Sunday</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="search-status">Status:</label>
+              <select id="search-status">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="invite">Invite</option>
+                <option value="pipeline">Pipeline</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <button id="search-btn" class="btn-primary">Search</button>
+            <button id="clear-search-btn" class="btn-secondary">Clear Filters</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Search Results -->
+      <div class="progress-container">
+        <div class="progress-header">
+          <div class="progress-title">Search Results</div>
+          <div id="search-results-count" class="progress-stats">0 circles found</div>
+        </div>
+        <div style="background: white; border-radius: 8px; padding: 1rem;">
+          <div id="search-results-desktop" class="table-container" style="display: block;">
+            <table id="search-results-table" class="table">
+              <thead>
+                <tr>
+                  <th class="sortable" data-column="name" data-table="search-results-table">Name <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-column="circle_type" data-table="search-results-table">Type <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-column="meeting_day" data-table="search-results-table">Day <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-column="meeting_time" data-table="search-results-table">Time <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-column="status" data-table="search-results-table">Status <span class="sort-indicator"></span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="5" style="text-align: center; color: #666; font-style: italic;">Use the filters above to search for circles</td></tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Mobile-friendly card view -->
+          <div id="search-results-mobile" class="mobile-cards" style="display: none;">
+            <!-- Mobile cards will be inserted here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script type="application/json" id="circle-data">
@@ -125,7 +1317,7 @@
     "full_name": "Mike Swan",
     "phone": "555-123-4567",
     "email": "mike@example.com",
-    "status": "leader"
+    "status": "active"
   },
   {
     "full_name": "Linsey Shields",
@@ -143,7 +1335,7 @@
     "full_name": "Pat Bowles",
     "phone": "555-777-8888",
     "email": "pat@example.com",
-    "status": "leader"
+    "status": "active"
   }
 ]
   </script>
@@ -163,11 +1355,268 @@
       document.getElementById('spinner').style.display = 'none'
     }
 
+    // Custom styled alert and confirm functions
+    function showAlert(message, title = 'Notice') {
+      return new Promise((resolve) => {
+        document.getElementById('alert-title').textContent = title
+        document.getElementById('alert-message').textContent = message
+        document.getElementById('alert-modal').classList.remove('hidden')
+        
+        const okButton = document.getElementById('alert-ok')
+        const handleOk = () => {
+          document.getElementById('alert-modal').classList.add('hidden')
+          okButton.removeEventListener('click', handleOk)
+          resolve()
+        }
+        
+        okButton.addEventListener('click', handleOk)
+      })
+    }
+
+    function showConfirm(message, title = 'Confirm Action') {
+      return new Promise((resolve) => {
+        document.getElementById('confirmation-title').textContent = title
+        document.getElementById('confirmation-message').textContent = message
+        document.getElementById('confirmation-modal').classList.remove('hidden')
+        
+        const confirmButton = document.getElementById('confirmation-confirm')
+        const cancelButton = document.getElementById('confirmation-cancel')
+        
+        const handleConfirm = () => {
+          document.getElementById('confirmation-modal').classList.add('hidden')
+          confirmButton.removeEventListener('click', handleConfirm)
+          cancelButton.removeEventListener('click', handleCancel)
+          resolve(true)
+        }
+        
+        const handleCancel = () => {
+          document.getElementById('confirmation-modal').classList.add('hidden')
+          confirmButton.removeEventListener('click', handleConfirm)
+          cancelButton.removeEventListener('click', handleCancel)
+          resolve(false)
+        }
+        
+        confirmButton.addEventListener('click', handleConfirm)
+        cancelButton.addEventListener('click', handleCancel)
+      })
+    }
+
     function formatDateTime(value) {
       if (!value) return ''
       const date = new Date(value)
       if (isNaN(date)) return value
-      return date.toLocaleString()
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const day = date.getDate().toString().padStart(2, '0')
+      const year = date.getFullYear().toString().slice(-2)
+      return `${month}/${day}/${year}`
+    }
+
+    function formatDateOnly(dateString) {
+      if (!dateString) return ''
+      // Handle YYYY-MM-DD format directly without timezone conversion
+      if (dateString.includes('-') && dateString.length === 10) {
+        const [year, month, day] = dateString.split('-')
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+        const formattedMonth = month.padStart(2, '0')
+        const formattedDay = day.padStart(2, '0')
+        const formattedYear = year.slice(-2)
+        return `${formattedMonth}/${formattedDay}/${formattedYear}`
+      }
+      return formatDateTime(dateString)
+    }
+
+    function isDateWithinCurrentMonth(dateString) {
+      if (!dateString) return false
+      
+      const now = new Date()
+      const currentYear = now.getFullYear()
+      const currentMonth = now.getMonth()
+      
+      let checkDate
+      if (dateString.includes('-') && dateString.length === 10) {
+        // Handle YYYY-MM-DD format
+        const [year, month, day] = dateString.split('-')
+        checkDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+      } else {
+        checkDate = new Date(dateString)
+      }
+      
+      return checkDate.getFullYear() === currentYear && checkDate.getMonth() === currentMonth
+    }
+
+    async function updateMonthlyProgress() {
+      try {
+        // Get all circle leaders
+        const { data: leaders, error } = await client
+          .from('circle_leaders')
+          .select('id, full_name, last_comm_date')
+        
+        if (error) {
+          console.error('Error fetching leaders for progress:', error)
+          return
+        }
+        
+        if (!leaders || leaders.length === 0) {
+          // Hide progress bar if no leaders
+          document.getElementById('monthly-progress').style.display = 'none'
+          return
+        }
+        
+        // Only show progress bar if main view is visible
+        const mainView = document.getElementById('main-view')
+        const isMainViewVisible = !mainView.classList.contains('hidden')
+        
+        if (isMainViewVisible) {
+          document.getElementById('monthly-progress').style.display = 'block'
+        } else {
+          document.getElementById('monthly-progress').style.display = 'none'
+          return
+        }
+        
+        // Count leaders contacted this month
+        const contactedThisMonth = leaders.filter(leader => 
+          isDateWithinCurrentMonth(leader.last_comm_date)
+        ).length
+        
+        const totalLeaders = leaders.length
+        const percentage = totalLeaders > 0 ? Math.round((contactedThisMonth / totalLeaders) * 100) : 0
+        
+        // Update the UI
+        document.getElementById('progress-count').textContent = `${contactedThisMonth} of ${totalLeaders}`
+        document.getElementById('progress-percentage').textContent = `${percentage}%`
+        
+        const progressFill = document.getElementById('progress-bar-fill')
+        progressFill.style.width = `${percentage}%`
+        
+        // Add class for low progress styling
+        if (percentage < 25) {
+          progressFill.classList.add('low-progress')
+        } else {
+          progressFill.classList.remove('low-progress')
+        }
+        
+        console.log(`Monthly progress: ${contactedThisMonth}/${totalLeaders} (${percentage}%)`)
+        
+      } catch (error) {
+        console.error('Error updating monthly progress:', error)
+      }
+    }
+
+    function getStatusClass(status) {
+      if (!status) return ''
+      return `status-${status.toLowerCase()}`
+    }
+
+    function formatStatusDisplay(status) {
+      if (!status) return ''
+      const statusClass = getStatusClass(status)
+      // Convert status to display text
+      const displayText = status === 'active' ? 'Active' : 
+                         status === 'invite' ? 'Invite' : 
+                         status === 'pipeline' ? 'Pipeline' : 
+                         status === 'paused' ? 'Paused' : status
+      return `<span class="profile-status ${statusClass}">${displayText}</span>`
+    }
+
+    let sortColumn = null
+    let sortDirection = 'asc'
+    
+    // Store table data for sorting
+    let tableData = {
+      'leaders-table': [],
+      'follow-up-table': [],
+      'one-on-one-table': [],
+      'training-table': [],
+      'lunch-table': [],
+      'visit-table': [],
+      'meeting-today-table': [],
+      'search-results-table': []
+    }
+    
+    let tableSortStates = {
+      'leaders-table': { column: null, direction: 'asc' },
+      'follow-up-table': { column: null, direction: 'asc' },
+      'one-on-one-table': { column: null, direction: 'asc' },
+      'training-table': { column: null, direction: 'asc' },
+      'lunch-table': { column: null, direction: 'asc' },
+      'visit-table': { column: null, direction: 'asc' },
+      'meeting-today-table': { column: null, direction: 'asc' },
+      'search-results-table': { column: null, direction: 'asc' }
+    }
+
+    function sortTableData(tableId, column, direction) {
+      const data = tableData[tableId]
+      if (!data || data.length === 0) return
+      
+      data.sort((a, b) => {
+        let aVal, bVal
+        
+        // Handle special field mapping for different tables
+        if (tableId === 'follow-up-table' && column === 'date') {
+          aVal = a.followUpDate || ''
+          bVal = b.followUpDate || ''
+        } else {
+          aVal = a[column] || ''
+          bVal = b[column] || ''
+        }
+        
+        // Special handling for dates
+        if (column === 'date' || column === 'last_comm_date') {
+          aVal = aVal || '1900-01-01'
+          bVal = bVal || '1900-01-01'
+        }
+        
+        // Convert to strings for comparison
+        aVal = aVal.toString().toLowerCase()
+        bVal = bVal.toString().toLowerCase()
+        
+        if (aVal < bVal) return direction === 'asc' ? -1 : 1
+        if (aVal > bVal) return direction === 'asc' ? 1 : -1
+        return 0
+      })
+      
+      // Re-populate the table with sorted data
+      if (tableId === 'leaders-table') {
+        populateLeadersTable(data)
+      } else if (tableId === 'follow-up-table') {
+        populateFollowUpTable(data, true) // true indicates called from sorting
+      } else if (tableId === 'meeting-today-table') {
+        populateMeetingTodayTable(data, true) // true indicates called from sorting
+      } else if (tableId === 'search-results-table') {
+        populateSearchResultsTable(data, true) // true indicates called from sorting
+      } else {
+        populateTable(tableId, data, true) // true indicates called from sorting
+      }
+    }
+
+    function populateLeadersTable(data) {
+      const tbody = document.querySelector('#leaders-table tbody')
+      tbody.innerHTML = ''
+
+      data.forEach(leader => {
+        const row = document.createElement('tr')
+        const lastCommText = leader.last_comm_date ? 
+          `${formatDateOnly(leader.last_comm_date)}${leader.last_comm_type ? `<br/>${leader.last_comm_type}` : ''}` :
+          ''
+        const isOverdue = leader.last_comm_date && !isDateWithinCurrentMonth(leader.last_comm_date)
+        
+        row.innerHTML = `
+          <td><a href="#" class="name-link">${leader.full_name || ''}</a></td>
+          <td>${formatStatusDisplay(leader.status)}</td>
+          <td class="${isOverdue ? 'overdue-comm' : ''}">${lastCommText}</td>
+        `
+        
+        // Make name clickable to open profile view
+        const nameLink = row.querySelector('.name-link')
+        if (nameLink) {
+          nameLink.addEventListener('click', (e) => {
+            e.preventDefault()
+            showLeaderProfile(leader)
+          })
+        }
+        
+        tbody.appendChild(row)
+      })
     }
 
     async function loadCircleLeaders() {
@@ -186,41 +1635,1006 @@
         return
       }
 
-      const tbody = document.querySelector('#leaders-table tbody')
+      // Store the data for sorting
+      tableData['leaders-table'] = [...data]
+      
+      // Sort data using table-specific sort state or fallback to global state
+      const sortState = tableSortStates['leaders-table']
+      const activeColumn = sortState.column || sortColumn
+      const activeDirection = sortState.direction || sortDirection
+      
+      if (activeColumn) {
+        data.sort((a, b) => {
+          let aVal = a[activeColumn] || ''
+          let bVal = b[activeColumn] || ''
+          
+          // Handle date sorting
+          if (activeColumn === 'last_comm_date') {
+            aVal = aVal ? new Date(aVal) : new Date(0)
+            bVal = bVal ? new Date(bVal) : new Date(0)
+          } else {
+            // Convert to string for comparison
+            aVal = String(aVal).toLowerCase()
+            bVal = String(bVal).toLowerCase()
+          }
+          
+          if (aVal < bVal) return activeDirection === 'asc' ? -1 : 1
+          if (aVal > bVal) return activeDirection === 'asc' ? 1 : -1
+          return 0
+        })
+        
+        // Update visual sort indicators
+        const tableHeaders = document.querySelectorAll('#leaders-table .sortable')
+        tableHeaders.forEach(h => {
+          h.classList.remove('sort-asc', 'sort-desc')
+          if (h.dataset.column === activeColumn) {
+            h.classList.add(activeDirection === 'asc' ? 'sort-asc' : 'sort-desc')
+          }
+        })
+      }
+
+      populateLeadersTable(data)
+      setStatus(`Displaying ${data.length} leaders.`)
+      
+      // Update monthly progress
+      await updateMonthlyProgress()
+      
+      // Load meeting today table
+      await loadMeetingToday()
+    }
+
+    async function loadMeetingToday() {
+      try {
+        // Only show meeting today section if main view is visible
+        const mainView = document.getElementById('main-view')
+        const isMainViewVisible = !mainView.classList.contains('hidden')
+        
+        if (!isMainViewVisible) {
+          document.getElementById('meeting-today-section').style.display = 'none'
+          return
+        }
+
+        // Get today's day name (e.g., "Monday", "Tuesday", etc.)
+        const today = new Date()
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        const todayName = dayNames[today.getDay()]
+
+        // Get all active leaders who have meetings on this day
+        const { data: leaders, error } = await client
+          .from('circle_leaders')
+          .select('id, full_name, meeting_day, meeting_time, status')
+          .eq('meeting_day', todayName)
+          .eq('status', 'active')
+          .order('meeting_time', { ascending: true })
+
+        if (error) {
+          console.error('Error fetching today\'s meetings:', error)
+          return
+        }
+
+        // Show the section
+        document.getElementById('meeting-today-section').style.display = 'block'
+
+        // Transform data for the table
+        const meetingData = (leaders || []).map(leader => ({
+          leader_id: leader.id,
+          name: leader.full_name,
+          meeting_day: leader.meeting_day,
+          meeting_time: formatMeetingTime(leader.meeting_time),
+          status: leader.status
+        }))
+
+        populateMeetingTodayTable(meetingData)
+      } catch (error) {
+        console.error('Error loading today\'s meetings:', error)
+      }
+    }
+
+    function formatMeetingTime(timeString) {
+      if (!timeString) return 'Not set'
+      
+      // Convert 24-hour time to 12-hour format
+      const timeParts = timeString.split(':')
+      let hour = parseInt(timeParts[0])
+      const minute = timeParts[1]
+      const ampm = hour >= 12 ? 'PM' : 'AM'
+      hour = hour % 12 || 12
+      return `${hour}:${minute} ${ampm}`
+    }
+
+    function populateMeetingTodayTable(data) {
+      // Store the data for sorting (unless it's being called from sorting function)
+      if (!arguments[1]) { // second argument indicates this is called from sorting
+        tableData['meeting-today-table'] = [...data]
+        
+        // Apply stored sort state if it exists
+        const sortState = tableSortStates['meeting-today-table']
+        if (sortState && sortState.column) {
+          data.sort((a, b) => {
+            let aVal = a[sortState.column] || ''
+            let bVal = b[sortState.column] || ''
+            
+            // Convert to strings for comparison
+            aVal = aVal.toString().toLowerCase()
+            bVal = bVal.toString().toLowerCase()
+            
+            if (aVal < bVal) return sortState.direction === 'asc' ? -1 : 1
+            if (aVal > bVal) return sortState.direction === 'asc' ? 1 : -1
+            return 0
+          })
+          
+          // Update visual sort indicators
+          const tableHeaders = document.querySelectorAll('#meeting-today-table .sortable')
+          tableHeaders.forEach(h => {
+            h.classList.remove('sort-asc', 'sort-desc')
+            if (h.dataset.column === sortState.column) {
+              h.classList.add(sortState.direction === 'asc' ? 'sort-asc' : 'sort-desc')
+            }
+          })
+        }
+      }
+      
+      const tbody = document.querySelector('#meeting-today-table tbody')
       tbody.innerHTML = ''
 
-      data.forEach(leader => {
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #666; font-style: italic;">No meetings scheduled for today</td></tr>'
+        return
+      }
+
+      data.forEach(item => {
         const row = document.createElement('tr')
         row.innerHTML = `
-          <td><a href="#" class="name-link">${leader.full_name || ''}</a></td>
-          <td><a href="#" class="phone-link" data-phone="${leader.phone || ''}">${leader.phone || ''}</a></td>
-          <td><a href="mailto:${leader.email || ''}">${leader.email || ''}</a></td>
-          <td>${leader.status || ''}</td>
-          <td>${formatDateTime(leader.last_comm_date)}${leader.last_comm_type ? ` (${leader.last_comm_type})` : ''}</td>
+          <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name}</a></td>
+          <td>${item.meeting_time}</td>
         `
-// Make name clickable to open edit form
-const nameLink = row.querySelector('.name-link')
-if (nameLink) {
-  nameLink.addEventListener('click', (e) => {
-    e.preventDefault()
-    openEditForm(leader)
-  })
-}
-
-// Add Phone number interaction handler
-const phoneLink = row.querySelector('.phone-link')
-if (phoneLink) {
-  phoneLink.addEventListener('click', (e) => {
-    e.preventDefault()
-    const phone = e.currentTarget.dataset.phone
-    const call = confirm('Would you like to call this number? Press Cancel to text instead.')
-    window.location.href = (call ? 'tel:' : 'sms:') + phone
-  })
-}
+        
+        // Make name clickable to open profile view
+        const nameLink = row.querySelector('.name-link')
+        if (nameLink) {
+          nameLink.addEventListener('click', async (e) => {
+            e.preventDefault()
+            const leaderId = e.target.dataset.leaderId
+            // Fetch the full leader data and show profile
+            const { data: leader, error } = await client
+              .from('circle_leaders')
+              .select('*')
+              .eq('id', leaderId)
+              .single()
+            
+            if (!error && leader) {
+              showLeaderProfile(leader)
+            }
+          })
+        }
+        
         tbody.appendChild(row)
       })
+    }
 
-      setStatus(`Loaded ${data.length} leaders.`)
+    async function searchCircles() {
+      const circleType = document.getElementById('search-type').value
+      const meetingDay = document.getElementById('search-day').value
+      const status = document.getElementById('search-status').value
+      
+      try {
+        let query = client
+          .from('circle_leaders')
+          .select('*')
+        
+        // Apply filters
+        if (circleType) {
+          query = query.eq('circle_type', circleType)
+        }
+        if (meetingDay) {
+          query = query.eq('meeting_day', meetingDay)
+        }
+        if (status) {
+          query = query.eq('status', status)
+        }
+        
+        const { data: leaders, error } = await query.order('full_name', { ascending: true })
+        
+        if (error) {
+          console.error('Error searching circles:', error)
+          return
+        }
+        
+        // Transform data for the table
+        const searchData = (leaders || []).map(leader => ({
+          leader_id: leader.id,
+          name: leader.full_name,
+          circle_type: leader.circle_type || 'Not set',
+          meeting_day: leader.meeting_day || 'Not set',
+          meeting_time: formatMeetingTime(leader.meeting_time),
+          status: leader.status
+        }))
+        
+        // Update results count
+        document.getElementById('search-results-count').textContent = `${searchData.length} circle${searchData.length === 1 ? '' : 's'} found`
+        
+        populateSearchResultsTable(searchData)
+        populateSearchResultsMobile(searchData)
+      } catch (error) {
+        console.error('Error searching circles:', error)
+      }
+    }
+
+    function populateSearchResultsTable(data) {
+      // Store the data for sorting (unless it's being called from sorting function)
+      if (!arguments[1]) { // second argument indicates this is called from sorting
+        tableData['search-results-table'] = [...data]
+        
+        // Apply stored sort state if it exists
+        const sortState = tableSortStates['search-results-table']
+        if (sortState && sortState.column) {
+          data.sort((a, b) => {
+            let aVal = a[sortState.column] || ''
+            let bVal = b[sortState.column] || ''
+            
+            // Convert to strings for comparison
+            aVal = aVal.toString().toLowerCase()
+            bVal = bVal.toString().toLowerCase()
+            
+            if (aVal < bVal) return sortState.direction === 'asc' ? -1 : 1
+            if (aVal > bVal) return sortState.direction === 'asc' ? 1 : -1
+            return 0
+          })
+          
+          // Update visual sort indicators
+          const tableHeaders = document.querySelectorAll('#search-results-table .sortable')
+          tableHeaders.forEach(h => {
+            h.classList.remove('sort-asc', 'sort-desc')
+            if (h.dataset.column === sortState.column) {
+              h.classList.add(sortState.direction === 'asc' ? 'sort-asc' : 'sort-desc')
+            }
+          })
+        }
+      }
+      
+      const tbody = document.querySelector('#search-results-table tbody')
+      tbody.innerHTML = ''
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666; font-style: italic;">No circles found matching your criteria</td></tr>'
+        return
+      }
+
+      data.forEach(item => {
+        const row = document.createElement('tr')
+        row.innerHTML = `
+          <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name}</a></td>
+          <td>${item.circle_type}</td>
+          <td>${item.meeting_day}</td>
+          <td>${item.meeting_time}</td>
+          <td>${formatStatusDisplay(item.status)}</td>
+        `
+        
+        // Make name clickable to open profile view
+        const nameLink = row.querySelector('.name-link')
+        if (nameLink) {
+          nameLink.addEventListener('click', async (e) => {
+            e.preventDefault()
+            const leaderId = e.target.dataset.leaderId
+            // Fetch the full leader data and show profile
+            const { data: leader, error } = await client
+              .from('circle_leaders')
+              .select('*')
+              .eq('id', leaderId)
+              .single()
+            
+            if (!error && leader) {
+              showLeaderProfile(leader)
+            }
+          })
+        }
+        
+        tbody.appendChild(row)
+      })
+    }
+
+    function populateSearchResultsMobile(data) {
+      const mobileContainer = document.getElementById('search-results-mobile')
+      mobileContainer.innerHTML = ''
+
+      if (data.length === 0) {
+        mobileContainer.innerHTML = '<div style="text-align: center; color: #666; font-style: italic; padding: 2rem;">No circles found matching your criteria</div>'
+        return
+      }
+
+      data.forEach(item => {
+        const card = document.createElement('div')
+        card.className = 'mobile-card'
+        card.innerHTML = `
+          <div class="mobile-card-header">
+            <a href="#" class="mobile-card-name" data-leader-id="${item.leader_id}">${item.name}</a>
+            ${formatStatusDisplay(item.status)}
+          </div>
+          <div class="mobile-card-details">
+            <div class="mobile-card-detail">
+              <span class="mobile-card-label">Type:</span>
+              <span>${item.circle_type}</span>
+            </div>
+            <div class="mobile-card-detail">
+              <span class="mobile-card-label">Day:</span>
+              <span>${item.meeting_day}</span>
+            </div>
+            <div class="mobile-card-detail">
+              <span class="mobile-card-label">Time:</span>
+              <span>${item.meeting_time}</span>
+            </div>
+          </div>
+        `
+        
+        // Make name clickable to open profile view
+        const nameLink = card.querySelector('.mobile-card-name')
+        if (nameLink) {
+          nameLink.addEventListener('click', async (e) => {
+            e.preventDefault()
+            const leaderId = e.target.dataset.leaderId
+            // Fetch the full leader data and show profile
+            const { data: leader, error } = await client
+              .from('circle_leaders')
+              .select('*')
+              .eq('id', leaderId)
+              .single()
+            
+            if (!error && leader) {
+              showLeaderProfile(leader)
+            }
+          })
+        }
+        
+        mobileContainer.appendChild(card)
+      })
+    }
+
+    function clearSearchFilters() {
+      document.getElementById('search-type').value = ''
+      document.getElementById('search-day').value = ''
+      document.getElementById('search-status').value = ''
+      
+      // Clear results
+      document.getElementById('search-results-count').textContent = '0 circles found'
+      document.querySelector('#search-results-table tbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666; font-style: italic;">Use the filters above to search for circles</td></tr>'
+      document.getElementById('search-results-mobile').innerHTML = ''
+    }
+
+    function showSearchCirclesPage() {
+      document.getElementById('main-view').classList.add('hidden')
+      document.getElementById('profile-view').classList.add('hidden')
+      document.getElementById('add-leader-view').classList.add('hidden')
+      document.getElementById('search-circles-view').classList.remove('hidden')
+      document.getElementById('monthly-progress').style.display = 'none'
+      document.getElementById('meeting-today-section').style.display = 'none'
+    }
+
+    function hideSearchCirclesPage() {
+      document.getElementById('search-circles-view').classList.add('hidden')
+      document.getElementById('main-view').classList.remove('hidden')
+      // Show progress bar and meeting today when returning to main view
+      updateMonthlyProgress()
+      loadMeetingToday()
+    }
+
+    async function loadCommunicationSummaries() {
+      await loadOneOnOneMeetings()
+      await loadTrainingSessions()
+      await loadLunchMeetings()
+      await loadCircleVisits()
+      await loadFollowUpLeaders()
+    }
+
+    async function loadOneOnOneMeetings() {
+      try {
+        const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0]
+        const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0]
+
+        // Get all communication notes from selected month containing "One-on-One"
+        const { data: comments, error: commentsError } = await client
+          .from('circle_comments')
+          .select(`
+            *,
+            circle_leaders!inner(full_name, status)
+          `)
+          .ilike('comment', '%One-on-One%')
+          .gte('created_at', firstDay)
+          .lte('created_at', lastDay + 'T23:59:59')
+
+        if (commentsError) {
+          console.error('Error fetching one-on-one comments:', commentsError)
+          return
+        }
+
+        // Get leaders with current last_comm_type as One-on-One from selected month
+        const { data: oneOnOneLeaders, error: leadersError } = await client
+          .from('circle_leaders')
+          .select('*')
+          .eq('last_comm_type', 'One-on-One')
+          .gte('last_comm_date', firstDay)
+          .lte('last_comm_date', lastDay)
+
+        if (leadersError) {
+          console.error('Error fetching one-on-one leaders:', leadersError)
+          return
+        }
+
+        // Combine and deduplicate
+        const meetingsMap = new Map()
+        
+        // Add from comments
+        comments?.forEach(comment => {
+          const dateMatch = comment.comment.match(/One-on-One on (\d{4}-\d{2}-\d{2})/)
+          const date = dateMatch ? dateMatch[1] : comment.created_at.split('T')[0]
+          
+          // Double-check date is within our filter range
+          if (date >= firstDay && date <= lastDay) {
+            const key = comment.leader_id
+            if (!meetingsMap.has(key) || meetingsMap.get(key).date < date) {
+              meetingsMap.set(key, {
+                name: comment.circle_leaders.full_name,
+                date: date,
+                status: comment.circle_leaders.status,
+                leader_id: comment.leader_id
+              })
+            }
+          }
+        })
+
+        // Add from current last_comm
+        oneOnOneLeaders?.forEach(leader => {
+          // Double-check date is within our filter range
+          if (leader.last_comm_date && leader.last_comm_date >= firstDay && leader.last_comm_date <= lastDay) {
+            const key = leader.id
+            if (!meetingsMap.has(key) || meetingsMap.get(key).date < leader.last_comm_date) {
+              meetingsMap.set(key, {
+                name: leader.full_name,
+                date: leader.last_comm_date,
+                status: leader.status,
+                leader_id: leader.id
+              })
+            }
+          }
+        })
+
+        populateTable('one-on-one-table', Array.from(meetingsMap.values()))
+      } catch (error) {
+        console.error('Error loading one-on-one meetings:', error)
+      }
+    }
+
+    async function loadTrainingSessions() {
+      try {
+        const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0]
+        const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0]
+
+        // Get all communication notes from selected month containing "Circle Leader Training"
+        const { data: comments, error: commentsError } = await client
+          .from('circle_comments')
+          .select(`
+            *,
+            circle_leaders!inner(full_name, status)
+          `)
+          .ilike('comment', '%Circle Leader Training%')
+          .gte('created_at', firstDay)
+          .lte('created_at', lastDay + 'T23:59:59')
+
+        if (commentsError) {
+          console.error('Error fetching training comments:', commentsError)
+          return
+        }
+
+        // Get leaders with current last_comm_type as Circle Leader Training from selected month
+        const { data: trainingLeaders, error: leadersError } = await client
+          .from('circle_leaders')
+          .select('*')
+          .eq('last_comm_type', 'Circle Leader Training')
+          .gte('last_comm_date', firstDay)
+          .lte('last_comm_date', lastDay)
+
+        if (leadersError) {
+          console.error('Error fetching training leaders:', leadersError)
+          return
+        }
+
+        // Combine and deduplicate
+        const trainingsMap = new Map()
+        
+        // Add from comments
+        comments?.forEach(comment => {
+          const dateMatch = comment.comment.match(/Circle Leader Training on (\d{4}-\d{2}-\d{2})/)
+          const date = dateMatch ? dateMatch[1] : comment.created_at.split('T')[0]
+          
+          // Double-check date is within our filter range
+          if (date >= firstDay && date <= lastDay) {
+            const key = comment.leader_id
+            if (!trainingsMap.has(key) || trainingsMap.get(key).date < date) {
+              trainingsMap.set(key, {
+                name: comment.circle_leaders.full_name,
+                date: date,
+                status: comment.circle_leaders.status,
+                leader_id: comment.leader_id
+              })
+            }
+          }
+        })
+
+        // Add from current last_comm
+        trainingLeaders?.forEach(leader => {
+          // Double-check date is within our filter range
+          if (leader.last_comm_date && leader.last_comm_date >= firstDay && leader.last_comm_date <= lastDay) {
+            const key = leader.id
+            if (!trainingsMap.has(key) || trainingsMap.get(key).date < leader.last_comm_date) {
+              trainingsMap.set(key, {
+                name: leader.full_name,
+                date: leader.last_comm_date,
+                status: leader.status,
+                leader_id: leader.id
+              })
+            }
+          }
+        })
+
+        populateTable('training-table', Array.from(trainingsMap.values()))
+      } catch (error) {
+        console.error('Error loading training sessions:', error)
+      }
+    }
+
+    async function loadLunchMeetings() {
+      try {
+        const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0]
+        const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0]
+
+        // Get all communication notes from selected month containing "Circle Leader Lunch"
+        const { data: comments, error: commentsError } = await client
+          .from('circle_comments')
+          .select(`
+            *,
+            circle_leaders!inner(full_name, status)
+          `)
+          .ilike('comment', '%Circle Leader Lunch%')
+          .gte('created_at', firstDay)
+          .lte('created_at', lastDay + 'T23:59:59')
+
+        if (commentsError) {
+          console.error('Error fetching lunch comments:', commentsError)
+          return
+        }
+
+        // Get leaders with current last_comm_type as Circle Leader Lunch from selected month
+        const { data: lunchLeaders, error: leadersError } = await client
+          .from('circle_leaders')
+          .select('*')
+          .eq('last_comm_type', 'Circle Leader Lunch')
+          .gte('last_comm_date', firstDay)
+          .lte('last_comm_date', lastDay)
+
+        if (leadersError) {
+          console.error('Error fetching lunch leaders:', leadersError)
+          return
+        }
+
+        // Combine and deduplicate
+        const lunchesMap = new Map()
+        
+        // Add from comments
+        comments?.forEach(comment => {
+          const dateMatch = comment.comment.match(/Circle Leader Lunch on (\d{4}-\d{2}-\d{2})/)
+          const date = dateMatch ? dateMatch[1] : comment.created_at.split('T')[0]
+          
+          // Double-check date is within our filter range
+          if (date >= firstDay && date <= lastDay) {
+            const key = comment.leader_id
+            if (!lunchesMap.has(key) || lunchesMap.get(key).date < date) {
+              lunchesMap.set(key, {
+                name: comment.circle_leaders.full_name,
+                date: date,
+                status: comment.circle_leaders.status,
+                leader_id: comment.leader_id
+              })
+            }
+          }
+        })
+
+        // Add from current last_comm
+        lunchLeaders?.forEach(leader => {
+          // Double-check date is within our filter range
+          if (leader.last_comm_date && leader.last_comm_date >= firstDay && leader.last_comm_date <= lastDay) {
+            const key = leader.id
+            if (!lunchesMap.has(key) || lunchesMap.get(key).date < leader.last_comm_date) {
+              lunchesMap.set(key, {
+                name: leader.full_name,
+                date: leader.last_comm_date,
+                status: leader.status,
+                leader_id: leader.id
+              })
+            }
+          }
+        })
+
+        populateTable('lunch-table', Array.from(lunchesMap.values()))
+      } catch (error) {
+        console.error('Error loading lunch meetings:', error)
+      }
+    }
+
+    async function loadCircleVisits() {
+      try {
+        const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0]
+        const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0]
+
+        // Get all communication notes from selected month containing "Circle Visit"
+        const { data: comments, error: commentsError } = await client
+          .from('circle_comments')
+          .select(`
+            *,
+            circle_leaders!inner(full_name, status)
+          `)
+          .ilike('comment', '%Circle Visit%')
+          .gte('created_at', firstDay)
+          .lte('created_at', lastDay + 'T23:59:59')
+
+        if (commentsError) {
+          console.error('Error fetching visit comments:', commentsError)
+          return
+        }
+
+        // Get leaders with current last_comm_type as Circle Visit from selected month
+        const { data: visitLeaders, error: leadersError } = await client
+          .from('circle_leaders')
+          .select('*')
+          .eq('last_comm_type', 'Circle Visit')
+          .gte('last_comm_date', firstDay)
+          .lte('last_comm_date', lastDay)
+
+        if (leadersError) {
+          console.error('Error fetching visit leaders:', leadersError)
+          return
+        }
+
+        // Combine and deduplicate
+        const visitsMap = new Map()
+        
+        // Add from comments
+        comments?.forEach(comment => {
+          const dateMatch = comment.comment.match(/Circle Visit on (\d{4}-\d{2}-\d{2})/)
+          const date = dateMatch ? dateMatch[1] : comment.created_at.split('T')[0]
+          
+          // Double-check date is within our filter range
+          if (date >= firstDay && date <= lastDay) {
+            const key = comment.leader_id
+            if (!visitsMap.has(key) || visitsMap.get(key).date < date) {
+              visitsMap.set(key, {
+                name: comment.circle_leaders.full_name,
+                date: date,
+                status: comment.circle_leaders.status,
+                leader_id: comment.leader_id
+              })
+            }
+          }
+        })
+
+        // Add from current last_comm
+        visitLeaders?.forEach(leader => {
+          // Double-check date is within our filter range
+          if (leader.last_comm_date && leader.last_comm_date >= firstDay && leader.last_comm_date <= lastDay) {
+            const key = leader.id
+            if (!visitsMap.has(key) || visitsMap.get(key).date < leader.last_comm_date) {
+              visitsMap.set(key, {
+                name: leader.full_name,
+                date: leader.last_comm_date,
+                status: leader.status,
+                leader_id: leader.id
+              })
+            }
+          }
+        })
+
+        populateTable('visit-table', Array.from(visitsMap.values()))
+      } catch (error) {
+        console.error('Error loading circle visits:', error)
+      }
+    }
+
+    async function loadFollowUpLeaders() {
+      try {
+        // Get all follow-up related comments (both marking and clearing)
+        const { data: followUpComments, error: commentsError } = await client
+          .from('circle_comments')
+          .select(`
+            *,
+            circle_leaders!inner(full_name, status, last_comm_date, last_comm_type)
+          `)
+          .or('comment.ilike.%follow-up%,comment.ilike.%Follow-up%')
+          .order('created_at', { ascending: false })
+
+        if (commentsError) {
+          console.error('Error fetching follow-up comments:', commentsError)
+          return
+        }
+
+        // Process follow-up comments to extract dates and get the most recent follow-up status for each leader
+        const followUpMap = new Map()
+        followUpComments?.forEach(comment => {
+          const key = comment.leader_id
+          
+          // Only process if we haven't seen this leader yet (most recent comment)
+          if (!followUpMap.has(key)) {
+            // Check if this is a "clear" comment
+            const isClearComment = comment.comment.toLowerCase().includes('follow-up flag cleared') || 
+                                  comment.comment.toLowerCase().includes('follow-up cleared')
+            
+            if (isClearComment) {
+              // Mark as cleared (will not be shown in follow-up table)
+              followUpMap.set(key, { cleared: true })
+            } else {
+              // This is a follow-up marking comment
+              const dateMatch = comment.comment.match(/follow-up on (\d{4}-\d{2}-\d{2})/)
+              const followUpDate = dateMatch ? dateMatch[1] : null
+              
+              // Only show if the follow-up date is in the future or today, or if no date was specified
+              const today = new Date().toISOString().split('T')[0]
+              if (!followUpDate || followUpDate >= today) {
+                followUpMap.set(key, {
+                  name: comment.circle_leaders.full_name,
+                  lastComm: comment.circle_leaders.last_comm_date ? 
+                    `${formatDateOnly(comment.circle_leaders.last_comm_date)}${comment.circle_leaders.last_comm_type ? ` (${comment.circle_leaders.last_comm_type})` : ''}` : 
+                    'No communication recorded',
+                  status: comment.circle_leaders.status,
+                  leader_id: comment.leader_id,
+                  followUpDate: followUpDate,
+                  followUpNote: comment.comment,
+                  cleared: false
+                })
+              } else {
+                // Mark as cleared if follow-up date has passed
+                followUpMap.set(key, { cleared: true })
+              }
+            }
+          }
+        })
+
+        // Filter out cleared follow-ups
+        const activeFollowUps = Array.from(followUpMap.values()).filter(item => !item.cleared)
+        
+        populateFollowUpTable(activeFollowUps)
+      } catch (error) {
+        console.error('Error loading follow-up leaders:', error)
+      }
+    }
+
+    async function checkFollowUpStatus(leaderId) {
+      try {
+        // Get the most recent follow-up comment for this leader
+        const { data: followUpComments, error } = await client
+          .from('circle_comments')
+          .select('*')
+          .eq('leader_id', leaderId)
+          .or('comment.ilike.%follow-up%,comment.ilike.%Follow-up%')
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        if (error) {
+          console.error('Error checking follow-up status:', error)
+          return
+        }
+
+        const clearFollowUpBtn = document.getElementById('clear-follow-up-btn')
+        
+        if (followUpComments && followUpComments.length > 0) {
+          const latestComment = followUpComments[0]
+          
+          // Check if this is a "clear" comment
+          const isClearComment = latestComment.comment.toLowerCase().includes('follow-up flag cleared') || 
+                                latestComment.comment.toLowerCase().includes('follow-up cleared')
+          
+          if (isClearComment) {
+            // Follow-up was cleared, hide the button
+            clearFollowUpBtn.style.display = 'none'
+          } else {
+            // This is an active follow-up, check if it's still valid
+            const dateMatch = latestComment.comment.match(/follow-up on (\d{4}-\d{2}-\d{2})/)
+            const followUpDate = dateMatch ? dateMatch[1] : null
+            
+            // Only show if the follow-up date is in the future or today, or if no date was specified
+            const today = new Date().toISOString().split('T')[0]
+            if (!followUpDate || followUpDate >= today) {
+              clearFollowUpBtn.style.display = 'block'
+            } else {
+              clearFollowUpBtn.style.display = 'none'
+            }
+          }
+        } else {
+          // No follow-up comments found, hide the button
+          clearFollowUpBtn.style.display = 'none'
+        }
+      } catch (error) {
+        console.error('Error checking follow-up status:', error)
+        // Default to hiding the button on error
+        document.getElementById('clear-follow-up-btn').style.display = 'none'
+      }
+    }
+
+    function populateTable(tableId, data) {
+      // Store the data for sorting (unless it's being called from sorting function)
+      if (!arguments[2]) { // third argument indicates this is called from sorting
+        tableData[tableId] = [...data]
+        
+        // Apply stored sort state if it exists
+        const sortState = tableSortStates[tableId]
+        if (sortState && sortState.column) {
+          data.sort((a, b) => {
+            let aVal = a[sortState.column] || ''
+            let bVal = b[sortState.column] || ''
+            
+            // Special handling for dates
+            if (sortState.column === 'date' || sortState.column === 'last_comm_date') {
+              aVal = aVal || '1900-01-01'
+              bVal = bVal || '1900-01-01'
+            }
+            
+            // Convert to strings for comparison
+            aVal = aVal.toString().toLowerCase()
+            bVal = bVal.toString().toLowerCase()
+            
+            if (aVal < bVal) return sortState.direction === 'asc' ? -1 : 1
+            if (aVal > bVal) return sortState.direction === 'asc' ? 1 : -1
+            return 0
+          })
+          
+          // Update visual sort indicators
+          const tableHeaders = document.querySelectorAll(`#${tableId} .sortable`)
+          tableHeaders.forEach(h => {
+            h.classList.remove('sort-asc', 'sort-desc')
+            if (h.dataset.column === sortState.column) {
+              h.classList.add(sortState.direction === 'asc' ? 'sort-asc' : 'sort-desc')
+            }
+          })
+        }
+      }
+      
+      const tbody = document.querySelector(`#${tableId} tbody`)
+      tbody.innerHTML = ''
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #666; font-style: italic;">No entries found</td></tr>'
+        return
+      }
+
+      data.forEach(item => {
+        const row = document.createElement('tr')
+        row.innerHTML = `
+          <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name}</a></td>
+          <td>${formatDateOnly(item.date)}</td>
+          <td>${formatStatusDisplay(item.status)}</td>
+        `
+        
+        // Make name clickable to open profile view
+        const nameLink = row.querySelector('.name-link')
+        if (nameLink) {
+          nameLink.addEventListener('click', async (e) => {
+            e.preventDefault()
+            const leaderId = e.target.dataset.leaderId
+            // Fetch the full leader data and show profile
+            const { data: leader, error } = await client
+              .from('circle_leaders')
+              .select('*')
+              .eq('id', leaderId)
+              .single()
+            
+            if (!error && leader) {
+              showLeaderProfile(leader)
+            }
+          })
+        }
+        
+        tbody.appendChild(row)
+      })
+    }
+
+    function populateFollowUpTable(data) {
+      // Store the data for sorting (unless it's being called from sorting function)
+      if (!arguments[1]) { // second argument indicates this is called from sorting
+        tableData['follow-up-table'] = [...data]
+        
+        // Apply stored sort state if it exists
+        const sortState = tableSortStates['follow-up-table']
+        if (sortState && sortState.column) {
+          data.sort((a, b) => {
+            let aVal, bVal
+            
+            // Map column names to actual data fields for follow-up table
+            if (sortState.column === 'date') {
+              aVal = a.followUpDate || ''
+              bVal = b.followUpDate || ''
+            } else {
+              aVal = a[sortState.column] || ''
+              bVal = b[sortState.column] || ''
+            }
+            
+            // Special handling for dates
+            if (sortState.column === 'date') {
+              aVal = aVal || '1900-01-01'
+              bVal = bVal || '1900-01-01'
+            }
+            
+            // Convert to strings for comparison
+            aVal = aVal.toString().toLowerCase()
+            bVal = bVal.toString().toLowerCase()
+            
+            if (aVal < bVal) return sortState.direction === 'asc' ? -1 : 1
+            if (aVal > bVal) return sortState.direction === 'asc' ? 1 : -1
+            return 0
+          })
+          
+          // Update visual sort indicators
+          const tableHeaders = document.querySelectorAll('#follow-up-table .sortable')
+          tableHeaders.forEach(h => {
+            h.classList.remove('sort-asc', 'sort-desc')
+            if (h.dataset.column === sortState.column) {
+              h.classList.add(sortState.direction === 'asc' ? 'sort-asc' : 'sort-desc')
+            }
+          })
+        }
+      }
+      
+      const tbody = document.querySelector('#follow-up-table tbody')
+      tbody.innerHTML = ''
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #666; font-style: italic;">No follow-ups needed</td></tr>'
+        return
+      }
+
+      data.forEach(item => {
+        const row = document.createElement('tr')
+        const followUpDateText = item.followUpDate ? formatDateOnly(item.followUpDate) : 'Not specified'
+        
+        // Check if follow-up is overdue
+        const isOverdue = item.followUpDate && item.followUpDate < new Date().toISOString().split('T')[0]
+        const dateClass = isOverdue ? 'overdue-comm' : ''
+        
+        row.innerHTML = `
+          <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name}</a></td>
+          <td class="${dateClass}">${followUpDateText}</td>
+          <td>${formatStatusDisplay(item.status)}</td>
+        `
+        
+        // Make name clickable to open profile view
+        const nameLink = row.querySelector('.name-link')
+        if (nameLink) {
+          nameLink.addEventListener('click', async (e) => {
+            e.preventDefault()
+            const leaderId = e.target.dataset.leaderId
+            // Fetch the full leader data and show profile
+            const { data: leader, error } = await client
+              .from('circle_leaders')
+              .select('*')
+              .eq('id', leaderId)
+              .single()
+            
+            if (!error && leader) {
+              showLeaderProfile(leader)
+            }
+          })
+        }
+        
+        tbody.appendChild(row)
+      })
+    }
+
+    async function contactLeader(leaderId) {
+      // Fetch the leader data and show profile
+      const { data: leader, error } = await client
+        .from('circle_leaders')
+        .select('*')
+        .eq('id', leaderId)
+        .single()
+      
+      if (!error && leader) {
+        showLeaderProfile(leader)
+      }
     }
 
     async function addCircleLeader(event) {
@@ -232,18 +2646,27 @@ if (phoneLink) {
       const status = document.getElementById('status').value
       const last_comm_date = document.getElementById('last_comm_date').value || null
       const last_comm_type = document.getElementById('last_comm_type').value || null
+      const circle_type = document.getElementById('circle_type').value || null
+      const meeting_day = document.getElementById('meeting_day').value || null
+      const meeting_time = document.getElementById('meeting_time').value || null
+      const meeting_frequency = document.getElementById('meeting_frequency').value || null
 
       const { error } = await client.from('circle_leaders').insert([
-        { full_name, phone, email, status, last_comm_date, last_comm_type }
+        { full_name, phone, email, status, last_comm_date, last_comm_type,
+          circle_type, meeting_day, meeting_time, meeting_frequency }
       ])
 
       if (error) {
         console.error('Error adding leader:', error)
+        await showAlert('Error adding leader', 'Error')
         return
       }
 
       document.getElementById('add-leader-form').reset()
       loadCircleLeaders()
+      loadCommunicationSummaries()
+      hideAddLeaderPage()
+      setStatus('Leader added successfully!')
     }
 
     function openEditForm(leader) {
@@ -254,6 +2677,10 @@ if (phoneLink) {
       document.getElementById('edit_status').value = leader.status || 'invite'
       document.getElementById('edit_last_comm_date').value = leader.last_comm_date || ''
       document.getElementById('edit_last_comm_type').value = leader.last_comm_type || ''
+      document.getElementById('edit_circle_type').value = leader.circle_type || ''
+      document.getElementById('edit_meeting_day').value = leader.meeting_day || ''
+      document.getElementById('edit_meeting_time').value = leader.meeting_time || ''
+      document.getElementById('edit_meeting_frequency').value = leader.meeting_frequency || ''
       document.getElementById('edit-leader-form').style.display = 'block'
       document.getElementById('edit-leader-form').scrollIntoView({ behavior: 'smooth' })
     }
@@ -268,9 +2695,14 @@ if (phoneLink) {
       const status = document.getElementById('edit_status').value
       const last_comm_date = document.getElementById('edit_last_comm_date').value || null
       const last_comm_type = document.getElementById('edit_last_comm_type').value || null
+      const circle_type = document.getElementById('edit_circle_type').value || null
+      const meeting_day = document.getElementById('edit_meeting_day').value || null
+      const meeting_time = document.getElementById('edit_meeting_time').value || null
+      const meeting_frequency = document.getElementById('edit_meeting_frequency').value || null
 
       const { error } = await client.from('circle_leaders').update({
-        full_name, phone, email, status, last_comm_date, last_comm_type
+        full_name, phone, email, status, last_comm_date, last_comm_type,
+        circle_type, meeting_day, meeting_time, meeting_frequency
       }).eq('id', id)
 
       if (error) {
@@ -280,7 +2712,687 @@ if (phoneLink) {
 
       document.getElementById('edit-leader-form').reset()
       document.getElementById('edit-leader-form').style.display = 'none'
+      
+      // Refresh the main list
       loadCircleLeaders()
+      loadCommunicationSummaries()
+      
+      // If we have a current leader, update their data and show the profile again
+      if (currentLeader && currentLeader.id === id) {
+        currentLeader.full_name = full_name
+        currentLeader.phone = phone
+        currentLeader.email = email
+        currentLeader.status = status
+        currentLeader.last_comm_date = last_comm_date
+        currentLeader.last_comm_type = last_comm_type
+        currentLeader.circle_type = circle_type
+        currentLeader.meeting_day = meeting_day
+        currentLeader.meeting_time = meeting_time
+        currentLeader.meeting_frequency = meeting_frequency
+        showLeaderProfile(currentLeader)
+      }
+    }
+
+    let currentLeader = null
+    let selectedSummaryMonth = null
+    let selectedSummaryYear = null
+
+    // Initialize date filters
+    function initializeSummaryFilters() {
+      const now = new Date()
+      const currentMonth = now.getMonth()
+      const currentYear = now.getFullYear()
+      
+      // Set default values
+      selectedSummaryMonth = currentMonth
+      selectedSummaryYear = currentYear
+      
+      // Populate year dropdown (current year +/- 2 years)
+      const yearSelect = document.getElementById('summary-year')
+      for (let year = currentYear - 2; year <= currentYear + 2; year++) {
+        const option = document.createElement('option')
+        option.value = year
+        option.textContent = year
+        if (year === currentYear) option.selected = true
+        yearSelect.appendChild(option)
+      }
+      
+      // Set default month
+      document.getElementById('summary-month').value = currentMonth
+    }
+
+    // Action menu functionality
+    let actionMenuInitialized = false
+    
+    function initializeActionMenu() {
+      if (actionMenuInitialized) return
+      
+      const actionBtn = document.getElementById('profile-actions-btn')
+      const actionDropdown = document.getElementById('profile-actions-dropdown')
+      
+      if (actionBtn && actionDropdown) {
+        actionBtn.addEventListener('click', (e) => {
+          e.stopPropagation()
+          actionDropdown.classList.toggle('show')
+        })
+        
+        actionMenuInitialized = true
+      }
+    }
+
+    function showLeaderProfile(leader) {
+      currentLeader = leader
+      document.getElementById('main-view').classList.add('hidden')
+      document.getElementById('profile-view').classList.remove('hidden')
+      document.getElementById('add-leader-view').classList.add('hidden')
+      document.getElementById('search-circles-view').classList.add('hidden')
+      document.getElementById('monthly-progress').style.display = 'none'
+      document.getElementById('meeting-today-section').style.display = 'none'
+      
+      // Populate profile data
+      document.getElementById('profile-name').textContent = leader.full_name || 'Unknown'
+      
+      // Build circle info display
+      const circleInfoParts = []
+      if (leader.circle_type) circleInfoParts.push(leader.circle_type)
+      if (leader.meeting_day) circleInfoParts.push(leader.meeting_day + 's')
+      if (leader.meeting_time) {
+        // Convert 24-hour time to 12-hour format
+        const timeParts = leader.meeting_time.split(':')
+        let hour = parseInt(timeParts[0])
+        const minute = timeParts[1]
+        const ampm = hour >= 12 ? 'pm' : 'am'
+        hour = hour % 12 || 12
+        circleInfoParts.push(`${hour}:${minute} ${ampm}`)
+      }
+      if (leader.meeting_frequency) circleInfoParts.push(leader.meeting_frequency)
+      
+      const circleInfoText = circleInfoParts.length > 0 ? circleInfoParts.join('<br>\n') : 'Circle information not set'
+      const circleInfoElement = document.getElementById('profile-circle-info')
+      circleInfoElement.innerHTML = circleInfoText
+      circleInfoElement.style.whiteSpace = 'normal'
+      
+      // Handle phone link
+      const phoneLink = document.getElementById('profile-phone')
+      phoneLink.textContent = leader.phone || 'No phone'
+      phoneLink.dataset.phone = leader.phone || ''
+      
+      // Handle email link
+      const emailLink = document.getElementById('profile-email')
+      emailLink.textContent = leader.email || 'No email'
+      emailLink.href = leader.email ? `mailto:${leader.email}` : '#'
+      
+      const lastCommText = leader.last_comm_date ? 
+        `${formatDateOnly(leader.last_comm_date)}${leader.last_comm_type ? ` (${leader.last_comm_type})` : ''}` : 
+        'No communication recorded'
+      document.getElementById('profile-last-comm').textContent = lastCommText
+      
+      const statusElement = document.getElementById('profile-status')
+      const statusValue = leader.status || 'invite'
+      const displayText = statusValue === 'active' ? 'Active' : 
+                         statusValue === 'invite' ? 'Invite' : 
+                         statusValue === 'pipeline' ? 'Pipeline' : 
+                         statusValue === 'paused' ? 'Paused' : statusValue
+      statusElement.textContent = displayText
+      statusElement.className = `profile-status status-${statusValue}`
+      
+      // Add phone link event listener (remove any existing listeners first)
+      const newPhoneLink = phoneLink.cloneNode(true)
+      phoneLink.parentNode.replaceChild(newPhoneLink, phoneLink)
+      newPhoneLink.addEventListener('click', async (e) => {
+        e.preventDefault()
+        const phone = e.currentTarget.dataset.phone
+        if (phone) {
+          const call = await showConfirm('Would you like to call this number? Press Cancel to text instead.', 'Contact Options')
+          window.location.href = (call ? 'tel:' : 'sms:') + phone
+        }
+      })
+      
+      // Ensure we're in display mode
+      showProfileDisplay()
+      
+      // Load notes for this leader
+      loadLeaderNotes(leader.id)
+      
+      // Check follow-up status and update button visibility
+      checkFollowUpStatus(leader.id)
+      
+      // Initialize action menu
+      initializeActionMenu()
+      
+      // Scroll to top of the page
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    function showProfileDisplay() {
+      document.getElementById('profile-display').classList.remove('hidden')
+      document.getElementById('profile-edit-form').classList.add('hidden')
+    }
+
+    function showProfileEdit() {
+      if (!currentLeader) return
+      
+      // Populate edit form
+      document.getElementById('inline-edit-name').value = currentLeader.full_name || ''
+      document.getElementById('inline-edit-phone').value = currentLeader.phone || ''
+      document.getElementById('inline-edit-email').value = currentLeader.email || ''
+      document.getElementById('inline-edit-status').value = currentLeader.status || 'invite'
+      document.getElementById('inline-edit-circle-type').value = currentLeader.circle_type || ''
+      document.getElementById('inline-edit-meeting-day').value = currentLeader.meeting_day || ''
+      document.getElementById('inline-edit-meeting-time').value = currentLeader.meeting_time || ''
+      document.getElementById('inline-edit-meeting-frequency').value = currentLeader.meeting_frequency || ''
+      
+      // Show edit form, hide display
+      document.getElementById('profile-display').classList.add('hidden')
+      document.getElementById('profile-edit-form').classList.remove('hidden')
+    }
+
+    async function saveInlineEdit() {
+      if (!currentLeader) return
+
+      const full_name = document.getElementById('inline-edit-name').value
+      const phone = document.getElementById('inline-edit-phone').value
+      const email = document.getElementById('inline-edit-email').value
+      const status = document.getElementById('inline-edit-status').value
+      const circle_type = document.getElementById('inline-edit-circle-type').value || null
+      const meeting_day = document.getElementById('inline-edit-meeting-day').value || null
+      const meeting_time = document.getElementById('inline-edit-meeting-time').value || null
+      const meeting_frequency = document.getElementById('inline-edit-meeting-frequency').value || null
+
+      try {
+        const { error } = await client.from('circle_leaders').update({
+          full_name, phone, email, status,
+          circle_type, meeting_day, meeting_time, meeting_frequency
+        }).eq('id', currentLeader.id)
+
+        if (error) {
+          console.error('Error updating leader:', error)
+          await showAlert('Error updating leader information', 'Error')
+          return
+        }
+
+        // Update the current leader data
+        currentLeader.full_name = full_name
+        currentLeader.phone = phone
+        currentLeader.email = email
+        currentLeader.status = status
+        currentLeader.circle_type = circle_type
+        currentLeader.meeting_day = meeting_day
+        currentLeader.meeting_time = meeting_time
+        currentLeader.meeting_frequency = meeting_frequency
+        
+        // Refresh the profile display and main list
+        showLeaderProfile(currentLeader)
+        loadCircleLeaders()
+        loadCommunicationSummaries()
+        
+        setStatus('Leader updated successfully!')
+      } catch (error) {
+        console.error('Error updating leader:', error)
+        await showAlert('Error updating leader information', 'Error')
+      }
+    }
+
+    async function deleteLeader() {
+      if (!currentLeader) return
+
+      const confirmDelete = await showConfirm(`Are you sure you want to delete ${currentLeader.full_name}? This action cannot be undone.`, 'Delete Leader')
+      if (!confirmDelete) return
+
+      const doubleConfirm = await showConfirm(`This will permanently delete ${currentLeader.full_name} and all associated notes. Are you absolutely sure?`, 'Final Confirmation')
+      if (!doubleConfirm) return
+
+      try {
+        // Delete the leader (this will cascade delete comments due to foreign key constraint)
+        const { error } = await client
+          .from('circle_leaders')
+          .delete()
+          .eq('id', currentLeader.id)
+
+        if (error) {
+          console.error('Error deleting leader:', error)
+          await showAlert('Error deleting leader', 'Error')
+          return
+        }
+
+        setStatus('Leader deleted successfully!')
+        
+        // Return to the main list
+        hideLeaderProfile()
+        loadCircleLeaders()
+        loadCommunicationSummaries()
+        
+      } catch (error) {
+        console.error('Error deleting leader:', error)
+        await showAlert('Error deleting leader', 'Error')
+      }
+    }
+
+    function hideLeaderProfile() {
+      document.getElementById('profile-view').classList.add('hidden')
+      document.getElementById('main-view').classList.remove('hidden')
+      currentLeader = null
+      // Show progress bar and meeting today when returning to main view
+      updateMonthlyProgress()
+      loadMeetingToday()
+    }
+
+    function showAddLeaderPage() {
+      document.getElementById('main-view').classList.add('hidden')
+      document.getElementById('profile-view').classList.add('hidden')
+      document.getElementById('add-leader-view').classList.remove('hidden')
+      document.getElementById('monthly-progress').style.display = 'none'
+      document.getElementById('meeting-today-section').style.display = 'none'
+    }
+
+    function hideAddLeaderPage() {
+      document.getElementById('add-leader-view').classList.add('hidden')
+      document.getElementById('main-view').classList.remove('hidden')
+      // Show progress bar and meeting today when returning to main view
+      updateMonthlyProgress()
+      loadMeetingToday()
+      // Reset the form
+      document.getElementById('add-leader-form').reset()
+    }
+
+    async function loadLeaderNotes(leaderId) {
+      try {
+        const { data, error } = await client
+          .from('circle_comments')
+          .select('*')
+          .eq('leader_id', leaderId)
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.error('Error loading notes:', error)
+          return
+        }
+
+        const notesList = document.getElementById('notes-list')
+        notesList.innerHTML = ''
+
+        if (data.length === 0) {
+          notesList.innerHTML = '<p style="color: #666; font-style: italic;">No notes yet.</p>'
+          return
+        }
+
+        data.forEach(note => {
+          const noteElement = document.createElement('div')
+          noteElement.className = 'note-item'
+          noteElement.innerHTML = `
+            <div class="note-date">${formatDateTime(note.created_at)}</div>
+            <div class="note-text" id="note-text-${note.id}">${note.comment}</div>
+            <div class="note-actions" style="margin-top: 0.5rem; display: flex; justify-content: flex-end;">
+              <div class="action-menu">
+                <button class="action-menu-btn" title="Actions">⋮</button>
+                <div class="action-menu-dropdown">
+                  <button class="action-menu-item note-edit-btn" data-note-id="${note.id}">Edit Note</button>
+                  <button class="action-menu-item danger note-delete-btn" data-note-id="${note.id}">Delete Note</button>
+                </div>
+              </div>
+            </div>
+            <div class="note-edit-form hidden" id="note-edit-${note.id}" style="margin-top: 0.5rem;">
+              <div class="wysiwyg-editor">
+                <div class="wysiwyg-toolbar">
+                  <button type="button" data-command="bold" title="Bold"><b>B</b></button>
+                  <button type="button" data-command="italic" title="Italic"><i>I</i></button>
+                  <button type="button" data-command="underline" title="Underline"><u>U</u></button>
+                  <button type="button" data-command="strikeThrough" title="Strikethrough"><s>S</s></button>
+                  <button type="button" data-command="insertUnorderedList" title="Bullet List">• List</button>
+                  <button type="button" data-command="insertOrderedList" title="Numbered List">1. List</button>
+                </div>
+                <div id="note-edit-text-${note.id}" class="wysiwyg-content" contenteditable="true">${note.comment}</div>
+              </div>
+              <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                <button class="btn-sm btn-primary note-save-btn" data-note-id="${note.id}">Save</button>
+                <button class="btn-sm btn-secondary note-cancel-btn" data-note-id="${note.id}">Cancel</button>
+              </div>
+            </div>
+          `
+          
+          // Add event listeners for the buttons
+          const editBtn = noteElement.querySelector('.note-edit-btn')
+          const deleteBtn = noteElement.querySelector('.note-delete-btn')
+          const saveBtn = noteElement.querySelector('.note-save-btn')
+          const cancelBtn = noteElement.querySelector('.note-cancel-btn')
+          
+          editBtn.addEventListener('click', () => editNote(note.id))
+          deleteBtn.addEventListener('click', () => deleteNote(note.id))
+          saveBtn.addEventListener('click', () => saveNoteEdit(note.id))
+          cancelBtn.addEventListener('click', () => cancelNoteEdit(note.id))
+          
+          // Initialize action menu for this note
+          const actionMenu = noteElement.querySelector('.action-menu')
+          if (actionMenu) {
+            const actionBtn = actionMenu.querySelector('.action-menu-btn')
+            const actionDropdown = actionMenu.querySelector('.action-menu-dropdown')
+            
+            actionBtn.addEventListener('click', (e) => {
+              e.stopPropagation()
+              // Close other open dropdowns
+              document.querySelectorAll('.action-menu-dropdown.show').forEach(dropdown => {
+                if (dropdown !== actionDropdown) {
+                  dropdown.classList.remove('show')
+                }
+              })
+              actionDropdown.classList.toggle('show')
+            })
+            
+            // Close dropdown when clicking menu items
+            actionDropdown.addEventListener('click', () => {
+              actionDropdown.classList.remove('show')
+            })
+          }
+          
+          // Initialize WYSIWYG editor for this note's edit form
+          const editor = noteElement.querySelector('.wysiwyg-editor')
+          if (editor) {
+            initializeWysiwygEditor(editor)
+          }
+          
+          notesList.appendChild(noteElement)
+        })
+      } catch (error) {
+        console.error('Error loading notes:', error)
+      }
+    }
+
+    async function addNote() {
+      const noteTextElement = document.getElementById('note-text')
+      const noteText = noteTextElement.innerHTML.trim()
+      if (!noteText || !currentLeader) return
+
+      try {
+        const { error } = await client
+          .from('circle_comments')
+          .insert([{
+            leader_id: currentLeader.id,
+            comment: noteText
+          }])
+
+        if (error) {
+          console.error('Error adding note:', error)
+          return
+        }
+
+        noteTextElement.innerHTML = ''
+        document.getElementById('add-note-form').classList.add('hidden')
+        loadLeaderNotes(currentLeader.id)
+      } catch (error) {
+        console.error('Error adding note:', error)
+      }
+    }
+
+    function editNote(noteId) {
+      // Hide the note text and show the edit form
+      document.getElementById(`note-text-${noteId}`).style.display = 'none'
+      document.querySelector(`#note-edit-${noteId}`).classList.remove('hidden')
+      
+      // Focus on the textarea
+      document.getElementById(`note-edit-text-${noteId}`).focus()
+    }
+
+    function cancelNoteEdit(noteId) {
+      // Show the note text and hide the edit form
+      document.getElementById(`note-text-${noteId}`).style.display = 'block'
+      document.querySelector(`#note-edit-${noteId}`).classList.add('hidden')
+      
+      // Reset the content to original text
+      const originalText = document.getElementById(`note-text-${noteId}`).innerHTML
+      document.getElementById(`note-edit-text-${noteId}`).innerHTML = originalText
+    }
+
+    async function saveNoteEdit(noteId) {
+      const newText = document.getElementById(`note-edit-text-${noteId}`).innerHTML.trim()
+      
+      if (!newText) {
+        await showAlert('Note cannot be empty', 'Validation Error')
+        return
+      }
+
+      try {
+        const { error } = await client
+          .from('circle_comments')
+          .update({ comment: newText })
+          .eq('id', noteId)
+
+        if (error) {
+          console.error('Error updating note:', error)
+          await showAlert('Error updating note', 'Error')
+          return
+        }
+
+        // Reload notes to show the updated content
+        loadLeaderNotes(currentLeader.id)
+      } catch (error) {
+        console.error('Error updating note:', error)
+        await showAlert('Error updating note', 'Error')
+      }
+    }
+
+    async function deleteNote(noteId) {
+      if (!(await showConfirm('Are you sure you want to delete this note? This action cannot be undone.', 'Delete Note'))) {
+        return
+      }
+
+      try {
+        const { error } = await client
+          .from('circle_comments')
+          .delete()
+          .eq('id', noteId)
+
+        if (error) {
+          console.error('Error deleting note:', error)
+          await showAlert('Error deleting note', 'Error')
+          return
+        }
+
+        // Reload notes to remove the deleted note
+        loadLeaderNotes(currentLeader.id)
+      } catch (error) {
+        console.error('Error deleting note:', error)
+        await showAlert('Error deleting note', 'Error')
+      }
+    }
+
+    async function updateLastCommunication() {
+      console.log('updateLastCommunication called')
+      console.log('currentLeader:', currentLeader)
+      
+      if (!currentLeader) {
+        await showAlert('No leader selected', 'Error')
+        return
+      }
+
+      // Set today as default date
+      const today = new Date().toISOString().split('T')[0]
+      document.getElementById('comm-date').value = today
+      
+      // Clear the type selection and note
+      document.getElementById('comm-type').value = ''
+      document.getElementById('comm-note').value = ''
+      
+      // Show the modal
+      document.getElementById('update-comm-modal').classList.remove('hidden')
+    }
+
+    async function saveCommUpdate(event) {
+      event.preventDefault()
+      
+      const commDate = document.getElementById('comm-date').value
+      const commType = document.getElementById('comm-type').value
+      const commNote = document.getElementById('comm-note').value.trim()
+      
+      if (!commDate || !commType) {
+        await showAlert('Please fill in both date and communication type', 'Validation Error')
+        return
+      }
+
+      try {
+        const { error } = await client
+          .from('circle_leaders')
+          .update({
+            last_comm_date: commDate,
+            last_comm_type: commType
+          })
+          .eq('id', currentLeader.id)
+
+        if (error) {
+          console.error('Error updating communication:', error)
+          await showAlert('Error updating last communication', 'Error')
+          return
+        }
+
+        // Always add a note when communication is updated
+        const noteText = commNote ? 
+          `<strong>Connection Made:</strong><br><em>${commType}</em><br>${commNote}` :
+          `<strong>Connection Made:</strong><br><em>${commType}</em>`
+        
+        const { error: noteError } = await client
+          .from('circle_comments')
+          .insert([{
+            leader_id: currentLeader.id,
+            comment: noteText
+          }])
+
+        if (noteError) {
+          console.error('Error adding note:', noteError)
+          // Don't fail the whole operation if note fails
+        }
+
+        // Update the current leader data and refresh the profile
+        currentLeader.last_comm_date = commDate
+        currentLeader.last_comm_type = commType
+        showLeaderProfile(currentLeader)
+        
+        // Also refresh the main list
+        loadCircleLeaders()
+        loadCommunicationSummaries()
+        
+        // Hide the modal
+        document.getElementById('update-comm-modal').classList.add('hidden')
+        
+        setStatus('Last communication updated successfully!')
+      } catch (error) {
+        console.error('Error updating communication:', error)
+        await showAlert('Error updating last communication', 'Error')
+      }
+    }
+
+    function hideCommModal() {
+      document.getElementById('update-comm-modal').classList.add('hidden')
+    }
+
+    async function markForFollowUp() {
+      if (!currentLeader) {
+        await showAlert('No leader selected', 'Error')
+        return
+      }
+
+      // Set default date to 7 days from now
+      const followUpDate = new Date()
+      followUpDate.setDate(followUpDate.getDate() + 7)
+      document.getElementById('follow-up-date').value = followUpDate.toISOString().split('T')[0]
+      
+      // Clear the note
+      document.getElementById('follow-up-note').value = ''
+      
+      // Show the modal
+      document.getElementById('follow-up-modal').classList.remove('hidden')
+    }
+
+    async function saveFollowUp(event) {
+      event.preventDefault()
+      
+      const followUpDate = document.getElementById('follow-up-date').value
+      const followUpNote = document.getElementById('follow-up-note').value.trim()
+      
+      if (!followUpDate) {
+        alert('Please select a follow-up date')
+        return
+      }
+
+      try {
+        // Add a note about the follow-up
+        const noteText = followUpNote ? 
+          `Marked for follow-up on ${formatDateOnly(followUpDate)}. ${followUpNote}` :
+          `Marked for follow-up on ${formatDateOnly(followUpDate)}`
+        
+        const { error: noteError } = await client
+          .from('circle_comments')
+          .insert([{
+            leader_id: currentLeader.id,
+            comment: noteText
+          }])
+
+        if (noteError) {
+          console.error('Error adding follow-up note:', noteError)
+          alert('Error marking leader for follow-up')
+          return
+        }
+
+        // Hide the modal
+        document.getElementById('follow-up-modal').classList.add('hidden')
+        
+        // Refresh notes and follow-up table
+        loadLeaderNotes(currentLeader.id)
+        loadCommunicationSummaries()
+        
+        // Update button visibility
+        checkFollowUpStatus(currentLeader.id)
+        
+        setStatus('Leader marked for follow-up successfully!')
+      } catch (error) {
+        console.error('Error marking for follow-up:', error)
+        alert('Error marking leader for follow-up')
+      }
+    }
+
+    function hideFollowUpModal() {
+      document.getElementById('follow-up-modal').classList.add('hidden')
+    }
+
+    async function clearFollowUp() {
+      if (!currentLeader) {
+        alert('No leader selected')
+        return
+      }
+
+      // Confirm action
+      const confirmClear = confirm(`Are you sure you want to clear the follow-up flag for ${currentLeader.full_name}?`)
+      if (!confirmClear) {
+        return
+      }
+
+      try {
+        // Add a note about clearing the follow-up
+        const noteText = `Follow-up flag cleared on ${formatDateOnly(new Date().toISOString().split('T')[0])}`
+        
+        const { error: noteError } = await client
+          .from('circle_comments')
+          .insert([{
+            leader_id: currentLeader.id,
+            comment: noteText
+          }])
+
+        if (noteError) {
+          console.error('Error adding clear follow-up note:', noteError)
+          alert('Error clearing follow-up flag')
+          return
+        }
+
+        // Refresh notes and follow-up table
+        loadLeaderNotes(currentLeader.id)
+        loadCommunicationSummaries()
+        
+        // Update button visibility
+        checkFollowUpStatus(currentLeader.id)
+        
+        setStatus('Follow-up flag cleared successfully!')
+      } catch (error) {
+        console.error('Error clearing follow-up:', error)
+        alert('Error clearing follow-up flag')
+      }
     }
 
     document.getElementById('add-leader-form').addEventListener('submit', addCircleLeader)
@@ -290,15 +3402,221 @@ if (phoneLink) {
       document.getElementById('edit-leader-form').reset()
     })
 
-    document.getElementById('filter-status').addEventListener('change', loadCircleLeaders)
-
-    document.getElementById('seed-button').addEventListener('click', async () => {
-      await seedDatabaseFromJson()
-      document.getElementById('seed-button-container').style.display = 'none'
+    document.getElementById('filter-status').addEventListener('change', () => {
+      loadCircleLeaders()
+      loadCommunicationSummaries()
     })
+
+    // Main action menu functionality
+    const mainActionsBtn = document.getElementById('main-actions-btn')
+    const mainActionsDropdown = document.getElementById('main-actions-dropdown')
+    
+    if (mainActionsBtn && mainActionsDropdown) {
+      mainActionsBtn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        mainActionsDropdown.classList.toggle('show')
+      })
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        // Close main actions dropdown
+        if (!mainActionsBtn.contains(e.target) && !mainActionsDropdown.contains(e.target)) {
+          mainActionsDropdown.classList.remove('show')
+        }
+        
+        // Close profile actions dropdown
+        const profileActionsBtn = document.getElementById('profile-actions-btn')
+        const profileActionsDropdown = document.getElementById('profile-actions-dropdown')
+        if (profileActionsBtn && profileActionsDropdown) {
+          if (!e.target.closest('.action-menu')) {
+            profileActionsDropdown.classList.remove('show')
+          }
+        }
+      })
+      
+      // Close dropdown when clicking menu items
+      mainActionsDropdown.addEventListener('click', (e) => {
+        if (e.target.classList.contains('main-action-menu-item')) {
+          mainActionsDropdown.classList.remove('show')
+        }
+      })
+      
+      // Close profile actions dropdown when clicking menu items
+      document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('action-menu-item')) {
+          const profileActionsDropdown = document.getElementById('profile-actions-dropdown')
+          if (profileActionsDropdown) {
+            profileActionsDropdown.classList.remove('show')
+          }
+        }
+      })
+    }
+
+    // Add Leader page event listeners
+    document.getElementById('add-leader-btn-menu').addEventListener('click', showAddLeaderPage)
+    document.getElementById('cancel-add-leader').addEventListener('click', hideAddLeaderPage)
+
+    // Search Circles page event listeners
+    document.getElementById('search-circles-btn').addEventListener('click', showSearchCirclesPage)
+    document.getElementById('search-btn').addEventListener('click', searchCircles)
+    document.getElementById('clear-search-btn').addEventListener('click', clearSearchFilters)
+
+    // Home link event listener
+    document.getElementById('home-link').addEventListener('click', () => {
+      hideLeaderProfile()
+      hideAddLeaderPage()
+      hideSearchCirclesPage()
+    })
+    
+    document.getElementById('edit-profile-btn-top').addEventListener('click', showProfileEdit)
+
+    document.getElementById('save-inline-edit').addEventListener('click', saveInlineEdit)
+    
+    document.getElementById('cancel-inline-edit').addEventListener('click', showProfileDisplay)
+
+    document.getElementById('delete-leader-btn').addEventListener('click', deleteLeader)
+
+    document.getElementById('add-note-btn').addEventListener('click', () => {
+      document.getElementById('add-note-form').classList.remove('hidden')
+      document.getElementById('note-text').focus()
+      
+      // Initialize WYSIWYG editor for the add note form
+      const editor = document.querySelector('#add-note-form .wysiwyg-editor')
+      if (editor) {
+        initializeWysiwygEditor(editor)
+      }
+      
+      // Scroll to bottom of page to show the add note form
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      }, 100)
+    })
+
+    document.getElementById('save-note-btn').addEventListener('click', addNote)
+    
+    document.getElementById('cancel-note-btn').addEventListener('click', () => {
+      document.getElementById('add-note-form').classList.add('hidden')
+      document.getElementById('note-text').innerHTML = ''
+    })
+
+    document.getElementById('update-last-comm-btn').addEventListener('click', () => {
+      console.log('Update Last Comm button clicked')
+      updateLastCommunication()
+    })
+
+    // Modal event listeners
+    document.getElementById('update-comm-form').addEventListener('submit', saveCommUpdate)
+    document.getElementById('cancel-comm-update').addEventListener('click', hideCommModal)
+    
+    // Follow-up modal event listeners
+    document.getElementById('follow-up-form').addEventListener('submit', saveFollowUp)
+    document.getElementById('cancel-follow-up').addEventListener('click', hideFollowUpModal)
+    
+    // Close modal when clicking outside of it
+    document.getElementById('update-comm-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'update-comm-modal') {
+        hideCommModal()
+      }
+    })
+
+    document.getElementById('follow-up-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'follow-up-modal') {
+        hideFollowUpModal()
+      }
+    })
+
+    document.getElementById('follow-up-btn').addEventListener('click', () => {
+      if (currentLeader) {
+        markForFollowUp()
+      }
+    })
+
+    document.getElementById('clear-follow-up-btn').addEventListener('click', () => {
+      if (currentLeader) {
+        clearFollowUp()
+      }
+    })
+
+    // WYSIWYG Editor functionality
+    function initializeWysiwygEditor(editorContainer) {
+      const toolbar = editorContainer.querySelector('.wysiwyg-toolbar')
+      const content = editorContainer.querySelector('.wysiwyg-content')
+      
+      if (!toolbar || !content) return
+      
+      // Handle toolbar button clicks
+      toolbar.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+          e.preventDefault()
+          const command = e.target.dataset.command
+          
+          // Focus the content area
+          content.focus()
+          
+          // Execute the command
+          document.execCommand(command, false, null)
+          
+          // Update button states
+          updateToolbarStates(toolbar, content)
+        }
+      })
+      
+      // Update toolbar button states based on current selection
+      content.addEventListener('keyup', () => updateToolbarStates(toolbar, content))
+      content.addEventListener('mouseup', () => updateToolbarStates(toolbar, content))
+    }
+    
+    function updateToolbarStates(toolbar, content) {
+      const buttons = toolbar.querySelectorAll('[data-command]')
+      buttons.forEach(button => {
+        const command = button.dataset.command
+        const isActive = document.queryCommandState(command)
+        button.classList.toggle('active', isActive)
+      })
+    }
 
     loadCircleLeaders()
 
+    // Load communication summaries
+    loadCommunicationSummaries()
+
+    // Add sort functionality to table headers
+    document.querySelectorAll('.sortable').forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.dataset.column
+        const tableId = header.dataset.table
+        
+        // Update sort direction for this specific table
+        const currentSort = tableSortStates[tableId]
+        if (currentSort.column === column) {
+          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc'
+        } else {
+          currentSort.column = column
+          currentSort.direction = 'asc'
+        }
+        
+        // Update sort indicators for this table only
+        const tableHeaders = document.querySelectorAll(`#${tableId} .sortable`)
+        tableHeaders.forEach(h => {
+          h.classList.remove('sort-asc', 'sort-desc')
+        })
+        header.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc')
+        
+        // Handle different tables differently
+        if (tableId === 'leaders-table') {
+          // Update global sort state for leaders table
+          sortColumn = column
+          sortDirection = currentSort.direction
+          loadCircleLeaders()
+        } else {
+          // Use the new universal sorting for other tables
+          sortTableData(tableId, column, currentSort.direction)
+        }
+      })
+    })
+
+    /*
+    // Removed seed and reset functions since buttons were removed
     async function seedDatabaseFromJson() {
       setStatus('Seeding data...', true)
       const jsonScript = document.getElementById('circle-data')
@@ -320,6 +3638,7 @@ if (phoneLink) {
         clearStatus()
         setStatus('Seeded successfully!')
         loadCircleLeaders()
+        loadCommunicationSummaries()
       }
     }
 
@@ -344,11 +3663,21 @@ if (phoneLink) {
 
       clearStatus()
       setStatus('Database reset and seeded successfully!')
+      loadCommunicationSummaries()
 
       alert('Circle leaders reset successfully!')
     }
+    */
 
-    document.getElementById('reset-button').addEventListener('click', resetDatabase)
+    // Apply summary filter event listener
+    document.getElementById('apply-summary-filter').addEventListener('click', () => {
+      selectedSummaryMonth = parseInt(document.getElementById('summary-month').value)
+      selectedSummaryYear = parseInt(document.getElementById('summary-year').value)
+      loadCommunicationSummaries()
+    })
+
+    // Initialize summary filters on page load
+    initializeSummaryFilters()
   </script>
 </body>
 </html>
