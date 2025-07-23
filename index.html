@@ -26,18 +26,43 @@
   <style>
     body {
       font-family: sans-serif;
-      padding: 2rem;
+      padding: 0.5rem;
       background: #f4f4f4;
+      margin: 0;
+    }
+    
+    /* Mobile-first responsive container */
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0;
+    }
+    
+    @media (min-width: 768px) {
+      body {
+        padding: 2rem;
+      }
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 0.5rem;
+      padding: 0.5rem 0.25rem;
       text-align: left;
+    }
+    
+    @media (min-width: 768px) {
+      table {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+      }
+      th, td {
+        padding: 0.5rem;
+      }
     }
     /* Prevent time column from wrapping */
     #meeting-today-table td:nth-child(2),
@@ -67,10 +92,18 @@
       content: "▼";
     }
     form {
-      margin-top: 2rem;
+      margin-top: 1rem;
       background: #fff;
-      padding: 1rem;
+      padding: 0.75rem;
       border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    @media (min-width: 768px) {
+      form {
+        margin-top: 2rem;
+        padding: 1rem;
+      }
     }
     input, button {
       margin: 0.5rem 0;
@@ -87,24 +120,44 @@
     }
     .profile-container {
       background: #fff;
-      padding: 2rem;
+      padding: 1rem;
       border: 1px solid #ccc;
-      margin: 1rem 0;
+      margin: 0.5rem 0;
       border-radius: 8px;
+    }
+    
+    @media (min-width: 768px) {
+      .profile-container {
+        padding: 2rem;
+        margin: 1rem 0;
+      }
     }
     .profile-header {
       display: flex;
       align-items: center;
-      margin-bottom: 2rem;
-      gap: 1rem;
+      margin-bottom: 1rem;
+      gap: 0.5rem;
+    }
+    
+    @media (min-width: 768px) {
+      .profile-header {
+        margin-bottom: 2rem;
+        gap: 1rem;
+      }
     }
     .profile-info {
       flex: 1;
     }
     .profile-name {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       font-weight: bold;
       margin: 0;
+    }
+    
+    @media (min-width: 768px) {
+      .profile-name {
+        font-size: 1.5rem;
+      }
     }
     .profile-details {
       color: #666;
@@ -309,20 +362,41 @@
       background: #f8f9fa;
     }
     .notes-section {
-      margin-top: 2rem;
+      margin-top: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      .notes-section {
+        margin-top: 2rem;
+      }
     }
     .notes-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    @media (min-width: 768px) {
+      .notes-header {
+        margin-bottom: 1rem;
+        flex-wrap: nowrap;
+      }
     }
     .note-item {
       background: #f8f9fa;
-      padding: 1rem;
+      padding: 0.75rem;
       margin: 0.5rem 0;
       border-left: 4px solid #007bff;
       border-radius: 4px;
+    }
+    
+    @media (min-width: 768px) {
+      .note-item {
+        padding: 1rem;
+      }
     }
     .note-date {
       font-size: 0.875rem;
@@ -352,10 +426,17 @@
       resize: vertical;
     }
     .add-note-form {
-      margin-top: 1rem;
-      padding: 1rem;
+      margin-top: 0.75rem;
+      padding: 0.75rem;
       background: #f8f9fa;
       border-radius: 4px;
+    }
+    
+    @media (min-width: 768px) {
+      .add-note-form {
+        margin-top: 1rem;
+        padding: 1rem;
+      }
     }
     .add-note-form textarea {
       width: 100%;
@@ -447,14 +528,28 @@
     }
     .modal-content {
       background: white;
-      padding: 2rem;
+      padding: 1rem;
       border-radius: 8px;
-      width: 90%;
+      width: 95%;
       max-width: 400px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin: 0.5rem;
+    }
+    
+    @media (min-width: 768px) {
+      .modal-content {
+        padding: 2rem;
+        width: 90%;
+      }
     }
     .modal-header {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      .modal-header {
+        margin-bottom: 1.5rem;
+      }
     }
     .modal-header h3 {
       margin: 0;
@@ -482,7 +577,15 @@
       display: flex;
       gap: 0.5rem;
       justify-content: center;
-      margin-top: 1.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    @media (min-width: 768px) {
+      .modal-buttons {
+        margin-top: 1.5rem;
+        flex-wrap: nowrap;
+      }
     }
     .modal-buttons button {
       padding: 0.75rem 1rem;
@@ -503,16 +606,37 @@
       color: #333;
       border-bottom: 2px solid #007bff;
       padding-bottom: 0.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    
+    @media (min-width: 768px) {
+      #communication-summary h2 {
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+      }
     }
     #communication-summary h3 {
       color: #555;
       margin-bottom: 0.5rem;
-      font-size: 1.1rem;
+      font-size: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      #communication-summary h3 {
+        font-size: 1.1rem;
+      }
     }
     #communication-summary table {
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 768px) {
+      #communication-summary table {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
     }
     #communication-summary .name-link {
       color: #007bff;
@@ -524,8 +648,15 @@
     }
     /* Ensure all tables have consistent styling */
     #leaders-table {
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 768px) {
+      #leaders-table {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
     }
     .name-link {
       color: #007bff;
@@ -541,15 +672,31 @@
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 8px;
-      padding: 1.5rem;
-      margin: 1rem 0 2rem 0;
+      padding: 0.75rem;
+      margin: 0.5rem 0 1rem 0;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    @media (min-width: 768px) {
+      .progress-container {
+        padding: 1.5rem;
+        margin: 1rem 0 2rem 0;
+      }
     }
     .progress-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    @media (min-width: 768px) {
+      .progress-header {
+        margin-bottom: 1rem;
+        flex-wrap: nowrap;
+      }
     }
     .progress-title {
       font-size: 1.1rem;
@@ -659,10 +806,10 @@
   </style>
 </head>
 <body>
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <div id="home-link" style="display: flex; align-items: center; gap: 1rem; cursor: pointer; text-decoration: none; color: inherit;">
-      <img src="https://i.imgur.com/aofM4G4.png" alt="Radius Logo" style="height: 40px; width: auto;">
-      <h1 style="margin: 0;">Radius</h1>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+    <div id="home-link" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; text-decoration: none; color: inherit;">
+      <img src="https://i.imgur.com/aofM4G4.png" alt="Radius Logo" style="height: 32px; width: auto;">
+      <h1 style="margin: 0; font-size: 1.5rem;">Radius</h1>
     </div>
     <div class="main-action-menu">
       <button class="main-action-menu-btn" id="main-actions-btn">
@@ -674,6 +821,28 @@
       </div>
     </div>
   </div>
+  
+  <!-- Add responsive media query for header -->
+  <style>
+    @media (min-width: 768px) {
+      body > div:first-child {
+        margin-bottom: 2rem !important;
+        padding: 0 !important;
+      }
+      
+      #home-link {
+        gap: 1rem !important;
+      }
+      
+      #home-link img {
+        height: 40px !important;
+      }
+      
+      #home-link h1 {
+        font-size: 2rem !important;
+      }
+    }
+  </style>
   
   <!-- Monthly Contact Progress Bar -->
   <div id="monthly-progress" class="progress-container">
@@ -712,9 +881,9 @@
   
   <!-- Main List View -->
   <div id="main-view">
-    <div id="filter-container" style="margin-bottom: 1rem;">
-      <label for="filter-status">Filter by Status:</label>
-      <select id="filter-status">
+    <div id="filter-container" style="margin-bottom: 0.75rem; padding: 0 0.25rem;">
+      <label for="filter-status" style="display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem;">Filter by Status:</label>
+      <select id="filter-status" style="width: 100%; padding: 0.5rem; font-size: 0.9rem;">
         <option value="">All</option>
         <option value="invite">Invite</option>
         <option value="pipeline">Pipeline</option>
@@ -723,12 +892,12 @@
       </select>
     </div>
 
-    <div id="status-container" style="margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; color: #495057; font-size: 0.95rem; font-weight: 500;">
+    <div id="status-container" style="margin-bottom: 1rem; padding: 0.5rem 0.75rem; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; color: #495057; font-size: 0.85rem; font-weight: 500;">
       <span id="status-message"></span>
       <span id="spinner" style="display: none; margin-left: 10px;">⏳</span>
     </div>
 
-    <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Circle Leaders</h2>
+    <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Circle Leaders</h2>
 
     <table id="leaders-table">
       <thead>
@@ -744,8 +913,8 @@
     </table>
 
     <!-- Follow Up Table -->
-    <div style="margin-top: 3rem;">
-      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Marked for Follow Up</h2>
+    <div style="margin-top: 2rem;">
+      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Marked for Follow Up</h2>
       <table id="follow-up-table" style="margin-top: 0.5rem;">
         <thead>
           <tr>
@@ -761,10 +930,10 @@
     </div>
 
     <!-- Communication Summary Tables -->
-    <div id="communication-summary" style="margin-top: 3rem;">
-      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Connection Summary</h2>
-      <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
-        <select id="summary-month" style="padding: 0.5rem;">
+    <div id="communication-summary" style="margin-top: 2rem;">
+      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Connection Summary</h2>
+      <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
+        <select id="summary-month" style="padding: 0.5rem; flex: 1; min-width: 120px; font-size: 0.9rem;">
           <option value="0">January</option>
           <option value="1">February</option>
           <option value="2">March</option>
@@ -778,14 +947,14 @@
           <option value="10">November</option>
           <option value="11">December</option>
         </select>
-        <select id="summary-year" style="padding: 0.5rem;">
+        <select id="summary-year" style="padding: 0.5rem; flex: 1; min-width: 80px; font-size: 0.9rem;">
           <!-- Years will be populated by JavaScript -->
         </select>
-        <button id="apply-summary-filter" class="btn-primary" style="padding: 0.75rem 1rem; font-size: 1rem; width: auto; min-height: 44px;">Apply</button>
+        <button id="apply-summary-filter" class="btn-primary" style="padding: 0.75rem 1rem; font-size: 0.9rem; width: auto; min-height: 44px; flex-shrink: 0;">Apply</button>
       </div>
       
       <!-- One-on-One Table -->
-      <div style="margin-bottom: 2rem;">
+      <div style="margin-bottom: 1.5rem;">
         <h3>One-on-One Meetings</h3>
         <table id="one-on-one-table" style="margin-top: 0.5rem;">
           <thead>
@@ -802,7 +971,7 @@
       </div>
 
       <!-- Circle Leader Training Table -->
-      <div style="margin-bottom: 2rem;">
+      <div style="margin-bottom: 1.5rem;">
         <h3>Circle Leader Training</h3>
         <table id="training-table" style="margin-top: 0.5rem;">
           <thead>
@@ -819,7 +988,7 @@
       </div>
 
       <!-- Circle Leader Lunch Table -->
-      <div style="margin-bottom: 2rem;">
+      <div style="margin-bottom: 1.5rem;">
         <h3>Circle Leader Lunch</h3>
         <table id="lunch-table" style="margin-top: 0.5rem;">
           <thead>
@@ -836,7 +1005,7 @@
       </div>
 
       <!-- Circle Visit Table -->
-      <div style="margin-bottom: 2rem;">
+      <div style="margin-bottom: 1.5rem;">
         <h3>Circle Visit</h3>
         <table id="visit-table" style="margin-top: 0.5rem;">
           <thead>
