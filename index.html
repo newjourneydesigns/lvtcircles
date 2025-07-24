@@ -1,6 +1,145 @@
+  <!-- Delete Note Modal -->
+  <div id="delete-note-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="delete-note-title">Delete Note</h3>
+      </div>
+      <div id="delete-note-message" style="margin-bottom: 1.5rem; color: #555; line-height: 1.4;">
+        Are you sure you want to delete this note? This action cannot be undone.
+      </div>
+      <div class="modal-buttons">
+        <button type="button" class="btn-secondary" id="delete-note-cancel">Cancel</button>
+        <button type="button" class="btn-danger" id="delete-note-confirm" style="margin-left:0.5rem;">Delete</button>
+      </div>
+    </div>
+  </div>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <style id="dark-mode-style">
+    body.dark-mode {
+      background: #181a1b !important;
+      color: #e0e0e0 !important;
+    }
+    body.dark-mode [style*="background: white"],
+    body.dark-mode [style*="background:white"],
+    body.dark-mode [style*="background: #fff"],
+    body.dark-mode [style*="background:#fff"] {
+      background: #232527 !important;
+      color: #e0e0e0 !important;
+      border-color: #333 !important;
+    }
+    body.dark-mode td,
+    body.dark-mode th,
+    body.dark-mode .progress-container,
+    body.dark-mode .modal-content,
+    body.dark-mode .profile-container,
+    body.dark-mode .mobile-card,
+    body.dark-mode .main-action-menu,
+    body.dark-mode .notes-section,
+    body.dark-mode .form-group input,
+    body.dark-mode .form-group select,
+    body.dark-mode .form-group textarea {
+      background: #232527 !important;
+      color: #e0e0e0 !important;
+      border-color: #333 !important;
+    }
+    body.dark-mode .progress-container,
+    body.dark-mode .modal-content {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.7) !important;
+    }
+    body.dark-mode .last-comm-cell {
+      background: #232527 !important;
+      color: #e0e0e0 !important;
+    }
+    body.dark-mode table,
+    body.dark-mode th,
+    body.dark-mode td {
+      background: #232527 !important;
+      color: #e0e0e0 !important;
+      border-color: #333 !important;
+    }
+    body.dark-mode thead th {
+      background: #181a1b !important;
+      color: #e0e0e0 !important;
+    }
+    body.dark-mode tbody tr {
+      background: #232527 !important;
+      color: #e0e0e0 !important;
+    }
+    body.dark-mode #monthly-progress,
+    body.dark-mode #meeting-today-section,
+    body.dark-mode #main-view,
+    body.dark-mode #communication-summary,
+    body.dark-mode #profile-view,
+    body.dark-mode #add-leader-view,
+    body.dark-mode #search-circles-view,
+    body.dark-mode #filter-container,
+    body.dark-mode #status-container {
+      background: #181a1b !important;
+      color: #e0e0e0 !important;
+      border-color: #333 !important;
+    }
+    body.dark-mode .progress-header,
+    body.dark-mode .progress-title,
+    body.dark-mode .progress-stats {
+      color: #e0e0e0 !important;
+    }
+    body.dark-mode .mobile-card-label,
+    body.dark-mode .form-group label,
+    body.dark-mode label {
+      color: #b0b0b0 !important;
+    }
+    body.dark-mode .mobile-card-name,
+    body.dark-mode a,
+    body.dark-mode .name-link {
+      color: #66aaff !important;
+    }
+    body.dark-mode .btn-primary {
+      background: #007aff !important;
+      color: #fff !important;
+      border-color: #007aff !important;
+    }
+    body.dark-mode .btn-secondary, body.dark-mode .btn-outline {
+      background: #232527 !important;
+      color: #007aff !important;
+      border-color: #007aff !important;
+    }
+    body.dark-mode .btn-danger {
+      background: #c82333 !important;
+      color: #fff !important;
+      border-color: #c82333 !important;
+    }
+    body.dark-mode .status-active {
+      background: #263e2e !important;
+      color: #7edc8a !important;
+    }
+    body.dark-mode .status-pipeline {
+      background: #3a3322 !important;
+      color: #ffe6a0 !important;
+    }
+    body.dark-mode .status-invite {
+      background: #2a2a3a !important;
+      color: #b0a0ff !important;
+    }
+    body.dark-mode .status-paused {
+      background: #3a2a2a !important;
+      color: #ffb0b0 !important;
+    }
+    body.dark-mode .progress-bar-track {
+      background: #333 !important;
+    }
+    body.dark-mode .progress-bar-fill {
+      background: linear-gradient(90deg, #28a745 0%, #20c997 100%) !important;
+    }
+    body.dark-mode .progress-bar-fill.low-progress {
+      background: linear-gradient(90deg, #dc3545 0%, #c82333 100%) !important;
+    }
+    body.dark-mode .modal-overlay {
+      background: rgba(24,26,27,0.85) !important;
+    }
+    /* Add more dark mode overrides as needed */
+  </style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Radius</title>
@@ -28,6 +167,7 @@
       font-family: sans-serif;
       padding: 0.5rem;
       background: #f4f4f4;
+      color: #222;
       margin: 0;
     }
     
@@ -613,7 +753,7 @@ input, button, select, textarea {
     }
     .modal-header h3 {
       margin: 0;
-      color: #333;
+      color: #fff;
     }
 /* Form groups and labels */
 .form-group {
@@ -950,12 +1090,42 @@ input, button, select, textarea {
         grid-template-columns: 1fr;
       }
     }
-  </style>
+  
+
+body.dark-mode {
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode th,
+body.dark-mode td,
+body.dark-mode .section-heading {
+  color: #ffffff;
+}
+
+body.dark-mode .card,
+body.dark-mode .table,
+body.dark-mode .progress-container,
+body.dark-mode .status-container {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
+body.dark-mode .status-container .status {
+  color: #00e676;
+}
+</style>
 </head>
 <body>
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
     <div id="home-link" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; text-decoration: none; color: inherit;">
-      <img src="https://i.imgur.com/aofM4G4.png" alt="Radius Logo" style="height: 32px; width: auto;">
+      <img id="radius-logo" src="https://i.imgur.com/aofM4G4.png" alt="Radius Logo" style="height: 32px; width: auto;">
       <h1 style="margin: 0; font-size: 1.5rem;">Radius</h1>
     </div>
     <div class="main-action-menu">
@@ -965,31 +1135,971 @@ input, button, select, textarea {
       <div class="main-action-menu-dropdown" id="main-actions-dropdown">
         <button class="main-action-menu-item" id="search-circles-btn">🔍 Search Circles</button>
         <button class="main-action-menu-item" id="add-leader-btn-menu">➕ Add New Leader</button>
+        <button class="main-action-menu-item" id="dark-mode-toggle">🌙 Dark Mode</button>
       </div>
     </div>
   </div>
   
   <!-- Add responsive media query for header -->
   <style>
+    body {
+      font-family: sans-serif;
+      padding: 0.5rem;
+      background: #f4f4f4;
+      color: #222;
+      margin: 0;
+    }
+    
+    /* Mobile-first responsive container */
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0;
+    }
+    
     @media (min-width: 768px) {
-      body > div:first-child {
-        margin-bottom: 2rem !important;
-        padding: 0 !important;
-      }
-      
-      #home-link {
-        gap: 1rem !important;
-      }
-      
-      #home-link img {
-        height: 40px !important;
-      }
-      
-      #home-link h1 {
-        font-size: 2rem !important;
+      body {
+        padding: 2rem;
       }
     }
-  </style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem 0.25rem;
+      text-align: left;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 200px;
+    }
+    
+    @media (min-width: 768px) {
+      table {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+      }
+      th, td {
+        padding: 0.5rem;
+        max-width: none;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      th, td {
+        padding: 0.4rem 0.2rem;
+        font-size: 0.8rem;
+        max-width: 120px;
+      }
+    }
+    /* Prevent time column from wrapping */
+    #meeting-today-table td:nth-child(2),
+    #meeting-today-table th:nth-child(2) {
+      white-space: nowrap;
+      min-width: 80px;
+    }
+    th {
+      background: #eee;
+    }
+    .sortable {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+    .sortable:hover {
+      background: #ddd;
+    }
+    .sort-indicator {
+      margin-left: 5px;
+      font-size: 0.8em;
+    }
+    .sort-asc::after {
+      content: "▲";
+    }
+    .sort-desc::after {
+      content: "▼";
+    }
+    form {
+      margin-top: 1rem;
+      background: #fff;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    @media (min-width: 768px) {
+      form {
+        margin-top: 2rem;
+        padding: 1rem;
+      }
+    }
+input, button, select, textarea {
+  margin: 0.5rem 0;
+  padding: 1rem;
+  font-size: 17px;
+  line-height: 1.5;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  width: 100%;
+  min-height: 44px; /* Minimum tap target */
+  box-sizing: border-box;
+}
+    .hidden {
+      display: none !important;
+    }
+    .profile-container {
+      background: #fff;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      margin: 0.5rem 0;
+      border-radius: 8px;
+    }
+    
+    @media (min-width: 768px) {
+      .profile-container {
+        padding: 2rem;
+        margin: 1rem 0;
+      }
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 0.5rem;
+    }
+    
+    @media (min-width: 768px) {
+      .profile-header {
+        margin-bottom: 2rem;
+        gap: 1rem;
+      }
+    }
+    .profile-info {
+      flex: 1;
+    }
+    .profile-name {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin: 0;
+    }
+    
+    @media (min-width: 768px) {
+      .profile-name {
+        font-size: 1.5rem;
+      }
+    }
+    .profile-details {
+      color: #666;
+      margin: 0.5rem 0;
+    }
+    .profile-phone-link, .profile-email-link {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .profile-phone-link:hover, .profile-email-link:hover {
+      text-decoration: underline;
+    }
+    .profile-status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-size: 0.875rem;
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+    .status-active {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-pipeline {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-invite {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .status-paused {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+.action-buttons button {
+  flex: 1;
+  min-width: 140px;
+  padding: 1rem;
+  font-size: 17px;
+  border: 1px solid #ddd;
+  background: #f4f4f4;
+  cursor: pointer;
+  border-radius: 12px;
+  font-weight: 500;
+  min-height: 44px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+.action-buttons .btn-primary {
+  background: #007aff !important;
+  color: #fff !important;
+  border-color: #007aff !important;
+}
+.action-buttons .btn-outline {
+  background: #fff !important;
+  color: #007aff !important;
+  border-color: #007aff !important;
+}
+.action-buttons .btn-ghost {
+  background: transparent !important;
+  color: #007aff !important;
+  border-color: transparent !important;
+}
+    
+    @media (max-width: 768px) {
+      .action-buttons button {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.75rem;
+        min-width: 100px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .action-buttons button {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.5rem;
+        min-width: 80px;
+      }
+    }
+    .btn-primary, .action-buttons .btn-primary {
+      background: #007bff !important;
+      color: white !important;
+      border-color: #007bff !important;
+    }
+    .btn-secondary, .action-buttons .btn-secondary {
+      background: #6c757d !important;
+      color: white !important;
+      border-color: #6c757d !important;
+    }
+    .btn-success, .action-buttons .btn-success {
+      background: #28a745 !important;
+      color: white !important;
+      border-color: #28a745 !important;
+    }
+    .btn-warning, .action-buttons .btn-warning {
+      background: #ffc107 !important;
+      color: #212529 !important;
+      border-color: #ffc107 !important;
+    }
+    .btn-danger, .action-buttons .btn-danger {
+      background: #dc3545 !important;
+      color: white !important;
+      border-color: #dc3545 !important;
+    }
+    .btn-sm {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+      min-width: auto;
+      width: auto;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+      min-height: 44px; /* Minimum touch target for mobile */
+    }
+    .action-menu {
+      position: relative;
+      display: inline-block;
+    }
+    .action-menu-btn {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 0.5rem 0.75rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #6c757d;
+      min-height: 44px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .action-menu-btn:hover {
+      background: #e9ecef;
+      color: #495057;
+    }
+    .action-menu-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      min-width: 120px;
+      display: none;
+    }
+    .action-menu-dropdown.show {
+      display: block;
+    }
+    .action-menu-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-size: 0.9rem;
+      color: #495057;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+    .action-menu-item:hover {
+      background: #f8f9fa;
+    }
+    .action-menu-item.danger:hover {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .main-action-menu {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .main-action-menu-btn {
+      background: #007bff;
+      color: white;
+      border: 1px solid #007bff;
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: bold;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .main-action-menu-btn:hover {
+      background: #0056b3;
+      border-color: #0056b3;
+    }
+    .main-action-menu-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      min-width: 180px;
+      display: none;
+    }
+    .main-action-menu-dropdown.show {
+      display: block;
+    }
+    .main-action-menu-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-size: 0.9rem;
+      color: #495057;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .main-action-menu-item:hover {
+      background: #f8f9fa;
+    }
+    .notes-section {
+      margin-top: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      .notes-section {
+        margin-top: 2rem;
+      }
+    }
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    @media (min-width: 768px) {
+      .notes-header {
+        margin-bottom: 1rem;
+        flex-wrap: nowrap;
+      }
+    }
+    .note-item {
+      background: #f8f9fa;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-left: 4px solid #007bff;
+      border-radius: 4px;
+    }
+    
+    @media (min-width: 768px) {
+      .note-item {
+        padding: 1rem;
+      }
+    }
+    .note-date {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+    .note-text {
+      margin: 0;
+    }
+    .note-actions {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .note-edit-form {
+      margin-top: 0.5rem;
+    }
+    .note-edit-form textarea {
+      width: 100%;
+      min-height: 60px;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: inherit;
+      resize: vertical;
+    }
+    .add-note-form {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    
+    @media (min-width: 768px) {
+      .add-note-form {
+        margin-top: 1rem;
+        padding: 1rem;
+      }
+    }
+    .add-note-form textarea {
+      width: 100%;
+      min-height: 80px;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: vertical;
+    }
+    .wysiwyg-editor {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+    .wysiwyg-toolbar {
+      background: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+      padding: 0.5rem;
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
+    .wysiwyg-toolbar button {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      border-radius: 3px;
+      font-weight: bold;
+      min-width: auto;
+      width: auto;
+      margin: 0;
+      min-height: 44px; /* Minimum touch target for mobile */
+    }
+    .wysiwyg-toolbar button:hover {
+      background: #e9ecef;
+    }
+    .wysiwyg-toolbar button.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    .wysiwyg-content {
+      min-height: 80px;
+      padding: 0.5rem;
+      outline: none;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: 1.5;
+    }
+    .wysiwyg-content:focus {
+      background: #fff;
+    }
+    .wysiwyg-content:empty:before {
+      content: attr(data-placeholder);
+      color: #999;
+      font-style: italic;
+    }
+    .wysiwyg-content:focus:empty:before {
+      content: "";
+    }
+    .wysiwyg-content ul, .wysiwyg-content ol {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+    .wysiwyg-content li {
+      margin-bottom: 0.25rem;
+    }
+    .note-text ul, .note-text ol {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+    .note-text li {
+      margin-bottom: 0.25rem;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      width: 95%;
+      max-width: 400px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin: 0.5rem;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    @media (min-width: 768px) {
+      .modal-content {
+        padding: 2rem;
+        width: 90%;
+        max-height: 80vh;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .modal-content {
+        width: 98%;
+        margin: 0.25rem;
+        padding: 0.75rem;
+        max-height: 95vh;
+      }
+    }
+    .modal-header {
+      margin-bottom: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      .modal-header {
+        margin-bottom: 1.5rem;
+      }
+    }
+    .modal-header h3 {
+      margin: 0;
+      color: #f4f4f4;
+    }
+/* Form groups and labels */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+  font-size: 1rem;
+  word-wrap: break-word;
+}
+    
+    @media (max-width: 768px) {
+      .form-group {
+        margin-bottom: 0.75rem;
+      }
+      
+      .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+      }
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      max-width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Specific styling for date inputs to prevent overflow */
+    .form-group input[type="date"] {
+      font-size: 0.9rem;
+      padding: 0.6rem;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    
+    @media (max-width: 768px) {
+      .form-group input,
+      .form-group select {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+      }
+      
+      .form-group input[type="date"] {
+        font-size: 0.8rem;
+        padding: 0.4rem;
+        -webkit-appearance: none;
+        appearance: none;
+        min-height: 44px;
+        box-sizing: border-box;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .form-group input[type="date"] {
+        font-size: 0.75rem;
+        padding: 0.3rem;
+        min-height: 40px;
+      }
+    }
+    
+    /* iOS Safari date input specific fixes */
+    @supports (-webkit-touch-callout: none) {
+      .form-group input[type="date"] {
+        font-size: 0.8rem !important;
+        padding: 0.4rem !important;
+        min-height: 44px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      
+      @media (max-width: 480px) {
+        .form-group input[type="date"] {
+          font-size: 0.7rem !important;
+          padding: 0.3rem !important;
+          min-height: 40px !important;
+        }
+      }
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    @media (min-width: 768px) {
+      .modal-buttons {
+        margin-top: 1.5rem;
+        flex-wrap: nowrap;
+      }
+    }
+    .modal-buttons button {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      min-width: auto;
+      width: auto;
+      min-height: 44px; /* Minimum touch target for mobile */
+      flex: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    @media (max-width: 768px) {
+      .modal-buttons button {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.75rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .modal-buttons button {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.5rem;
+      }
+    }
+    .overdue-comm {
+      background-color: #ffebee !important;
+      color: #d32f2f;
+    }
+    #communication-summary h2 {
+      color: #333;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    
+    @media (min-width: 768px) {
+      #communication-summary h2 {
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+      }
+    }
+    #communication-summary h3 {
+      color: #555;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      #communication-summary h3 {
+        font-size: 1.1rem;
+      }
+    }
+    #communication-summary table {
+      margin-bottom: 0.75rem;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 768px) {
+      #communication-summary table {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
+    }
+    #communication-summary .name-link {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    #communication-summary .name-link:hover {
+      text-decoration: underline;
+    }
+    /* Ensure all tables have consistent styling */
+    #leaders-table {
+      margin-bottom: 0.75rem;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 768px) {
+      #leaders-table {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
+    }
+    .name-link {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .name-link:hover {
+      text-decoration: underline;
+    }
+    
+    /* Progress Bar Styles */
+    .progress-container {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin: 0.5rem 0 1rem 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    @media (min-width: 768px) {
+      .progress-container {
+        padding: 1.5rem;
+        margin: 1rem 0 2rem 0;
+      }
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    @media (min-width: 768px) {
+      .progress-header {
+        margin-bottom: 1rem;
+        flex-wrap: nowrap;
+      }
+    }
+    .progress-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #333;
+    }
+    .progress-stats {
+      font-size: 1rem;
+      color: #666;
+    }
+    .progress-bar-track {
+      width: 100%;
+      height: 24px;
+      background: #e9ecef;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+      border-radius: 12px;
+      transition: width 0.5s ease-in-out;
+      position: relative;
+    }
+    .progress-percentage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.875rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      z-index: 1;
+    }
+    .progress-bar-fill.low-progress {
+      background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+    }
+    .progress-bar-fill.low-progress .progress-percentage {
+      color: #333;
+      text-shadow: none;
+    }
+    
+    /* Mobile-friendly search results */
+    .mobile-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .mobile-card {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    
+    .mobile-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .mobile-card-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #007bff;
+      text-decoration: none;
+    }
+    
+    .mobile-card-name:hover {
+      text-decoration: underline;
+    }
+    
+    .mobile-card-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .mobile-card-detail {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .mobile-card-label {
+      font-weight: bold;
+      color: #666;
+    }
+    
+    /* Responsive behavior */
+    @media (max-width: 768px) {
+      #search-results-desktop {
+        display: none !important;
+      }
+      #search-results-mobile {
+        display: block !important;
+      }
+      
+      .mobile-card-details {
+        grid-template-columns: 1fr;
+      }
+    }
+  
+
+body.dark-mode {
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode th,
+body.dark-mode td,
+body.dark-mode .section-heading {
+  color: #ffffff;
+}
+
+body.dark-mode .card,
+body.dark-mode .table,
+body.dark-mode .progress-container,
+body.dark-mode .status-container {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
+body.dark-mode .status-container .status {
+  color: #00e676;
+}
+</style>
   
   <!-- Monthly Contact Progress Bar -->
   <div id="monthly-progress" class="progress-container">
@@ -1028,6 +2138,9 @@ input, button, select, textarea {
   
   <!-- Main List View -->
   <div id="main-view">
+
+    <h2 style="color: #fff; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Circle Leaders</h2>
+
     <div id="filter-container" style="margin-bottom: 0.75rem; padding: 0 0.25rem;">
       <label for="filter-status" style="display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem;">Filter by Status:</label>
       <select id="filter-status" style="width: 100%; padding: 0.5rem; font-size: 0.9rem;">
@@ -1044,8 +2157,6 @@ input, button, select, textarea {
       <span id="spinner" style="display: none; margin-left: 10px;">⏳</span>
     </div>
 
-    <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Circle Leaders</h2>
-
     <table id="leaders-table">
       <thead>
         <tr>
@@ -1061,7 +2172,7 @@ input, button, select, textarea {
 
     <!-- Follow Up Table -->
     <div style="margin-top: 2rem;">
-      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Marked for Follow Up</h2>
+      <h2 style="color: #fff; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Marked for Follow Up</h2>
       <table id="follow-up-table" style="margin-top: 0.5rem;">
         <thead>
           <tr>
@@ -1077,7 +2188,7 @@ input, button, select, textarea {
 
     <!-- Communication Summary Tables -->
     <div id="communication-summary" style="margin-top: 2rem;">
-      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Connection Summary</h2>
+      <h2 style="color: #fff; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Connection Summary</h2>
       <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
         <select id="summary-month" style="padding: 0.5rem; flex: 1; min-width: 120px; font-size: 0.9rem;">
           <option value="0">January</option>
@@ -1489,7 +2600,7 @@ input, button, select, textarea {
         </div>
         <div class="modal-buttons">
           <button type="button" class="btn-secondary" id="cancel-comm-update">Cancel</button>
-          <button type="submit" class="btn-primary">Update Communication</button>
+          <button type="submit" class="btn-primary">Save</button>
         </div>
         <div class="modal-buttons" style="margin-top:0.5rem;">
           <button type="button" class="btn-danger" id="clear-last-comm-btn" style="width:100%;">Clear Last Connection</button>
@@ -1570,10 +2681,11 @@ input, button, select, textarea {
         <h3 id="confirmation-title">Contact Options</h3>
       </div>
       <div id="confirmation-message" style="margin-bottom: 1.5rem; color: #555; line-height: 1.4;">
-        Would you like to call or text this number?
+        Would you like to call this number? Press Cancel to text instead.
       </div>
       <div class="modal-buttons">
-        <button type="button" class="btn-danger" id="confirmation-delete">Delete</button>
+        <button type="button" class="btn-primary" id="confirmation-call">Call</button>
+        <button type="button" class="btn-secondary" id="confirmation-text" style="margin-left:0.5rem;">Text</button>
         <button type="button" class="btn-outline" id="confirmation-cancel" style="margin-left:auto;">Cancel</button>
       </div>
     </div>
@@ -1665,18 +2777,71 @@ input, button, select, textarea {
                   <th class="sortable" data-column="circle_type" data-table="search-results-table">Type <span class="sort-indicator"></span></th>
                   <th class="sortable" data-column="meeting_day" data-table="search-results-table">Day <span class="sort-indicator"></span></th>
                   <th class="sortable" data-column="meeting_time" data-table="search-results-table">Time <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-column="meeting_frequency" data-table="search-results-table">Frequency <span class="sort-indicator"></span></th>
                   <th class="sortable" data-column="status" data-table="search-results-table">Status <span class="sort-indicator"></span></th>
                 </tr>
               </thead>
-              <tbody>
-                <tr><td colspan="5" style="text-align: center; color: #666; font-style: italic;">Use the filters above to search for circles</td></tr>
+              <tbody id="search-results-table-body">
+                <tr><td colspan="6" style="text-align: center; color: #666; font-style: italic;">Use the filters above to search for circles</td></tr>
               </tbody>
             </table>
           </div>
           
           <!-- Mobile-friendly card view -->
           <div id="search-results-mobile" class="mobile-cards" style="display: none;">
+            <script>
+            // Patch: Add frequency to desktop/table rendering
+            function populateSearchResultsTable(results) {
+              const tbody = document.getElementById('search-results-table-body');
+              tbody.innerHTML = '';
+              if (!results || results.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666;font-style:italic;">No circles found</td></tr>';
+                return;
+              }
+              results.forEach(circle => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                  <td>${circle.name || ''}</td>
+                  <td>${circle.circle_type || ''}</td>
+                  <td>${circle.meeting_day || 'Not set'}</td>
+                  <td>${circle.meeting_time || 'Not set'}</td>
+                  <td>${circle.meeting_frequency || 'Not set'}</td>
+                  <td>${circle.status || ''}</td>
+                `;
+                tbody.appendChild(tr);
+              });
+            }
+            </script>
             <!-- Mobile cards will be inserted here -->
+            <script>
+            // Patch: Add frequency to mobile card rendering
+// Main JS block: ensure correct mobile card rendering is used
+function populateSearchResultsMobile(results) {
+  const container = document.getElementById('search-results-mobile');
+  container.innerHTML = '';
+  if (!results || results.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:#666;font-style:italic;">No circles found</div>';
+    return;
+  }
+  results.forEach(circle => {
+    const card = document.createElement('div');
+    card.className = 'mobile-card';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:600;font-size:1.1rem;color:#007bff;">${circle.name || ''}</span>
+        <span style="padding:0.25rem 0.75rem;border-radius:16px;background:${circle.status==='Active'?'#e6f4ea':'#f7ecd7'};color:${circle.status==='Active'?'#2e7d32':'#8d6e63'};font-weight:600;">${circle.status || ''}</span>
+      </div>
+      <div style="margin-top:0.5rem;">
+        <div><span style="font-weight:600;">Type:</span> ${circle.circle_type || ''}</div>
+        <div><span style="font-weight:600;">Day:</span> ${circle.meeting_day || 'Not set'}</div>
+        <div><span style="font-weight:600;">Time:</span> ${circle.meeting_time || 'Not set'}</div>
+        <div><span style="font-weight:600;">Frequency:</span> ${circle.meeting_frequency || 'Not set'}</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+            </script>
           </div>
         </div>
       </div>
@@ -1684,6 +2849,91 @@ input, button, select, textarea {
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    // Switch logo for dark mode
+    function updateLogoForDarkMode() {
+      const logo = document.getElementById('radius-logo');
+      if (!logo) return;
+      if (document.body.classList.contains('dark-mode')) {
+        logo.src = 'https://i.imgur.com/KEqrcrK.png';
+      } else {
+        logo.src = 'https://i.imgur.com/aofM4G4.png';
+      }
+    }
+    // Switch logo for dark mode and handle dark mode toggle
+    function updateLogoForDarkMode() {
+      const logo = document.getElementById('radius-logo');
+      if (!logo) return;
+      if (document.body.classList.contains('dark-mode')) {
+        logo.src = 'https://i.imgur.com/KEqrcrK.png';
+      } else {
+        logo.src = 'https://i.imgur.com/aofM4G4.png';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      function setDarkMode(enabled) {
+        if (enabled) {
+          document.body.classList.add('dark-mode');
+          darkModeToggle.textContent = '☀️ Light Mode';
+        } else {
+          document.body.classList.remove('dark-mode');
+          darkModeToggle.textContent = '🌙 Dark Mode';
+        }
+        localStorage.setItem('radius-dark-mode', enabled ? '1' : '0');
+        updateLogoForDarkMode();
+      }
+      darkModeToggle.addEventListener('click', function() {
+        setDarkMode(!document.body.classList.contains('dark-mode'));
+      });
+      // Always start in light mode unless user previously selected dark mode
+      if (localStorage.getItem('radius-dark-mode') === '1') {
+        setDarkMode(true);
+      } else {
+        setDarkMode(false);
+      }
+    });
+  </script>
+      color: #e0e0e0 !important;
+      border-color: #333 !important;
+    }
+  <script>
+    // Dark mode toggle logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      function setDarkMode(enabled) {
+        if (enabled) {
+          document.body.classList.add('dark-mode');
+          darkModeToggle.textContent = '☀️ Light Mode';
+        } else {
+          document.body.classList.remove('dark-mode');
+          darkModeToggle.textContent = '🌙 Dark Mode';
+        }
+        localStorage.setItem('radius-dark-mode', enabled ? '1' : '0');
+      }
+      darkModeToggle.addEventListener('click', function() {
+        setDarkMode(!document.body.classList.contains('dark-mode'));
+      });
+      setDarkMode(localStorage.getItem('radius-dark-mode') === '1');
+    });
+  </script>
+  <script>
+    function toggleSearchResultsView() {
+      const desktop = document.getElementById('search-results-desktop');
+      const mobile = document.getElementById('search-results-mobile');
+      if (window.innerWidth <= 767) {
+        desktop.style.display = 'none';
+        mobile.style.display = 'block';
+      } else {
+        desktop.style.display = 'block';
+        mobile.style.display = 'none';
+      }
+    }
+    window.addEventListener('resize', toggleSearchResultsView);
+    document.addEventListener('DOMContentLoaded', toggleSearchResultsView);
+    // Ensure toggle runs after search
+    window.toggleSearchResultsView = toggleSearchResultsView;
+  </script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('clear-last-comm-btn').addEventListener('click', async function() {
@@ -1784,26 +3034,34 @@ input, button, select, textarea {
         document.getElementById('confirmation-title').textContent = title
         document.getElementById('confirmation-message').textContent = message
         document.getElementById('confirmation-modal').classList.remove('hidden')
-        
-        const confirmButton = document.getElementById('confirmation-delete')
+
+        // Support new Contact Options modal buttons
+        const callButton = document.getElementById('confirmation-call')
+        const textButton = document.getElementById('confirmation-text')
         const cancelButton = document.getElementById('confirmation-cancel')
-        
-        const handleConfirm = () => {
+
+        // Remove any previous listeners
+        callButton.replaceWith(callButton.cloneNode(true))
+        textButton.replaceWith(textButton.cloneNode(true))
+        cancelButton.replaceWith(cancelButton.cloneNode(true))
+
+        // Re-select after replace
+        const callBtn = document.getElementById('confirmation-call')
+        const textBtn = document.getElementById('confirmation-text')
+        const cancelBtn = document.getElementById('confirmation-cancel')
+
+        callBtn.addEventListener('click', () => {
           document.getElementById('confirmation-modal').classList.add('hidden')
-          confirmButton.removeEventListener('click', handleConfirm)
-          cancelButton.removeEventListener('click', handleCancel)
-          resolve(true)
-        }
-        
-        const handleCancel = () => {
+          resolve('call')
+        })
+        textBtn.addEventListener('click', () => {
           document.getElementById('confirmation-modal').classList.add('hidden')
-          confirmButton.removeEventListener('click', handleConfirm)
-          cancelButton.removeEventListener('click', handleCancel)
-          resolve(false)
-        }
-        
-        confirmButton.addEventListener('click', handleConfirm)
-        cancelButton.addEventListener('click', handleCancel)
+          resolve('text')
+        })
+        cancelBtn.addEventListener('click', () => {
+          document.getElementById('confirmation-modal').classList.add('hidden')
+          // Only close the modal, do not trigger any external action
+        })
       })
     }
 
@@ -2263,6 +3521,7 @@ input, button, select, textarea {
           circle_type: leader.circle_type || 'Not set',
           meeting_day: leader.meeting_day || 'Not set',
           meeting_time: formatMeetingTime(leader.meeting_time),
+          meeting_frequency: leader.meeting_frequency || 'Not set',
           status: leader.status
         }))
         
@@ -2271,6 +3530,7 @@ input, button, select, textarea {
         
         populateSearchResultsTable(searchData)
         populateSearchResultsMobile(searchData)
+        if (window.toggleSearchResultsView) window.toggleSearchResultsView();
       } catch (error) {
         console.error('Error searching circles:', error)
       }
@@ -2323,9 +3583,9 @@ input, button, select, textarea {
           <td>${item.circle_type}</td>
           <td>${item.meeting_day}</td>
           <td>${item.meeting_time}</td>
+          <td>${item.meeting_frequency}</td>
           <td>${formatStatusDisplay(item.status)}</td>
         `
-        
         // Make name clickable to open profile view
         const nameLink = row.querySelector('.name-link')
         if (nameLink) {
@@ -2338,13 +3598,11 @@ input, button, select, textarea {
               .select('*')
               .eq('id', leaderId)
               .single()
-            
             if (!error && leader) {
               showLeaderProfile(leader)
             }
           })
         }
-        
         tbody.appendChild(row)
       })
     }
@@ -3617,28 +4875,66 @@ input, button, select, textarea {
     }
 
     async function deleteNote(noteId) {
-      if (!(await showConfirm('Are you sure you want to delete this note? This action cannot be undone.', 'Delete Note'))) {
-        return
-      }
 
-      try {
-        const { error } = await client
-          .from('circle_comments')
-          .delete()
-          .eq('id', noteId)
-
-        if (error) {
-          console.error('Error deleting note:', error)
-          await showAlert('Error deleting note', 'Error')
-          return
+      // Show the custom delete note modal and position it above the trigger button
+      const modal = document.getElementById('delete-note-modal');
+      modal.classList.remove('hidden');
+      modal.style.position = 'absolute';
+      // Use requestAnimationFrame to ensure modal is rendered before measuring
+      requestAnimationFrame(() => {
+        if (triggerButton) {
+          const rect = triggerButton.getBoundingClientRect();
+          // Position modal above the button, centered horizontally
+          modal.style.left = `${rect.left + window.scrollX + rect.width / 2 - modal.offsetWidth / 2}px`;
+          modal.style.top = `${rect.top + window.scrollY - modal.offsetHeight - 12}px`;
+          modal.style.zIndex = 2000;
+        } else {
+          modal.style.left = '';
+          modal.style.top = '';
+          modal.style.position = '';
+          modal.style.zIndex = '';
         }
+      });
 
-        // Reload notes to remove the deleted note
-        loadLeaderNotes(currentLeader.id)
-      } catch (error) {
-        console.error('Error deleting note:', error)
-        await showAlert('Error deleting note', 'Error')
-      }
+      const cancelBtn = document.getElementById('delete-note-cancel');
+      const confirmBtn = document.getElementById('delete-note-confirm');
+
+      // Remove previous listeners
+      cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+      confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+      const cancel = document.getElementById('delete-note-cancel');
+      const confirm = document.getElementById('delete-note-confirm');
+
+      cancel.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.style.position = '';
+        modal.style.left = '';
+        modal.style.top = '';
+        modal.style.zIndex = '';
+      });
+      confirm.addEventListener('click', async () => {
+        modal.classList.add('hidden');
+        modal.style.position = '';
+        modal.style.left = '';
+        modal.style.top = '';
+        modal.style.zIndex = '';
+        try {
+          const { error } = await client
+            .from('circle_comments')
+            .delete()
+            .eq('id', noteId);
+          if (error) {
+            console.error('Error deleting note:', error);
+            await showAlert('Error deleting note', 'Error');
+            return;
+          }
+          // Reload notes to remove the deleted note
+          loadLeaderNotes(currentLeader.id);
+        } catch (err) {
+          console.error('Error deleting note:', err);
+          await showAlert('Error deleting note', 'Error');
+        }
+      });
     }
 
     async function updateLastCommunication() {
@@ -4125,5 +5421,14 @@ input, button, select, textarea {
     // Initialize summary filters on page load
     initializeSummaryFilters()
   </script>
+
+<script>
+  const toggleBtn = document.getElementById('dark-mode-toggle');
+  toggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    toggleBtn.innerText = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+  });
+</script>
+
 </body>
 </html>
