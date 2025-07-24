@@ -39,9 +39,7 @@
     body.dark-mode .form-group select,
     body.dark-mode .form-group textarea {
       background: #232527 !important;
-      color: #e0e0e0 !important;
-      border-color: #333 !important;
-    }
+
     body.dark-mode .progress-container,
     body.dark-mode .modal-content {
       box-shadow: 0 2px 8px rgba(0,0,0,0.7) !important;
@@ -2115,6 +2113,7 @@ body.dark-mode .status-container .status {
   </div>
   
   <!-- Meeting Today Table -->
+
   <div id="meeting-today-section" class="progress-container" style="margin-bottom: 1rem;">
     <div class="progress-header">
       <div class="progress-title">Meeting Today</div>
@@ -2125,6 +2124,27 @@ body.dark-mode .status-container .status {
           <tr>
             <th class="sortable" data-column="name" data-table="meeting-today-table">Name <span class="sort-indicator"></span></th>
             <th class="sortable" data-column="meeting_time" data-table="meeting-today-table">Time <span class="sort-indicator"></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="3" style="text-align: center; color: #666; font-style: italic;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Follow Up Table (moved below Meeting Today) -->
+  <div id="follow-up-section" class="progress-container" style="margin-bottom: 1rem;">
+    <div class="progress-header">
+      <div class="progress-title">Follow Up</div>
+    </div>
+    <div style="background: white; border-radius: 8px; padding: 1rem;">
+      <table id="follow-up-table" class="table">
+        <thead>
+          <tr>
+            <th class="sortable" data-column="name" data-table="follow-up-table">Name <span class="sort-indicator"></span></th>
+            <th class="sortable" data-column="follow_up_date" data-table="follow-up-table">Follow Up Date <span class="sort-indicator"></span></th>
+            <th class="sortable" data-column="status" data-table="follow-up-table">Status <span class="sort-indicator"></span></th>
           </tr>
         </thead>
         <tbody>
@@ -2169,20 +2189,7 @@ body.dark-mode .status-container .status {
     </table>
 
     <!-- Follow Up Table -->
-    <div style="margin-top: 2rem;">
-      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Marked for Follow Up</h2>
-      <table id="follow-up-table" style="margin-top: 0.5rem;">
-        <thead>
-          <tr>
-            <th class="sortable" data-column="name" data-table="follow-up-table">Name <span class="sort-indicator"></span></th>
-            <th class="sortable" data-column="status" data-table="follow-up-table">Status <span class="sort-indicator"></span></th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Data will be populated here -->
-        </tbody>
-      </table>
-    </div>
+    <!-- Removed duplicate Follow Up Table from main list view -->
 
     <!-- Communication Summary Tables -->
     <div id="communication-summary" style="margin-top: 2rem;">
@@ -4249,6 +4256,7 @@ function populateSearchResultsMobile(results) {
         const row = document.createElement('tr')
         row.innerHTML = `
           <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name}</a></td>
+          <td>${item.followUpDate ? formatDateOnly(item.followUpDate) : ''}</td>
           <td>${formatStatusDisplay(item.status)}</td>
         `
         // Make name clickable to open profile view
@@ -5418,13 +5426,7 @@ function populateSearchResultsMobile(results) {
     initializeSummaryFilters()
   </script>
 
-<script>
-  const toggleBtn = document.getElementById('dark-mode-toggle');
-  toggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
-    toggleBtn.innerText = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
-  });
-</script>
+<!-- Removed duplicate dark mode toggle script -->
 
 </body>
 </html>
