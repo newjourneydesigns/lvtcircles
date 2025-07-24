@@ -2005,13 +2005,13 @@ input, button, select, textarea {
           `${formatDateOnly(leader.last_comm_date)}${leader.last_comm_type ? `<br/>${leader.last_comm_type}` : ''}` :
           ''
         const isOverdue = leader.last_comm_date && !isDateWithinCurrentMonth(leader.last_comm_date)
-        
+
         row.innerHTML = `
           <td><a href="#" class="name-link">${leader.full_name || ''}</a></td>
           <td>${formatStatusDisplay(leader.status)}</td>
-          <td class="${isOverdue ? 'overdue-comm' : ''}">${lastCommText}</td>
+          <td class="${isOverdue ? 'overdue-comm' : ''} last-comm-cell" style="cursor:pointer; background:#f6f6f6; border-radius:12px; min-height:44px; font-size:17px; padding:0.5rem 1rem; text-align:center; color:#007aff; font-weight:500; box-shadow:0 1px 2px rgba(0,0,0,0.04); transition:background 0.2s;" onmouseover="this.style.background='#e9e9e9'" onmouseout="this.style.background='#f6f6f6'">${lastCommText || 'No communication recorded'}</td>
         `
-        
+
         // Make name clickable to open profile view
         const nameLink = row.querySelector('.name-link')
         if (nameLink) {
@@ -2020,7 +2020,17 @@ input, button, select, textarea {
             showLeaderProfile(leader)
           })
         }
-        
+
+        // Make last comm cell open the connection made modal
+        const lastCommCell = row.querySelector('.last-comm-cell')
+        if (lastCommCell) {
+          lastCommCell.addEventListener('click', async (e) => {
+            e.preventDefault()
+            currentLeader = leader
+            await updateLastCommunication()
+          })
+        }
+
         tbody.appendChild(row)
       })
     }
