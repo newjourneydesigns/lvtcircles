@@ -996,7 +996,7 @@ input, button, select, textarea {
     <div class="progress-header">
       <div class="progress-title">Monthly Progress</div>
       <div class="progress-stats">
-        <span id="progress-count">0 of 0</span> leaders contacted
+        <span id="progress-count">0 of 0</span> Connections
       </div>
     </div>
     <div class="progress-bar-track">
@@ -1320,6 +1320,7 @@ input, button, select, textarea {
         <button class="btn-primary" id="follow-up-btn">Follow Up</button>
         <button class="btn-success" id="clear-follow-up-btn">Clear Follow Up</button>
         <button class="btn-warning" id="update-last-comm-btn">Connection Made</button>
+        <!-- Removed Clear Last Comm button from profile view -->
       </div>
 
       <div class="notes-section">
@@ -1329,6 +1330,18 @@ input, button, select, textarea {
         
         <div id="notes-list">
           <!-- Notes will be populated here -->
+          <!-- Example note card structure with menu above -->
+          <div class="note-card" style="position:relative; margin-bottom:1rem;">
+            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+              <button class="note-menu-btn" style="margin-bottom:0.5rem; border:1px solid #e0a800; border-radius:8px; background:white; padding:0.25rem 0.5rem; cursor:pointer;">
+                <span style="font-size:1.5rem; color:#888;">&#8942;</span>
+              </button>
+            </div>
+            <div class="note-content" style="background:#f8f9fa; border-radius:8px; padding:1rem;">
+              <div style="font-size:0.95rem; color:#333; margin-bottom:0.5rem;">07/23/25</div>
+              <div style="font-size:1.1rem; color:#222;">This is a test</div>
+            </div>
+          </div>
         </div>
 
         <div id="add-note-form" class="add-note-form hidden">
@@ -1478,6 +1491,9 @@ input, button, select, textarea {
           <button type="button" class="btn-secondary" id="cancel-comm-update">Cancel</button>
           <button type="submit" class="btn-primary">Update Communication</button>
         </div>
+        <div class="modal-buttons" style="margin-top:0.5rem;">
+          <button type="button" class="btn-danger" id="clear-last-comm-btn" style="width:100%;">Clear Last Connection</button>
+        </div>
       </form>
     </div>
   </div>
@@ -1509,6 +1525,45 @@ input, button, select, textarea {
   </div>
 
   <!-- Custom Confirmation Modal -->
+  <!-- Connection Made Modal (Update Communication Modal) -->
+  <div id="update-comm-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Update Last Connection</h3>
+      </div>
+      <form id="update-comm-form">
+        <div class="form-group">
+          <label for="comm-date">Communication Date:</label>
+          <input type="date" id="comm-date" required />
+        </div>
+        <div class="form-group">
+          <label for="comm-type">Communication Type:</label>
+          <select id="comm-type" required>
+            <option value="">Select Type</option>
+            <option value="Atrium">Atrium</option>
+            <option value="One-on-One">One-on-One</option>
+            <option value="Zoom">Zoom</option>
+            <option value="Text">Text</option>
+            <option value="Phone">Phone</option>
+            <option value="Circle Leader Training">Circle Leader Training</option>
+            <option value="Circle Leader Lunch">Circle Leader Lunch</option>
+            <option value="Circle Visit">Circle Visit</option>
+            <option value="Email">Email</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="comm-note">Note (Optional):</label>
+          <textarea id="comm-note" placeholder="Add a note about this communication..." style="width: 100%; min-height: 60px; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box; resize: vertical;"></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn-secondary" id="cancel-comm-update">Cancel</button>
+          <button type="submit" class="btn-primary">Update Communication</button>
+          <button type="button" class="btn-outline" id="clear-last-comm-btn" style="margin-left:0.5rem;">Clear Last Comm</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <div id="confirmation-modal" class="modal-overlay hidden">
     <div class="modal-content">
       <div class="modal-header">
@@ -1518,9 +1573,8 @@ input, button, select, textarea {
         Would you like to call or text this number?
       </div>
       <div class="modal-buttons">
-        <button type="button" class="btn-secondary" id="confirmation-text">Text</button>
-        <button type="button" class="btn-primary" id="confirmation-call">Call</button>
-        <button type="button" class="btn-outline" id="confirmation-cancel">Cancel</button>
+        <button type="button" class="btn-danger" id="confirmation-delete">Delete</button>
+        <button type="button" class="btn-outline" id="confirmation-cancel" style="margin-left:auto;">Cancel</button>
       </div>
     </div>
   </div>
@@ -1630,6 +1684,34 @@ input, button, select, textarea {
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('clear-last-comm-btn').addEventListener('click', async function() {
+        if (confirm('Are you sure you want to clear the last communication date and type for this leader?')) {
+          document.getElementById('profile-last-comm').textContent = '';
+          if (typeof currentLeader !== 'undefined' && currentLeader && currentLeader.id) {
+            try {
+              const { error } = await client
+                .from('circle_leaders')
+                .update({ last_comm_date: null, last_comm_type: null })
+                .eq('id', currentLeader.id);
+              if (error) {
+                console.error('Error clearing last communication:', error);
+              } else {
+                currentLeader.last_comm_date = null;
+                currentLeader.last_comm_type = null;
+                loadCommunicationSummaries();
+                showLeaderProfile(currentLeader);
+              }
+            } catch (err) {
+              console.error('Unexpected error clearing last communication:', err);
+            }
+          }
+          document.getElementById('update-comm-modal').classList.add('hidden');
+        }
+      });
+    });
+  </script>
   <script type="application/json" id="circle-data">
 [
   {
@@ -1675,6 +1757,11 @@ input, button, select, textarea {
     }
 
     // Custom styled alert and confirm functions
+
+    // Ensure monthly progress is updated on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateMonthlyProgress();
+    });
     function showAlert(message, title = 'Notice') {
       return new Promise((resolve) => {
         document.getElementById('alert-title').textContent = title
@@ -1698,7 +1785,7 @@ input, button, select, textarea {
         document.getElementById('confirmation-message').textContent = message
         document.getElementById('confirmation-modal').classList.remove('hidden')
         
-        const confirmButton = document.getElementById('confirmation-confirm')
+        const confirmButton = document.getElementById('confirmation-delete')
         const cancelButton = document.getElementById('confirmation-cancel')
         
         const handleConfirm = () => {
@@ -1792,9 +1879,9 @@ input, button, select, textarea {
           return
         }
         
-        // Count leaders contacted this month
+        // Count leaders contacted this month (exclude null last_comm_date)
         const contactedThisMonth = leaders.filter(leader => 
-          isDateWithinCurrentMonth(leader.last_comm_date)
+          leader.last_comm_date && isDateWithinCurrentMonth(leader.last_comm_date)
         ).length
         
         const totalLeaders = leaders.length
@@ -2480,7 +2567,7 @@ input, button, select, textarea {
 
         // Add from current last_comm
         trainingLeaders?.forEach(leader => {
-          // Double-check date is within our filter range
+          // Only add if last_comm_date is not null and within range
           if (leader.last_comm_date && leader.last_comm_date >= firstDay && leader.last_comm_date <= lastDay) {
             const key = leader.id
             if (!trainingsMap.has(key) || trainingsMap.get(key).date < leader.last_comm_date) {
