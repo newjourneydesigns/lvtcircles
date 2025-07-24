@@ -17,6 +17,9 @@
 <html lang="en">
 <head>
   <style id="dark-mode-style">
+    body.dark-mode .profile-name {
+      color: #e0e0e0 !important;
+    }
     body.dark-mode {
       background: #181a1b !important;
       color: #e0e0e0 !important;
@@ -26,6 +29,7 @@
     body.dark-mode [style*="background: #fff"],
     body.dark-mode [style*="background:#fff"] {
       background: #232527 !important;
+    }
 
     body.dark-mode td,
     body.dark-mode th,
@@ -39,6 +43,7 @@
     body.dark-mode .form-group select,
     body.dark-mode .form-group textarea {
       background: #232527 !important;
+    }
 
     body.dark-mode .progress-container,
     body.dark-mode .modal-content {
@@ -2896,26 +2901,7 @@ function populateSearchResultsMobile(results) {
       color: #e0e0e0 !important;
       border-color: #333 !important;
     }
-  <script>
-    // Dark mode toggle logic
-    document.addEventListener('DOMContentLoaded', function() {
-      const darkModeToggle = document.getElementById('dark-mode-toggle');
-      function setDarkMode(enabled) {
-        if (enabled) {
-          document.body.classList.add('dark-mode');
-          darkModeToggle.textContent = '☀️ Light Mode';
-        } else {
-          document.body.classList.remove('dark-mode');
-          darkModeToggle.textContent = '🌙 Dark Mode';
-        }
-        localStorage.setItem('radius-dark-mode', enabled ? '1' : '0');
-      }
-      darkModeToggle.addEventListener('click', function() {
-        setDarkMode(!document.body.classList.contains('dark-mode'));
-      });
-      setDarkMode(localStorage.getItem('radius-dark-mode') === '1');
-    });
-  </script>
+  <!-- Removed duplicate dark mode toggle script -->
   <script>
     function toggleSearchResultsView() {
       const desktop = document.getElementById('search-results-desktop');
