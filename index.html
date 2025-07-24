@@ -2862,13 +2862,7 @@ function populateSearchResultsMobile(results) {
     }
     // Switch logo for dark mode and handle dark mode toggle
     function updateLogoForDarkMode() {
-      const logo = document.getElementById('radius-logo');
-      if (!logo) return;
-      if (document.body.classList.contains('dark-mode')) {
-        logo.src = 'https://i.imgur.com/KEqrcrK.png';
-      } else {
-        logo.src = 'https://i.imgur.com/aofM4G4.png';
-      }
+      // Duplicate function removed to prevent conflicts
     }
     document.addEventListener('DOMContentLoaded', function() {
       const darkModeToggle = document.getElementById('dark-mode-toggle');
