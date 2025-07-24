@@ -3050,7 +3050,7 @@ function populateSearchResultsMobile(results) {
         })
         textBtn.addEventListener('click', () => {
           document.getElementById('confirmation-modal').classList.add('hidden')
-          resolve('text')
+          resolve('sms')
         })
         cancelBtn.addEventListener('click', () => {
           document.getElementById('confirmation-modal').classList.add('hidden')
@@ -4541,8 +4541,12 @@ function populateSearchResultsMobile(results) {
         e.preventDefault()
         const phone = e.currentTarget.dataset.phone
         if (phone) {
-          const call = await showConfirm('Would you like to call this number? Press Cancel to text instead.', 'Contact Options')
-          window.location.href = (call ? 'tel:' : 'sms:') + phone
+        const action = await showConfirm('Would you like to call this number? Press Cancel to text instead.', 'Contact Options')
+        if (action === 'call') {
+          window.location.href = 'tel:' + phone
+        } else if (action === 'sms') {
+          window.location.href = 'sms:' + phone
+        }
         }
       })
       
