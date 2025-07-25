@@ -1601,6 +1601,7 @@ body.dark-mode .status-container .status {
       <div class="main-action-menu-dropdown" id="main-actions-dropdown">
         <button class="main-action-menu-item" id="search-circles-btn">Search Circles</button>
         <button class="main-action-menu-item" id="add-leader-btn-menu">Add New Leader</button>
+        <button class="main-action-menu-item" id="report-btn">Report</button>
         <button class="main-action-menu-item" id="dark-mode-toggle">Toggle Dark Mode</button>
       </div>
     </div>
@@ -5853,6 +5854,9 @@ function populateSearchResultsMobile(results) {
 
     // Search Circles page event listeners
     document.getElementById('search-circles-btn').addEventListener('click', showSearchCirclesPage)
+    document.getElementById('report-btn').addEventListener('click', () => {
+      window.location.href = 'report.html'
+    })
     document.getElementById('search-btn').addEventListener('click', searchCircles)
     document.getElementById('clear-search-btn').addEventListener('click', clearSearchFilters)
 

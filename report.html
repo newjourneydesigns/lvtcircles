@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radius Snapshot Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #fff; color: #000; padding: 1rem; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.9rem; }
+    th, td { border: 1px solid #000; padding: 0.5rem; }
+    th { background: #e0e0e0; }
+    button { margin: 0.5rem 0.25rem; padding: 0.5rem 1rem; }
+    .header { text-align: center; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://i.imgur.com/aofM4G4.png" alt="Radius Logo" style="height:40px;" />
+    <h1>Radius Snapshot Report</h1>
+    <p id="generated-date"></p>
+  </div>
+  <div>
+    <label for="month-selector">Select Month:</label>
+    <input type="month" id="month-selector">
+  </div>
+  <div id="report-content">
+    <h2>Monthly Connection Summary</h2>
+    <table id="one-on-one-table">
+      <thead><tr><th>Name</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <table id="lunch-table">
+      <thead><tr><th>Name</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <table id="visit-table">
+      <thead><tr><th>Name</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <h2>Follow Ups</h2>
+    <table id="follow-up-table">
+      <thead><tr><th>Name</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <h2>Circle Leaders</h2>
+    <table id="leaders-table">
+      <thead><tr><th>Name</th><th>Last Comm</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div style="margin-top:1rem;">
+    <button id="pdf-btn">Download PDF</button>
+    <button id="excel-btn">Download Excel</button>
+  </div>
+
+<script>
+const SUPABASE_URL = 'https://eruboulvrgrodccmjjbe.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVydWJvdWx2cmdyb2RjY21qamJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMzOTUsImV4cCI6MjA2ODY2OTM5NX0.FJ0nu1Ov8jbAdZy8SX9qs2gJ60_qdROsIkwRg8k9GK0';
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let selectedSummaryMonth = new Date().getMonth();
+let selectedSummaryYear = new Date().getFullYear();
+const monthInput = document.getElementById('month-selector');
+monthInput.value = `${selectedSummaryYear}-${String(selectedSummaryMonth+1).padStart(2,'0')}`;
+monthInput.addEventListener('change', async () => {
+  const [year, month] = monthInput.value.split('-');
+  selectedSummaryYear = parseInt(year);
+  selectedSummaryMonth = parseInt(month) - 1;
+  await loadOneOnOneMeetings();
+  await loadLunchMeetings();
+  await loadCircleVisits();
+});
+
+document.getElementById('generated-date').textContent = 'Generated on: ' + new Date().toLocaleDateString();
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadCircleLeaders();
+  await loadFollowUpLeaders();
+  await loadOneOnOneMeetings();
+  await loadLunchMeetings();
+  await loadCircleVisits();
+});
+
+function formatDateOnly(dateString) {
+  if (!dateString) return '';
+  if (dateString.includes('-') && dateString.length === 10) {
+    const [y,m,d] = dateString.split('-');
+    return `${m.padStart(2,'0')}/${d.padStart(2,'0')}/${y.slice(-2)}`;
+  }
+  const d = new Date(dateString);
+  return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}`;
+}
+
+function renderRows(tableId, rows, cols) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  tbody.innerHTML = '';
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;font-style:italic;">No data</td></tr>`;
+    return;
+  }
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    if (tableId === 'leaders-table') {
+      tr.innerHTML = `<td>${r.full_name || ''}</td><td>${r.lastComm || ''}</td><td>${r.status || ''}</td>`;
+    } else if (tableId === 'follow-up-table') {
+      tr.innerHTML = `<td>${r.name || ''}</td><td>${r.status || ''}</td>`;
+    } else {
+      tr.innerHTML = `<td>${r.name || ''}</td><td>${formatDateOnly(r.date)}</td><td>${r.status || ''}</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+async function loadCircleLeaders() {
+  const { data, error } = await client.from('circle_leaders').select('*');
+  if (error) return;
+  const rows = (data||[]).map(l => ({
+    full_name: l.full_name,
+    lastComm: l.last_comm_date ? `${formatDateOnly(l.last_comm_date)}${l.last_comm_type ? ` (${l.last_comm_type})` : ''}` : '',
+    status: l.status
+  }));
+  renderRows('leaders-table', rows, 3);
+}
+
+async function loadFollowUpLeaders() {
+  const { data: followUpComments } = await client
+    .from('circle_comments')
+    .select('*, circle_leaders!inner(full_name, status, last_comm_date, last_comm_type)')
+    .or('comment.ilike.%follow-up%,comment.ilike.%Follow-up%')
+    .order('created_at', { ascending: false });
+  const followUpMap = new Map();
+  followUpComments?.forEach(comment => {
+    const key = comment.leader_id;
+    if (!followUpMap.has(key)) {
+      const text = comment.comment.toLowerCase();
+      const isClear = text.includes('follow-up flag cleared') || text.includes('follow-up cleared');
+      if (isClear) {
+        followUpMap.set(key, { cleared: true });
+      } else {
+        const dateMatch = comment.comment.match(/follow-up on (\d{4}-\d{2}-\d{2})/);
+        let followUpDate = dateMatch ? dateMatch[1] : null;
+        if (!followUpDate && comment.created_at) followUpDate = comment.created_at.split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
+        if (!followUpDate || followUpDate >= today) {
+          followUpMap.set(key, {
+            name: comment.circle_leaders.full_name,
+            status: comment.circle_leaders.status,
+            followUpDate,
+            cleared: false
+          });
+        } else {
+          followUpMap.set(key, { cleared: true });
+        }
+      }
+    }
+  });
+  const active = Array.from(followUpMap.values()).filter(v => !v.cleared);
+  renderRows('follow-up-table', active, 2);
+}
+
+async function loadOneOnOneMeetings() {
+  const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0];
+  const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0];
+  const { data: comments } = await client
+    .from('circle_comments')
+    .select('*, circle_leaders!inner(full_name,status)')
+    .ilike('comment', '%One-on-One%')
+    .gte('created_at', firstDay)
+    .lte('created_at', `${lastDay}T23:59:59`);
+  const { data: leaders } = await client
+    .from('circle_leaders')
+    .select('*')
+    .eq('last_comm_type', 'One-on-One')
+    .gte('last_comm_date', firstDay)
+    .lte('last_comm_date', lastDay);
+  const map = new Map();
+  comments?.forEach(c => {
+    const m = c.comment.match(/One-on-One on (\d{4}-\d{2}-\d{2})/);
+    const date = m ? m[1] : c.created_at.split('T')[0];
+    if (date >= firstDay && date <= lastDay) {
+      const key = c.leader_id;
+      if (!map.has(key) || map.get(key).date < date) {
+        map.set(key, { name: c.circle_leaders.full_name, date, status: c.circle_leaders.status });
+      }
+    }
+  });
+  leaders?.forEach(l => {
+    if (l.last_comm_date && l.last_comm_date >= firstDay && l.last_comm_date <= lastDay) {
+      const key = l.id;
+      if (!map.has(key) || map.get(key).date < l.last_comm_date) {
+        map.set(key, { name: l.full_name, date: l.last_comm_date, status: l.status });
+      }
+    }
+  });
+  renderRows('one-on-one-table', Array.from(map.values()), 3);
+}
+
+async function loadLunchMeetings() {
+  const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0];
+  const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0];
+  const { data: comments } = await client
+    .from('circle_comments')
+    .select('*, circle_leaders!inner(full_name,status)')
+    .ilike('comment', '%Circle Leader Lunch%')
+    .gte('created_at', firstDay)
+    .lte('created_at', `${lastDay}T23:59:59`);
+  const { data: leaders } = await client
+    .from('circle_leaders')
+    .select('*')
+    .eq('last_comm_type', 'Circle Leader Lunch')
+    .gte('last_comm_date', firstDay)
+    .lte('last_comm_date', lastDay);
+  const map = new Map();
+  comments?.forEach(c => {
+    const m = c.comment.match(/Circle Leader Lunch on (\d{4}-\d{2}-\d{2})/);
+    const date = m ? m[1] : c.created_at.split('T')[0];
+    if (date >= firstDay && date <= lastDay) {
+      const key = c.leader_id;
+      if (!map.has(key) || map.get(key).date < date) {
+        map.set(key, { name: c.circle_leaders.full_name, date, status: c.circle_leaders.status });
+      }
+    }
+  });
+  leaders?.forEach(l => {
+    if (l.last_comm_date && l.last_comm_date >= firstDay && l.last_comm_date <= lastDay) {
+      const key = l.id;
+      if (!map.has(key) || map.get(key).date < l.last_comm_date) {
+        map.set(key, { name: l.full_name, date: l.last_comm_date, status: l.status });
+      }
+    }
+  });
+  renderRows('lunch-table', Array.from(map.values()), 3);
+}
+
+async function loadCircleVisits() {
+  const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0];
+  const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0];
+  const { data: comments } = await client
+    .from('circle_comments')
+    .select('*, circle_leaders!inner(full_name,status)')
+    .ilike('comment', '%Circle Visit%')
+    .gte('created_at', firstDay)
+    .lte('created_at', `${lastDay}T23:59:59`);
+  const { data: leaders } = await client
+    .from('circle_leaders')
+    .select('*')
+    .eq('last_comm_type', 'Circle Visit')
+    .gte('last_comm_date', firstDay)
+    .lte('last_comm_date', lastDay);
+  const map = new Map();
+  comments?.forEach(c => {
+    const m = c.comment.match(/Circle Visit on (\d{4}-\d{2}-\d{2})/);
+    const date = m ? m[1] : c.created_at.split('T')[0];
+    if (date >= firstDay && date <= lastDay) {
+      const key = c.leader_id;
+      if (!map.has(key) || map.get(key).date < date) {
+        map.set(key, { name: c.circle_leaders.full_name, date, status: c.circle_leaders.status });
+      }
+    }
+  });
+  leaders?.forEach(l => {
+    if (l.last_comm_date && l.last_comm_date >= firstDay && l.last_comm_date <= lastDay) {
+      const key = l.id;
+      if (!map.has(key) || map.get(key).date < l.last_comm_date) {
+        map.set(key, { name: l.full_name, date: l.last_comm_date, status: l.status });
+      }
+    }
+  });
+  renderRows('visit-table', Array.from(map.values()), 3);
+}
+
+document.getElementById('pdf-btn').addEventListener('click', () => {
+  const doc = new jspdf.jsPDF('p', 'pt', 'a4');
+  doc.html(document.getElementById('report-content'), {
+    callback: function (d) { d.save('radius_snapshot_report.pdf'); },
+    x: 10,
+    y: 10
+  });
+});
+
+document.getElementById('excel-btn').addEventListener('click', () => {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(document.getElementById('one-on-one-table')), 'One-on-One');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(document.getElementById('lunch-table')), 'Leader Lunch');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(document.getElementById('visit-table')), 'Circle Visit');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(document.getElementById('follow-up-table')), 'Follow Ups');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(document.getElementById('leaders-table')), 'Circle Leaders');
+  XLSX.writeFile(wb, 'radius_snapshot_report.xlsx');
+});
+</script>
+</body>
+</html>
