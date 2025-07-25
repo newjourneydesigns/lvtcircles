@@ -1558,7 +1558,6 @@ body.dark-mode .status-container .status {
         <button class="main-action-menu-item" id="search-circles-btn">Search Circles</button>
         <button class="main-action-menu-item" id="add-leader-btn-menu">Add New Leader</button>
         <button class="main-action-menu-item" id="dark-mode-toggle">Toggle Dark Mode</button>
-        <button class="main-action-menu-item" id="logout-btn">Logout</button>
       </div>
     </div>
   </div>
@@ -5847,23 +5846,37 @@ function populateSearchResultsMobile(results) {
     initializeSummaryFilters()
   </script>
 
-<!-- Removed duplicate dark mode toggle script -->
+
+<!-- Add Logout to main actions dropdown menu -->
 <script>
-  const logoutBtn = document.getElementById('logout-btn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        if (window.supabaseClient && window.supabaseClient.auth) {
-          await window.supabaseClient.auth.signOut();
-        }
-      } catch (_) {}
-      finally {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = 'login.html';
+  document.addEventListener('DOMContentLoaded', function() {
+    const mainActionsDropdown = document.getElementById('main-actions-dropdown');
+    if (mainActionsDropdown) {
+      // Add Logout menu item if not present
+      if (!mainActionsDropdown.querySelector('.main-action-logout')) {
+        const logoutItem = document.createElement('div');
+        logoutItem.className = 'main-action-menu-item main-action-logout';
+        logoutItem.textContent = 'Logout';
+        logoutItem.style.cursor = 'pointer';
+        logoutItem.style.color = '#ef4444';
+        logoutItem.style.fontWeight = '600';
+        logoutItem.style.padding = '0.5em 1em';
+        logoutItem.addEventListener('click', async () => {
+          try {
+            if (window.supabaseClient && window.supabaseClient.auth) {
+              await window.supabaseClient.auth.signOut();
+            }
+          } catch (_) {}
+          finally {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+          }
+        });
+        mainActionsDropdown.appendChild(logoutItem);
       }
-    });
-  }
+    }
+  });
 </script>
 
 </body>
