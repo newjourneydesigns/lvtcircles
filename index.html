@@ -90,19 +90,19 @@
   </div>
 
   <!-- Mark for Follow Up Modal -->
-  <div id="follow-up-modal" class="modal-overlay hidden">
-    <div class="modal-box bg-base-200 text-gray-100 p-6 rounded-lg shadow-lg" style="max-width:400px; width:95%;">
-      <h3 class="font-bold text-lg mb-4">Mark for Follow Up</h3>
-      <label class="block mb-2 text-sm" for="follow-up-date-input">Follow Up Date:</label>
-      <input type="date" id="follow-up-date-input" class="input input-bordered w-full bg-base-100 text-gray-100 mb-4" />
-      <label class="block mb-2 text-sm" for="follow-up-note-input">Follow Up Note (Optional):</label>
-      <textarea id="follow-up-note-input" class="textarea textarea-bordered w-full bg-base-100 text-gray-100 mb-4"></textarea>
-      <div class="modal-action flex justify-end gap-4">
-        <button type="button" class="btn btn-outline" id="follow-up-cancel-btn">Cancel</button>
-        <button type="button" class="btn btn-primary" id="follow-up-submit-btn">Mark for Follow Up</button>
+  <dialog id="followUpModal" class="modal-overlay hidden" style="padding:0;border:none;background:none;">
+    <div class="modal-box bg-neutral text-white p-6 rounded-lg shadow-lg" style="max-width:400px; width:95%;">
+      <h3 class="font-bold text-lg mb-4 text-white">Mark for Follow Up</h3>
+      <label class="block mb-2 text-sm text-white" for="follow-up-date-input">Follow Up Date:</label>
+      <input type="date" id="follow-up-date-input" class="input input-bordered bg-base-100 text-white w-full mb-4" />
+      <label class="block mb-2 text-sm text-white" for="follow-up-note-input">Follow Up Note (Optional):</label>
+      <textarea id="follow-up-note-input" class="textarea textarea-bordered bg-base-100 text-white w-full mb-4"></textarea>
+      <div class="flex flex-col gap-2 mt-4">
+        <button class="btn btn-outline btn-error w-full" id="cancel-followup-btn" type="button">Cancel</button>
+        <button class="btn btn-primary w-full" id="confirm-followup-btn" type="button">Mark for Follow Up</button>
       </div>
     </div>
-  </div>
+  </dialog>
   <style id="dark-mode-style">
     body.dark-mode .profile-name {
       color: #e0e0e0 !important;
@@ -5921,4 +5921,15 @@ function populateSearchResultsMobile(results) {
     document.getElementById('clear-confirmation-modal').onclick = function(e) {
       if (e.target.id === 'clear-confirmation-modal') closeClearConfirmationModal();
     };
+  </script>
+  <script>
+    // DaisyUI-style Mark for Follow Up Modal event listeners
+    document.getElementById('cancel-followup-btn')?.addEventListener('click', () => {
+      document.getElementById('followUpModal')?.close();
+    });
+    document.getElementById('confirm-followup-btn')?.addEventListener('click', () => {
+      // Perform save logic here
+      console.log("Follow up marked.");
+      document.getElementById('followUpModal')?.close();
+    });
   </script>
