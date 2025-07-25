@@ -94,7 +94,7 @@
     <div class="modal-box bg-neutral text-white p-6 rounded-lg shadow-lg" style="max-width:400px; width:95%;">
       <h3 class="font-bold text-lg mb-4 text-white">Mark for Follow Up</h3>
       <label class="block mb-2 text-sm text-white" for="follow-up-date-input">Follow Up Date:</label>
-      <input type="date" id="follow-up-date-input" class="input input-bordered bg-base-100 text-white w-full mb-4" />
+      <input type="date" id="follow-up-date-input" class="input input-bordered bg-base-100 text-white w-full mb-4" style="color:#f3f4f6;" />
       <label class="block mb-2 text-sm text-white" for="follow-up-note-input">Follow Up Note (Optional):</label>
       <textarea id="follow-up-note-input" class="textarea textarea-bordered bg-base-100 text-white w-full mb-4"></textarea>
       <div class="flex flex-col gap-2 mt-4">
@@ -176,8 +176,12 @@
 
     /* Ensure readable text color for select and input in dark mode */
     body.dark-mode select,
-    body.dark-mode input {
+    body.dark-mode input,
+    body.dark-mode input[type="date"] {
       color: #f3f4f6 !important; /* Tailwind's gray-100 or any light color that contrasts well */
+      background: #232527 !important;
+      border-color: #333 !important;
+      opacity: 1 !important;
     }
     body.dark-mode .mobile-card-label,
     body.dark-mode .form-group label,
@@ -5927,9 +5931,19 @@ function populateSearchResultsMobile(results) {
     document.getElementById('cancel-followup-btn')?.addEventListener('click', () => {
       document.getElementById('followUpModal')?.close();
     });
-    document.getElementById('confirm-followup-btn')?.addEventListener('click', () => {
-      // Perform save logic here
-      console.log("Follow up marked.");
-      document.getElementById('followUpModal')?.close();
+    document.getElementById('confirm-followup-btn')?.addEventListener('click', async () => {
+      const date = document.getElementById('follow-up-date-input').value;
+      const note = document.getElementById('follow-up-note-input').value;
+      if (!date) {
+        alert('Please select a follow up date.');
+        return;
+      }
+      if (typeof saveFollowUp === 'function') {
+        // Use the same logic as the main form
+        await saveFollowUp({ preventDefault: () => {} }, date, note);
+      } else {
+        // Fallback: just close modal
+        document.getElementById('followUpModal')?.close();
+      }
     });
   </script>
