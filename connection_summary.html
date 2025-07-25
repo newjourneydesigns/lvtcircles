@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connection Summary</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/aofM4G4.png">
+  <link rel="apple-touch-icon" href="https://i.imgur.com/aofM4G4.png">
+  <style id="dark-mode-style">
+    body.dark-mode {
+      background: #181a1b;
+      color: #e0e0e0;
+    }
+    body.dark-mode select,
+    body.dark-mode input {
+      background: #232527;
+      color: #f3f4f6;
+      border-color: #333;
+    }
+    body.dark-mode table,
+    body.dark-mode th,
+    body.dark-mode td {
+      background: #232527;
+      color: #e0e0e0;
+      border-color: #333;
+    }
+    body.dark-mode thead th {
+      background: #181a1b;
+      border-bottom: 2px solid #007aff;
+    }
+    body.dark-mode .main-action-menu-item:hover {
+      background: #374151 !important;
+      color: #f3f4f6 !important;
+    }
+    body.dark-mode .btn-primary {
+      background: #007aff !important;
+      color: #fff !important;
+      border-color: #007aff !important;
+    }
+  </style>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 0.5rem;
+      background: #f4f4f4;
+      color: #222;
+      margin: 0;
+    }
+    .main-action-menu {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .main-action-menu-btn {
+      background: #007bff;
+      color: white;
+      border: 1px solid #007bff;
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: bold;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .main-action-menu-btn:hover {
+      background: #0056b3;
+      border-color: #0056b3;
+    }
+    .main-action-menu-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      min-width: 180px;
+      display: none;
+    }
+    .main-action-menu-dropdown.show {
+      display: block;
+    }
+    .main-action-menu-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-size: 0.9rem;
+      color: #495057;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .main-action-menu-item:hover {
+      background: #f8f9fa;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      background: #fff;
+      font-size: 0.85rem;
+    }
+    th, td {
+      padding: 1rem 0.75rem;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      color: #222;
+      font-size: 17px;
+    }
+    thead th {
+      background: #f4f4f4;
+      font-weight: 700;
+      color: #222;
+      border-bottom: 2px solid #007aff;
+    }
+    tbody tr:hover {
+      background: #e9ecef;
+    }
+    .name-link {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .name-link:hover {
+      text-decoration: underline;
+    }
+    .profile-status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-size: 0.875rem;
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+    .status-active {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-pipeline {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-invite {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .status-paused {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+    .sortable {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+    .sort-indicator {
+      margin-left: 5px;
+      font-size: 0.8em;
+    }
+    .sort-asc::after { content: "▲"; }
+    .sort-desc::after { content: "▼"; }
+    select, input, button {
+      margin: 0.5rem 0;
+      padding: 1rem;
+      font-size: 17px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      box-sizing: border-box;
+      min-height: 44px;
+    }
+    .btn-primary {
+      background: #007aff;
+      color: #fff;
+      border: 2px solid #007aff;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .btn-primary:hover {
+      filter: brightness(0.95);
+    }
+  </style>
+</head>
+<body>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:0.5rem;">
+    <div onclick="window.location.href='index.html'" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+      <img id="radius-logo" src="https://i.imgur.com/aofM4G4.png" alt="Radius Logo" style="height:32px;width:auto;">
+      <h1 style="margin:0;font-size:1.5rem;">Radius</h1>
+    </div>
+    <div class="main-action-menu">
+      <button class="main-action-menu-btn" id="main-actions-btn">Menu ▼</button>
+      <div class="main-action-menu-dropdown" id="main-actions-dropdown">
+        <button class="main-action-menu-item" onclick="window.location.href='index.html'">Dashboard</button>
+        <button class="main-action-menu-item" id="dark-mode-toggle">Toggle Dark Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="communication-summary" style="margin-top:2rem;">
+    <h2 style="color:#333;border-bottom:2px solid #007bff;padding-bottom:0.5rem;margin-bottom:1rem;font-size:1.3rem;">Connection Summary</h2>
+    <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+      <select id="summary-month" style="padding:0.5rem;flex:1;min-width:120px;font-size:0.9rem;"></select>
+      <select id="summary-year" style="padding:0.5rem;flex:1;min-width:80px;font-size:0.9rem;"></select>
+      <button id="apply-summary-filter" class="btn-primary" style="padding:0.75rem 1rem;font-size:0.9rem;flex-shrink:0;">Apply</button>
+    </div>
+    <div style="margin-bottom:1.5rem;">
+      <h3>One-on-One Meetings</h3>
+      <table id="one-on-one-table">
+        <thead><tr><th class="sortable" data-column="name">Name</th><th class="sortable" data-column="date">Date</th><th class="sortable" data-column="status">Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div style="margin-bottom:1.5rem;">
+      <h3>Circle Leader Lunch</h3>
+      <table id="lunch-table">
+        <thead><tr><th class="sortable" data-column="name">Name</th><th class="sortable" data-column="date">Date</th><th class="sortable" data-column="status">Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div style="margin-bottom:1.5rem;">
+      <h3>Circle Visit</h3>
+      <table id="visit-table">
+        <thead><tr><th class="sortable" data-column="name">Name</th><th class="sortable" data-column="date">Date</th><th class="sortable" data-column="status">Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabaseUrl = 'https://eruboulvrgrodccmjjbe.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVydWJvdWx2cmdyb2RjY21qamJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMzOTUsImV4cCI6MjA2ODY2OTM5NX0.FJ0nu1Ov8jbAdZy8SX9qs2gJ60_qdROsIkwRg8k9GK0';
+    const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+    let selectedSummaryMonth = null;
+    let selectedSummaryYear = null;
+
+    function formatDateOnly(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+    function getStatusClass(status) {
+      if (!status) return '';
+      return `status-${status.toLowerCase()}`;
+    }
+
+    function formatStatusDisplay(status) {
+      if (!status) return '';
+      const statusClass = getStatusClass(status);
+      const displayText = status === 'active' ? 'Active' :
+                         status === 'invite' ? 'Invite' :
+                         status === 'pipeline' ? 'Pipeline' :
+                         status === 'paused' ? 'Paused' : status;
+      return `<span class="profile-status ${statusClass}">${displayText}</span>`;
+    }
+
+    const tableData = {
+      'one-on-one-table': [],
+      'lunch-table': [],
+      'visit-table': []
+    };
+
+    const tableSortStates = {
+      'one-on-one-table': { column: null, direction: 'asc' },
+      'lunch-table': { column: null, direction: 'asc' },
+      'visit-table': { column: null, direction: 'asc' }
+    };
+
+    function populateTable(tableId, data) {
+      if (!arguments[2]) {
+        tableData[tableId] = [...data];
+
+        const sortState = tableSortStates[tableId];
+        if (sortState && sortState.column) {
+          data.sort((a, b) => {
+            let aVal = a[sortState.column] || '';
+            let bVal = b[sortState.column] || '';
+            if (sortState.column === 'date') {
+              aVal = aVal || '1900-01-01';
+              bVal = bVal || '1900-01-01';
+            }
+            aVal = aVal.toString().toLowerCase();
+            bVal = bVal.toString().toLowerCase();
+            if (aVal < bVal) return sortState.direction === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortState.direction === 'asc' ? 1 : -1;
+            return 0;
+          });
+
+          const headers = document.querySelectorAll(`#${tableId} .sortable`);
+          headers.forEach(h => {
+            h.classList.remove('sort-asc', 'sort-desc');
+            if (h.dataset.column === sortState.column) {
+              h.classList.add(sortState.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
+          });
+        }
+      }
+
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      tbody.innerHTML = '';
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#666;font-style:italic;">No entries found</td></tr>';
+        return;
+      }
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><a href="index.html?leader_id=${item.id}" class="name-link" data-leader-id="${item.id}">${item.name}</a></td>
+          <td>${formatDateOnly(item.date)}</td>
+          <td>${formatStatusDisplay(item.status)}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function sortTableData(tableId, column, direction) {
+      const data = tableData[tableId];
+      if (!data || data.length === 0) return;
+
+      data.sort((a, b) => {
+        let aVal = a[column] || '';
+        let bVal = b[column] || '';
+        if (column === 'date') {
+          aVal = aVal || '1900-01-01';
+          bVal = bVal || '1900-01-01';
+        }
+        aVal = aVal.toString().toLowerCase();
+        bVal = bVal.toString().toLowerCase();
+        if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      populateTable(tableId, data, true);
+    }
+
+    async function loadOneOnOneMeetings() {
+      const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0];
+      const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0];
+      const { data: comments } = await client.from('circle_comments').select('*, circle_leaders!inner(full_name, status)').ilike('comment', '%One-on-One%').gte('created_at', firstDay).lte('created_at', lastDay + 'T23:59:59');
+      const { data: leaders } = await client.from('circle_leaders').select('*').eq('last_comm_type', 'One-on-One').gte('last_comm_date', firstDay).lte('last_comm_date', lastDay);
+      const meetingsMap = new Map();
+      comments?.forEach(c => {
+        const date = (c.comment.match(/One-on-One on (\d{4}-\d{2}-\d{2})/)||[])[1] || c.created_at.split('T')[0];
+        if(date>=firstDay && date<=lastDay){
+          const key = c.leader_id;
+          if(!meetingsMap.has(key) || meetingsMap.get(key).date < date){
+            meetingsMap.set(key,{id:key,name:c.circle_leaders.full_name,date,status:c.circle_leaders.status});
+          }
+        }
+      });
+      leaders?.forEach(l => {
+        if(l.last_comm_date && l.last_comm_date>=firstDay && l.last_comm_date<=lastDay){
+          const key=l.id;
+          if(!meetingsMap.has(key) || meetingsMap.get(key).date < l.last_comm_date){
+            meetingsMap.set(key,{id:key,name:l.full_name,date:l.last_comm_date,status:l.status});
+          }
+        }
+      });
+      populateTable('one-on-one-table', Array.from(meetingsMap.values()));
+    }
+    async function loadTrainingSessions() { /* omitted on summary page */ }
+    async function loadLunchMeetings() {
+      const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0];
+      const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0];
+      const { data: comments } = await client.from('circle_comments').select('*, circle_leaders!inner(full_name, status)').ilike('comment', '%Circle Leader Lunch%').gte('created_at', firstDay).lte('created_at', lastDay + 'T23:59:59');
+      const { data: leaders } = await client.from('circle_leaders').select('*').eq('last_comm_type', 'Circle Leader Lunch').gte('last_comm_date', firstDay).lte('last_comm_date', lastDay);
+      const map = new Map();
+      comments?.forEach(c => {
+        const date=(c.comment.match(/Circle Leader Lunch on (\d{4}-\d{2}-\d{2})/)||[])[1]||c.created_at.split('T')[0];
+        if(date>=firstDay && date<=lastDay){
+          const key=c.leader_id;
+          if(!map.has(key) || map.get(key).date<date){
+            map.set(key,{id:key,name:c.circle_leaders.full_name,date,status:c.circle_leaders.status});
+          }
+        }
+      });
+      leaders?.forEach(l=>{
+        if(l.last_comm_date && l.last_comm_date>=firstDay && l.last_comm_date<=lastDay){
+          const key=l.id;
+          if(!map.has(key) || map.get(key).date<l.last_comm_date){
+            map.set(key,{id:key,name:l.full_name,date:l.last_comm_date,status:l.status});
+          }
+        }
+      });
+      populateTable('lunch-table', Array.from(map.values()));
+    }
+    async function loadCircleVisits() {
+      const firstDay = new Date(selectedSummaryYear, selectedSummaryMonth, 1).toISOString().split('T')[0];
+      const lastDay = new Date(selectedSummaryYear, selectedSummaryMonth + 1, 0).toISOString().split('T')[0];
+      const { data: comments } = await client.from('circle_comments').select('*, circle_leaders!inner(full_name, status)').ilike('comment', '%Circle Visit%').gte('created_at', firstDay).lte('created_at', lastDay + 'T23:59:59');
+      const { data: leaders } = await client.from('circle_leaders').select('*').eq('last_comm_type', 'Circle Visit').gte('last_comm_date', firstDay).lte('last_comm_date', lastDay);
+      const map=new Map();
+      comments?.forEach(c=>{ 
+        const date=(c.comment.match(/Circle Visit on (\d{4}-\d{2}-\d{2})/)||[])[1]||c.created_at.split('T')[0];
+        if(date>=firstDay && date<=lastDay){
+          const key=c.leader_id;
+          if(!map.has(key) || map.get(key).date<date){
+            map.set(key,{id:key,name:c.circle_leaders.full_name,date,status:c.circle_leaders.status});
+          }
+        }
+      });
+      leaders?.forEach(l=>{
+        if(l.last_comm_date && l.last_comm_date>=firstDay && l.last_comm_date<=lastDay){
+          const key=l.id;
+          if(!map.has(key) || map.get(key).date<l.last_comm_date){
+            map.set(key,{id:key,name:l.full_name,date:l.last_comm_date,status:l.status});
+          }
+        }
+      });
+      populateTable('visit-table', Array.from(map.values()));
+    }
+    async function loadCommunicationSummaries() {
+      await loadOneOnOneMeetings();
+      await loadLunchMeetings();
+      await loadCircleVisits();
+    }
+    function initializeSummaryFilters() {
+      const now=new Date();
+      selectedSummaryMonth=now.getMonth();
+      selectedSummaryYear=now.getFullYear();
+      const yearSelect=document.getElementById('summary-year');
+      for(let y=selectedSummaryYear-2;y<=selectedSummaryYear+2;y++){ const opt=document.createElement('option'); opt.value=y; opt.textContent=y; if(y===selectedSummaryYear) opt.selected=true; yearSelect.appendChild(opt); }
+      document.getElementById('summary-month').innerHTML=["January","February","March","April","May","June","July","August","September","October","November","December"].map((m,i)=>`<option value="${i}"${i===selectedSummaryMonth?' selected':''}>${m}</option>`).join('');
+    }
+    document.getElementById('apply-summary-filter').addEventListener('click', () => { selectedSummaryMonth=parseInt(document.getElementById('summary-month').value); selectedSummaryYear=parseInt(document.getElementById('summary-year').value); loadCommunicationSummaries(); });
+    initializeSummaryFilters();
+    loadCommunicationSummaries();
+
+    document.querySelectorAll('.sortable').forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.dataset.column;
+        const tableId = header.closest('table').id;
+        const currentSort = tableSortStates[tableId];
+        if (currentSort.column === column) {
+          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSort.column = column;
+          currentSort.direction = 'asc';
+        }
+
+        document.querySelectorAll(`#${tableId} .sortable`).forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+        header.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+
+        sortTableData(tableId, column, currentSort.direction);
+      });
+    });
+
+    const mainActionsBtn=document.getElementById('main-actions-btn');
+    const mainActionsDropdown=document.getElementById('main-actions-dropdown');
+    mainActionsBtn.addEventListener('click',()=>{ mainActionsDropdown.classList.toggle('show'); });
+    document.addEventListener('click', e=>{ if(!mainActionsDropdown.contains(e.target) && e.target!==mainActionsBtn){ mainActionsDropdown.classList.remove('show'); } });
+    const darkToggle=document.getElementById('dark-mode-toggle');
+    function setDarkMode(enabled){ if(enabled){ document.body.classList.add('dark-mode'); darkToggle.textContent='Light Mode'; } else { document.body.classList.remove('dark-mode'); darkToggle.textContent='Dark Mode'; } localStorage.setItem('radius-dark-mode', enabled ? '1' : '0'); }
+    darkToggle.addEventListener('click', ()=>{ setDarkMode(!document.body.classList.contains('dark-mode')); });
+    if(localStorage.getItem('radius-dark-mode')==='1'){ setDarkMode(true); }
+  </script>
+</body>
+</html>
