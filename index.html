@@ -1,3 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    /* Confirmation Modal Styling */
+    #confirmation-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.45);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #confirmation-modal .modal-content {
+      background: #222;
+      color: #f3f4f6;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+      padding: 2rem 2.5rem;
+      min-width: 320px;
+      max-width: 90vw;
+      text-align: center;
+    }
+    #confirmation-modal .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    #confirmation-modal .modal-message {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    #confirmation-modal .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    #confirmation-modal button {
+      font-size: 1rem;
+      border-radius: 8px;
+      padding: 0.5rem 1.5rem;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    #confirmation-modal .btn-primary {
+      background: #007aff;
+      color: #fff;
+    }
+    #confirmation-modal .btn-primary:hover {
+      background: #005bb5;
+    }
+    #confirmation-modal .btn-danger {
+      background: #e53e3e;
+      color: #fff;
+    }
+    #confirmation-modal .btn-danger:hover {
+      background: #c53030;
+    }
+    #confirmation-modal .btn-secondary {
+      background: #444;
+      color: #fff;
+    }
+    #confirmation-modal .btn-secondary:hover {
+      background: #222;
+    }
+  </style>
   <!-- Delete Note Modal -->
   <div id="delete-note-modal" class="modal-overlay hidden">
     <div class="modal-content">
@@ -13,9 +85,21 @@
       </div>
     </div>
   </div>
-<!DOCTYPE html>
-<html lang="en">
-<head>
+
+  <!-- Mark for Follow Up Modal -->
+  <div id="follow-up-modal" class="modal-overlay hidden">
+    <div class="modal-box bg-base-200 text-gray-100 p-6 rounded-lg shadow-lg" style="max-width:400px; width:95%;">
+      <h3 class="font-bold text-lg mb-4">Mark for Follow Up</h3>
+      <label class="block mb-2 text-sm" for="follow-up-date-input">Follow Up Date:</label>
+      <input type="date" id="follow-up-date-input" class="input input-bordered w-full bg-base-100 text-gray-100 mb-4" />
+      <label class="block mb-2 text-sm" for="follow-up-note-input">Follow Up Note (Optional):</label>
+      <textarea id="follow-up-note-input" class="textarea textarea-bordered w-full bg-base-100 text-gray-100 mb-4"></textarea>
+      <div class="modal-action flex justify-end gap-4">
+        <button type="button" class="btn btn-outline" id="follow-up-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="follow-up-submit-btn">Mark for Follow Up</button>
+      </div>
+    </div>
+  </div>
   <style id="dark-mode-style">
     body.dark-mode .profile-name {
       color: #e0e0e0 !important;
@@ -2472,11 +2556,6 @@ body.dark-mode .status-container .status {
     </div>
   </div>
 
-  <!-- Follow Up Table (homepage only, below Meeting Today) -->
-  
-
-
-  
   <!-- Main List View -->
   <div id="main-view">
 
@@ -2486,18 +2565,17 @@ body.dark-mode .status-container .status {
       <div class="progress-header">
         <div class="progress-title">Follow Up</div>
       </div>
-      <div style="background: white; border-radius: 4px; padding: 1rem; font-size: 17px;">
+      <!-- Modal-like container for Follow Up (for DaisyUI dark mode consistency) -->
+      <div class="bg-base-200 text-base-content rounded-lg shadow-lg p-6">
         <table id="follow-up-table" class="table px-4 py-2" style="font-size: 17px; border-radius: 2px">
           <thead>
             <tr>
               <th class="sortable" data-column="name" data-table="follow-up-table">Name <span class="sort-indicator"></span></th>
-              <th class="sortable" data-column="follow_up_date" data-table="follow-up-table">Date <span class="sort-indicator"></span></th>
               <th class="sortable" data-column="status" data-table="follow-up-table">Status <span class="sort-indicator"></span></th>
-
             </tr>
           </thead>
           <tbody>
-            <tr><td colspan="3" style="text-align: center; color: #666; font-style: italic;">Loading...</td></tr>
+            <tr><td colspan="3" class="text-base-content" style="text-align: center; font-style: italic;">Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -2525,8 +2603,8 @@ body.dark-mode .status-container .status {
       <thead>
         <tr>
           <th class="sortable" data-column="full_name" data-table="leaders-table">Name <span class="sort-indicator"></span></th>
-          <th class="sortable" data-column="status" data-table="leaders-table">Status <span class="sort-indicator"></span></th>
           <th class="sortable" data-column="last_comm_date" data-table="leaders-table">Last Comm <span class="sort-indicator"></span></th>
+          <th class="sortable" data-column="status" data-table="leaders-table">Status <span class="sort-indicator"></span></th>
         </tr>
       </thead>
       <tbody>
@@ -2615,55 +2693,86 @@ body.dark-mode .status-container .status {
     <form id="edit-leader-form" style="display:none;">
       <h2>Edit Leader</h2>
       <input type="hidden" id="edit-id" />
-      <input type="text" id="edit_full_name" placeholder="Full Name" required />
-      <input type="text" id="edit_phone" placeholder="Phone" required />
-      <input type="email" id="edit_email" placeholder="Email" required />
-      <select id="edit_status">
-        <option value="invite">Invite</option>
-        <option value="pipeline">Pipeline</option>
-        <option value="active">Active</option>
-        <option value="paused">Paused</option>
-      </select>
-      <input type="date" id="edit_last_comm_date" />
-      <select id="edit_last_comm_type">
-        <option value="">Communication Type</option>
-        <option value="Atrium">Atrium</option>
-        <option value="One-on-One">One-on-One</option>
-        <option value="Zoom">Zoom</option>
-        <option value="Text">Text</option>
-        <option value="Phone">Phone</option>
-
-        <option value="Circle Leader Lunch">Circle Leader Lunch</option>
-        <option value="Circle Visit">Circle Visit</option>
-      </select>
-      <select id="edit_circle_type">
-        <option value="">Circle Type</option>
-        <option value="Men">Men</option>
-        <option value="Women">Women</option>
-        <option value="Mixed">Mixed</option>
-        <option value="Young Adults">Young Adults</option>
-        <option value="Other">Other</option>
-      </select>
-      <select id="edit_meeting_day">
-        <option value="">Meeting Day</option>
-        <option value="Sunday">Sunday</option>
-        <option value="Monday">Monday</option>
-        <option value="Tuesday">Tuesday</option>
-        <option value="Wednesday">Wednesday</option>
-        <option value="Thursday">Thursday</option>
-        <option value="Friday">Friday</option>
-        <option value="Saturday">Saturday</option>
-      </select>
-      <input type="time" id="edit_meeting_time" placeholder="Meeting Time" />
-      <select id="edit_meeting_frequency">
-        <option value="">Meeting Frequency</option>
-        <option value="Weekly">Weekly</option>
-        <option value="1/3/5">1/3/5</option>
-        <option value="2/4">2/4</option>
-        <option value="Other">Other</option>
-      </select>
-      <button type="submit" class="btn-primary">Update Leader</button>
-      <button type="button" id="cancel-edit" class="btn-secondary">Cancel</button>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_full_name">Full Name:</label>
+        <input type="text" id="edit_full_name" placeholder="Full Name" required class="input input-bordered w-full bg-base-100 text-base-content" />
+      </div>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_phone">Phone:</label>
+        <input type="text" id="edit_phone" placeholder="Phone" required class="input input-bordered w-full bg-base-100 text-base-content" />
+      </div>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_email">Email:</label>
+        <input type="email" id="edit_email" placeholder="Email" required class="input input-bordered w-full bg-base-100 text-base-content" />
+      </div>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_status">Status:</label>
+        <select id="edit_status" class="input input-bordered w-full bg-base-100 text-base-content">
+          <option value="invite">Invite</option>
+          <option value="pipeline">Pipeline</option>
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_last_comm_date">Last Communication Date:</label>
+        <input type="date" id="edit_last_comm_date" class="input input-bordered w-full bg-base-100 text-base-content" />
+      </div>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_last_comm_type">Last Communication Type:</label>
+        <select id="edit_last_comm_type" class="input input-bordered w-full bg-base-100 text-base-content">
+          <option value="">Communication Type</option>
+          <option value="Atrium">Atrium</option>
+          <option value="One-on-One">One-on-One</option>
+          <option value="Zoom">Zoom</option>
+          <option value="Text">Text</option>
+          <option value="Phone">Phone</option>
+          <option value="Circle Leader Lunch">Circle Leader Lunch</option>
+          <option value="Circle Visit">Circle Visit</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_circle_type">Circle Type:</label>
+        <select id="edit_circle_type" class="input input-bordered w-full bg-base-100 text-base-content">
+          <option value="">Circle Type</option>
+          <option value="Men">Men</option>
+          <option value="Women">Women</option>
+          <option value="Mixed">Mixed</option>
+          <option value="Young Adults">Young Adults</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_meeting_day">Meeting Day:</label>
+        <select id="edit_meeting_day" class="input input-bordered w-full bg-base-100 text-base-content">
+          <option value="">Meeting Day</option>
+          <option value="Sunday">Sunday</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_meeting_time">Meeting Time:</label>
+        <input type="time" id="edit_meeting_time" placeholder="Meeting Time" class="input input-bordered w-full bg-base-100 text-base-content" />
+      </div>
+      <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_meeting_frequency">Meeting Frequency:</label>
+        <select id="edit_meeting_frequency" class="input input-bordered w-full bg-base-100 text-base-content">
+          <option value="">Meeting Frequency</option>
+          <option value="Weekly">Weekly</option>
+          <option value="1/3/5">1/3/5</option>
+          <option value="2/4">2/4</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="modal-buttons">
+        <button type="button" id="cancel-edit" class="btn btn-outline btn-sm">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm ml-2">Update Leader</button>
+      </div>
     </form>
   </div>
 
@@ -3483,7 +3592,7 @@ function populateSearchResultsMobile(results) {
       return `<span class="profile-status ${statusClass}">${displayText}</span>`
     }
 
-    let sortColumn = null
+    let sortColumn = 'full_name'
     let sortDirection = 'asc'
     
     // Store table data for sorting
@@ -4407,17 +4516,20 @@ function populateSearchResultsMobile(results) {
                                 latestComment.comment.toLowerCase().includes('follow-up cleared')
           if (isClearComment) {
             // Follow-up was cleared, show Follow Up, hide Clear Follow Up
-            followUpBtn.style.display = 'block'
-            clearFollowUpBtn.style.display = 'none'
+            followUpBtn.style.display = 'block';
+            clearFollowUpBtn.style.display = 'none';
+            clearFollowUpBtn.disabled = true;
           } else {
             // Follow-up is active, hide Follow Up, show Clear Follow Up
-            followUpBtn.style.display = 'none'
-            clearFollowUpBtn.style.display = 'block'
+            followUpBtn.style.display = 'none';
+            clearFollowUpBtn.style.display = 'block';
+            clearFollowUpBtn.disabled = false;
           }
         } else {
           // No follow-up, show Follow Up, hide Clear Follow Up
-          followUpBtn.style.display = 'block'
-          clearFollowUpBtn.style.display = 'none'
+          followUpBtn.style.display = 'block';
+          clearFollowUpBtn.style.display = 'none';
+          clearFollowUpBtn.disabled = true;
         }
       } catch (error) {
         console.error('Error checking follow-up status:', error)
@@ -4553,37 +4665,36 @@ function populateSearchResultsMobile(results) {
       tbody.innerHTML = ''
 
       if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #666; font-style: italic;">No follow-ups needed</td></tr>'
-        return
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #666; font-style: italic;">No follow-ups needed</td></tr>';
+        return;
       }
 
       data.forEach(item => {
-        const row = document.createElement('tr')
+        const row = document.createElement('tr');
+        // Only show name and status, no date column
         row.innerHTML = `
-          <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name}</a></td>
-          <td>${item.followUpDate ? formatDateOnly(item.followUpDate) : ''}</td>
+          <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name || 'Unknown'}</a></td>
           <td>${formatStatusDisplay(item.status)}</td>
-
-        `
+        `;
         // Make name clickable to open profile view
-        const nameLink = row.querySelector('.name-link')
+        const nameLink = row.querySelector('.name-link');
         if (nameLink) {
           nameLink.addEventListener('click', async (e) => {
-            e.preventDefault()
-            const leaderId = e.target.dataset.leaderId
+            e.preventDefault();
+            const leaderId = e.target.dataset.leaderId;
             // Fetch the full leader data and show profile
-            const { data: leader, error } = await client
+            const { data: fullLeader, error } = await client
               .from('circle_leaders')
               .select('*')
               .eq('id', leaderId)
-              .single()
-            if (!error && leader) {
-              showLeaderProfile(leader)
+              .single();
+            if (!error && fullLeader) {
+              showLeaderProfile(fullLeader);
             }
-          })
+          });
         }
-        tbody.appendChild(row)
-      })
+        tbody.appendChild(row);
+      });
     }
 
     async function contactLeader(leaderId) {
@@ -5736,8 +5847,44 @@ function populateSearchResultsMobile(results) {
 
 </body>
 </html>
-/* Tailwind-style dropdown menu container for dark mode (utility class version for future use) */
-.dark .dropdown-content {
-  background-color: #1f2937 !important;
-  color: #f3f4f6 !important;
-}
+  <!-- Clear Follow Up Confirmation Modal -->
+  <div id="clear-confirmation-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden" style="min-height:100vh;">
+    <div class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl p-6 shadow-2xl w-full max-w-md mx-4 text-center flex flex-col gap-4" style="box-sizing:border-box;">
+      <h2 class="text-xl font-bold mb-2">Clear Follow Up</h2>
+      <p class="mb-4 text-base">Are you sure you want to clear the follow-up flag for <span id="confirm-leader-name" class="font-semibold"></span>?</p>
+      <div class="flex flex-col sm:flex-row justify-center gap-3 mt-2">
+        <button id="cancel-clear-btn" class="btn btn-secondary px-4 py-2 rounded-lg font-medium" style="background:#e5e7eb;color:#111827;" onclick="closeClearConfirmationModal()">Cancel</button>
+        <button id="confirm-clear-btn" class="btn btn-primary px-4 py-2 rounded-lg font-medium" style="background:#2563eb;color:#fff;" onclick="confirmClearFollowUp()">Yes, Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Modal open/close logic
+    function openClearConfirmationModal(leaderName) {
+      document.getElementById('confirm-leader-name').textContent = leaderName;
+      document.getElementById('clear-confirmation-modal').classList.remove('hidden');
+    }
+    function closeClearConfirmationModal() {
+      document.getElementById('clear-confirmation-modal').classList.add('hidden');
+    }
+    // Confirm clear follow up logic
+    function confirmClearFollowUp() {
+      // Use currentLeader context
+      if (!currentLeader) return closeClearConfirmationModal();
+      clearFollowUp();
+      closeClearConfirmationModal();
+    }
+    // Attach modal open to clear-follow-up-btn
+    document.getElementById('clear-follow-up-btn').onclick = function() {
+      if (currentLeader) openClearConfirmationModal(currentLeader.full_name);
+    };
+    // Attach modal close to cancel button
+    document.getElementById('cancel-clear-btn').onclick = closeClearConfirmationModal;
+    // Attach confirm to confirm button
+    document.getElementById('confirm-clear-btn').onclick = confirmClearFollowUp;
+    // Close modal when clicking outside
+    document.getElementById('clear-confirmation-modal').onclick = function(e) {
+      if (e.target.id === 'clear-confirmation-modal') closeClearConfirmationModal();
+    };
+  </script>
