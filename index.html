@@ -2631,6 +2631,7 @@ body.dark-mode .status-container .status {
             <tr>
               <th class="sortable" data-column="name" data-table="follow-up-table">Name <span class="sort-indicator"></span></th>
               <th class="sortable" data-column="status" data-table="follow-up-table">Status <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="note" data-table="follow-up-table">Follow Up <span class="sort-indicator"></span></th>
             </tr>
           </thead>
           <tbody>
@@ -2641,10 +2642,13 @@ body.dark-mode .status-container .status {
     </div>
 
     <!-- Event Summary Tracker -->
-    <div id="event-summary-section" class="progress-container" style="margin-bottom: 1rem;">
-      <div class="progress-header">
-        <div class="progress-title">Event Summary Tracker</div>
-        <div id="summary-count" class="progress-stats">0 out of 0 Summaries Received</div>
+    <div class="event-summary-tracker">
+      <h2 class="text-xl font-bold mb-2">Event Summary Tracker</h2>
+      <p id="summary-count">0 out of 21 Summaries Received</p>
+      <h3 class="text-lg font-bold mt-4">Event Summary Completion</h3>
+      <p id="summary-progress">0 of 21 Summaries</p>
+      <div class="w-full bg-base-200 rounded-full h-2.5 dark:bg-gray-700">
+        <div id="summary-progress-bar" class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
       </div>
       <div class="bg-base-200 text-base-content rounded-lg shadow-lg p-6">
         <table id="event-summary-table" class="table px-4 py-2" style="font-size: 17px; border-radius: 2px">
@@ -2653,13 +2657,16 @@ body.dark-mode .status-container .status {
               <th class="sortable" data-column="name" data-table="event-summary-table">Name <span class="sort-indicator"></span></th>
               <th class="sortable" data-column="day" data-table="event-summary-table">Day <span class="sort-indicator"></span></th>
               <th class="sortable" data-column="time" data-table="event-summary-table">Time <span class="sort-indicator"></span></th>
-              <th style="text-align:center;">Checkbox</th>
+              <th style="text-align:center;">Received</th>
             </tr>
           </thead>
           <tbody>
             <tr><td colspan="4" class="text-base-content" style="text-align: center; font-style: italic;">Loading...</td></tr>
           </tbody>
         </table>
+        <button id="reset-summary-btn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem; background: transparent; color: #007aff; border: 1px solid #007aff; border-radius: 6px; cursor: pointer; margin-top: 1rem;">
+          Reset
+        </button>
       </div>
     </div>
     <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Circle Leaders</h2>
@@ -6110,6 +6117,53 @@ function populateSearchResultsMobile(results) {
         mainActionsDropdown.appendChild(logoutItem);
       }
     }
+  });
+</script>
+
+<script>
+  function updateEventSummaryProgress() {
+    const checkboxes = document.querySelectorAll('#event-summary-table input[type="checkbox"]');
+    const total = checkboxes.length;
+    const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+    const percent = total === 0 ? 0 : Math.round((checked / total) * 100);
+    const fill = document.getElementById('event-summary-progress');
+    const count = document.getElementById('event-summary-count');
+    if (fill) {
+      fill.style.width = `${percent}%`;
+      fill.textContent = `${percent}%`;
+    }
+    if (count) {
+      count.textContent = `${checked} of ${total} Summaries`;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const resetBtn = document.getElementById('reset-summary-btn');
+    resetBtn?.addEventListener('click', () => {
+      const confirmReset = confirm('Are you sure you want to clear all checkboxes in the Event Summary Table?');
+      if (!confirmReset) return;
+      const checkboxes = document.querySelectorAll('#event-summary-table input[type="checkbox"]');
+      checkboxes.forEach(cb => cb.checked = false);
+      updateEventSummaryProgress();
+    });
+
+    // Use event delegation for dynamic checkboxes
+    const summaryTable = document.getElementById('event-summary-table');
+    if (summaryTable) {
+      summaryTable.addEventListener('change', function(e) {
+        if (e.target && e.target.type === 'checkbox') {
+          updateEventSummaryProgress();
+        }
+      });
+    }
+
+    // Also update progress on table changes (e.g., after data reload)
+    const observer = new MutationObserver(updateEventSummaryProgress);
+    if (summaryTable) {
+      observer.observe(summaryTable, { childList: true, subtree: true });
+    }
+
+    updateEventSummaryProgress(); // run on load
   });
 </script>
 
