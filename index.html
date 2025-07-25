@@ -2642,13 +2642,16 @@ body.dark-mode .status-container .status {
     </div>
 
     <!-- Event Summary Tracker -->
-    <div class="event-summary-tracker">
-      <h2 class="text-xl font-bold mb-2">Event Summary Tracker</h2>
-      <p id="summary-count">0 out of 21 Summaries Received</p>
-      <h3 class="text-lg font-bold mt-4">Event Summary Completion</h3>
-      <p id="summary-progress">0 of 21 Summaries</p>
-      <div class="w-full bg-base-200 rounded-full h-2.5 dark:bg-gray-700">
-        <div id="summary-progress-bar" class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
+    <div id="event-summary-section" class="progress-container" style="margin-bottom: 1rem;">
+      <div class="progress-header">
+        <div class="progress-title">Event Summary Tracker</div>
+      </div>
+      <div class="progress-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5em;">
+        <div class="progress-title" style="font-size:1.2em;font-weight:700;">Event Summary Completion</div>
+        <div id="event-summary-count" style="font-size:1em;font-weight:500;">0 of 0 Summaries</div>
+      </div>
+      <div class="progress-bar" style="background:#23272b;height:24px;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px #0002;margin-bottom:18px;">
+        <div id="event-summary-progress" class="progress-bar-fill" style="background:linear-gradient(90deg,#4ade80,#22d3ee);height:100%;width:0%;transition:width 0.3s;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1em;color:#fff;text-shadow:0 1px 2px #0008;"></div>
       </div>
       <div class="bg-base-200 text-base-content rounded-lg shadow-lg p-6">
         <table id="event-summary-table" class="table px-4 py-2" style="font-size: 17px; border-radius: 2px">
@@ -6128,12 +6131,16 @@ function populateSearchResultsMobile(results) {
     const percent = total === 0 ? 0 : Math.round((checked / total) * 100);
     const fill = document.getElementById('event-summary-progress');
     const count = document.getElementById('event-summary-count');
+    const summaryCount = document.getElementById('summary-count');
     if (fill) {
       fill.style.width = `${percent}%`;
       fill.textContent = `${percent}%`;
     }
     if (count) {
       count.textContent = `${checked} of ${total} Summaries`;
+    }
+    if (summaryCount) {
+      summaryCount.textContent = `${checked} out of ${total} Summaries Received`;
     }
   }
 
