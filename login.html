@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; color: #222; }
+    .container { max-width: 400px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    h2 { margin-bottom: 1.5rem; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+    input { width: 100%; padding: 0.75rem; margin-bottom: 1.25rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
+    button { width: 100%; padding: 0.75rem; border-radius: 8px; border: none; background: #007aff; color: #fff; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+    button:hover { background: #005bb5; }
+    .message { margin-top: 1rem; color: #e53e3e; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="text-align:center; margin-bottom:2rem;">
+      <img src="https://i.imgur.com/iOCCuWL.png" alt="Radius Logo" style="width:72px;height:72px;margin-bottom:0.5rem;">
+      <div style="font-size:2rem;font-weight:700;letter-spacing:0.05em;color:#010101;">Radius</div>
+    </div>
+    <h2 style="text-align:center;">Login</h2>
+    <form id="login-form">
+      <label for="email">Email</label>
+      <input type="text" id="email" name="email" required>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+      <div style="margin-bottom:1rem;">
+        <input type="checkbox" id="show-password" style="margin-right:0.5em;">
+        <label for="show-password" style="font-size:0.95em;">Show password</label>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+    <div class="message" id="login-message"></div>
+  </div>
+  <script>
+// --- Supabase Auth (no more manual hashing / REST queries) ---
+const SUPABASE_URL = 'https://eruboulvrgrodccmjjbe.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVydWJvdWx2cmdyb2RjY21qamJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTMzOTUsImV4cCI6MjA2ODY2OTM5NX0.FJ0nu1Ov8jbAdZy8SX9qs2gJ60_qdROsIkwRg8k9GK0';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Show/hide password
+(document.getElementById('show-password')).addEventListener('change', function () {
+  const pwdInput = document.getElementById('password');
+  pwdInput.type = this.checked ? 'text' : 'password';
+});
+
+// Handle login submit
+(document.getElementById('login-form')).addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const messageDiv = document.getElementById('login-message');
+  messageDiv.style.color = '#e53e3e';
+  messageDiv.textContent = '';
+
+  if (!email || !password) {
+    messageDiv.textContent = 'Please enter both email and password.';
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    messageDiv.textContent = error.message || 'Invalid email or password.';
+    return;
+  }
+
+  // Success
+  messageDiv.style.color = '#007aff';
+  messageDiv.textContent = 'Login successful! Redirecting...';
+
+  // Persist whatever you need (session is already stored by supabase-js)
+  // Optional: localStorage.setItem('userId', data.user.id);
+
+  setTimeout(() => {
+    window.location.href = 'index.html';
+  }, 800);
+});
+  </script>
+</body>
+</html>
