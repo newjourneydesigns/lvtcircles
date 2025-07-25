@@ -104,6 +104,14 @@
     </div>
   </dialog>
   <style id="dark-mode-style">
+    :root {
+      --modal-bg-light: #ffffff;
+      --modal-text-light: #000000;
+      --modal-overlay-light: rgba(0,0,0,0.45);
+      --modal-bg-dark: #1c1c1e;
+      --modal-text-dark: #f5f5f7;
+      --modal-overlay-dark: rgba(0,0,0,0.8);
+    }
     body.dark-mode .profile-name {
       color: #e0e0e0 !important;
     }
@@ -299,7 +307,7 @@
       color: #e0e0e0 !important;
     }
     body.dark-mode .modal-overlay {
-      background: rgba(24,26,27,0.85) !important;
+      background: var(--modal-overlay-dark) !important;
     }
     body.dark-mode .add-note-form,
     body.dark-mode .note-edit-form {
@@ -334,9 +342,9 @@
       color: #888 !important;
     }
     body.dark-mode .modal-content {
-      background: #232527 !important;
-      color: #e0e0e0 !important;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.32) !important;
+      background: var(--modal-bg-dark) !important;
+      color: var(--modal-text-dark) !important;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.4) !important;
       border: 1px solid #333 !important;
     }
     body.dark-mode .modal-header h3 {
@@ -431,10 +439,10 @@ body.dark-mode #filter-container option:checked {
     .modal-content {
       border-radius: 16px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-      background: #fff;
+      background: var(--modal-bg-light);
+      color: var(--modal-text-light);
       padding: 2rem 1.5rem;
       font-size: 17px;
-      color: #222;
     }
     .modal-header h3 {
       font-size: 1.3rem;
@@ -501,9 +509,9 @@ body.dark-mode #filter-container option:checked {
       filter: brightness(1.08);
     }
     body.dark-mode .modal-content {
-      background: #232527 !important;
-      color: #e0e0e0 !important;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.32) !important;
+      background: var(--modal-bg-dark) !important;
+      color: var(--modal-text-dark) !important;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.4) !important;
     }
     body.dark-mode .modal-header h3 {
       color: #e0e0e0 !important;
@@ -1120,29 +1128,30 @@ input, button, select, textarea {
     .note-text li {
       margin-bottom: 0.25rem;
     }
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      width: 95%;
-      max-width: 400px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      margin: 0.5rem;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--modal-overlay-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .modal-content {
+        background: var(--modal-bg-light);
+        color: var(--modal-text-light);
+        padding: 1rem;
+        border-radius: 16px;
+        width: 95%;
+        max-width: 400px;
+        box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
+        margin: 0.5rem;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
     
     @media (min-width: 768px) {
       .modal-content {
@@ -2107,29 +2116,30 @@ input, button, select, textarea {
     .note-text li {
       margin-bottom: 0.25rem;
     }
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      width: 95%;
-      max-width: 400px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      margin: 0.5rem;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--modal-overlay-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .modal-content {
+        background: var(--modal-bg-light);
+        color: var(--modal-text-light);
+        padding: 1rem;
+        border-radius: 16px;
+        width: 95%;
+        max-width: 400px;
+        box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
+        margin: 0.5rem;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
     
     @media (min-width: 768px) {
       .modal-content {
