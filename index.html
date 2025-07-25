@@ -86,6 +86,12 @@
     body.dark-mode .progress-stats {
       color: #e0e0e0 !important;
     }
+
+    /* Ensure readable text color for select and input in dark mode */
+    body.dark-mode select,
+    body.dark-mode input {
+      color: #f3f4f6 !important; /* Tailwind's gray-100 or any light color that contrasts well */
+    }
     body.dark-mode .mobile-card-label,
     body.dark-mode .form-group label,
     body.dark-mode label {
@@ -778,6 +784,13 @@ input, button, select, textarea {
     .action-menu-dropdown.show {
       display: block;
     }
+    /* Dark mode for dropdown menu */
+    body.dark-mode .action-menu-dropdown,
+    body.dark-mode .main-action-menu-dropdown {
+      background-color: #1f2937 !important; /* Tailwind gray-800 */
+      color: #f3f4f6 !important; /* Tailwind gray-100 */
+      border-color: #333 !important;
+    }
     .action-menu-item {
       padding: 0.75rem 1rem;
       cursor: pointer;
@@ -835,6 +848,16 @@ input, button, select, textarea {
     }
     .main-action-menu-dropdown.show {
       display: block;
+    }
+    /* Optional: style dropdown menu items for dark mode */
+    body.dark-mode .main-action-menu-item,
+    body.dark-mode .action-menu-item {
+      color: #f3f4f6 !important;
+    }
+    body.dark-mode .main-action-menu-item:hover,
+    body.dark-mode .action-menu-item:hover {
+      background: #374151 !important; /* Tailwind gray-700 */
+      color: #f3f4f6 !important;
     }
     .main-action-menu-item {
       padding: 0.75rem 1rem;
@@ -2434,8 +2457,8 @@ body.dark-mode .status-container .status {
     <div class="progress-header">
       <div class="progress-title">Meeting Today</div>
     </div>
-    <div style="background: white; border-radius: 8px; padding: 1rem;">
-      <table id="meeting-today-table" class="table">
+    <div style="background: white; border-radius: 4px; padding: 1rem;">
+      <table id="meeting-today-table" class="table px-4 py-2" style="border-radius: 2px">
         <thead>
           <tr>
             <th class="sortable" data-column="name" data-table="meeting-today-table">Name <span class="sort-indicator"></span></th>
@@ -2463,8 +2486,8 @@ body.dark-mode .status-container .status {
       <div class="progress-header">
         <div class="progress-title">Follow Up</div>
       </div>
-      <div style="background: white; border-radius: 8px; padding: 1rem; font-size: 17px;">
-        <table id="follow-up-table" class="table" style="font-size: 17px;">
+      <div style="background: white; border-radius: 4px; padding: 1rem; font-size: 17px;">
+        <table id="follow-up-table" class="table px-4 py-2" style="font-size: 17px; border-radius: 2px">
           <thead>
             <tr>
               <th class="sortable" data-column="name" data-table="follow-up-table">Name <span class="sort-indicator"></span></th>
@@ -2498,7 +2521,7 @@ body.dark-mode .status-container .status {
       <span id="spinner" style="display: none; margin-left: 10px;">⏳</span>
     </div>
 
-    <table id="leaders-table">
+    <table id="leaders-table" class="px-4 py-2" style="border-radius: 2px">
       <thead>
         <tr>
           <th class="sortable" data-column="full_name" data-table="leaders-table">Name <span class="sort-indicator"></span></th>
@@ -2538,7 +2561,7 @@ body.dark-mode .status-container .status {
       <!-- One-on-One Table -->
       <div style="margin-bottom: 1.5rem;">
         <h3>One-on-One Meetings</h3>
-        <table id="one-on-one-table" style="margin-top: 0.5rem;">
+        <table id="one-on-one-table" class="px-4 py-2" style="margin-top: 0.5rem; border-radius: 2px">
           <thead>
             <tr>
               <th class="sortable" data-column="name" data-table="one-on-one-table">Name <span class="sort-indicator"></span></th>
@@ -2557,7 +2580,7 @@ body.dark-mode .status-container .status {
       <!-- Circle Leader Lunch Table -->
       <div style="margin-bottom: 1.5rem;">
         <h3>Circle Leader Lunch</h3>
-        <table id="lunch-table" style="margin-top: 0.5rem;">
+        <table id="lunch-table" class="px-4 py-2" style="margin-top: 0.5rem; border-radius: 2px">
           <thead>
             <tr>
               <th class="sortable" data-column="name" data-table="lunch-table">Name <span class="sort-indicator"></span></th>
@@ -2574,7 +2597,7 @@ body.dark-mode .status-container .status {
       <!-- Circle Visit Table -->
       <div style="margin-bottom: 1.5rem;">
         <h3>Circle Visit</h3>
-        <table id="visit-table" style="margin-top: 0.5rem;">
+        <table id="visit-table" class="px-4 py-2" style="margin-top: 0.5rem; border-radius: 2px">
           <thead>
             <tr>
               <th class="sortable" data-column="name" data-table="visit-table">Name <span class="sort-indicator"></span></th>
@@ -5713,3 +5736,8 @@ function populateSearchResultsMobile(results) {
 
 </body>
 </html>
+/* Tailwind-style dropdown menu container for dark mode (utility class version for future use) */
+.dark .dropdown-content {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
