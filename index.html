@@ -212,6 +212,14 @@
     body.dark-mode .name-link {
       color: #66aaff !important;
     }
+    [data-theme="dark"] #header-bar {
+      background: #1a1d1e;
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      border-bottom: 1px solid #2f3334;
+      border-bottom-left-radius: 0.75rem;
+      border-bottom-right-radius: 0.75rem;
+    }
     .btn-primary, .btn-secondary, .btn-success, .btn-warning, .btn-danger, .btn-outline {
       min-height: 44px;
       font-size: 17px;
@@ -1589,13 +1597,13 @@ body.dark-mode .status-container .status {
   />
 </head>
 <body>
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+  <div id="header-bar" class="flex justify-between items-center flex-wrap gap-2 mb-4 px-4 py-3">
     <div id="home-link" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; text-decoration: none; color: inherit;">
       <img id="radius-logo" src="https://i.imgur.com/aofM4G4.png" alt="Radius Logo" style="height: 32px; width: auto;">
       <h1 style="margin: 0; font-size: 1.5rem;">Radius</h1>
     </div>
     <div class="main-action-menu">
-      <button class="main-action-menu-btn" id="main-actions-btn">
+      <button class="main-action-menu-btn btn btn-primary" id="main-actions-btn">
         Menu ▼
       </button>
       <div class="main-action-menu-dropdown" id="main-actions-dropdown">
@@ -3387,9 +3395,11 @@ function populateSearchResultsMobile(results) {
       function setDarkMode(enabled) {
         if (enabled) {
           document.body.classList.add('dark-mode');
+          document.documentElement.setAttribute('data-theme', 'dark');
           darkModeToggle.textContent = 'Light Mode';
         } else {
           document.body.classList.remove('dark-mode');
+          document.documentElement.removeAttribute('data-theme');
           darkModeToggle.textContent = 'Dark Mode';
         }
         localStorage.setItem('radius-dark-mode', enabled ? '1' : '0');
