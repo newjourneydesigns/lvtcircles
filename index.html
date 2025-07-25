@@ -2876,6 +2876,9 @@ body.dark-mode .status-container .status {
           <div class="profile-details" id="profile-display">
             <div style="margin-bottom: 0.5rem;" id="profile-circle-info">Circle info will be displayed here</div>
             <div style="margin-bottom: 0.5rem;">Last Comm: <span id="profile-last-comm">Sunday 7/13/25</span></div>
+            <div style="margin-bottom: 0.5rem;">Last One-on-One: <span id="profile-last-one-on-one">N/A</span></div>
+            <div style="margin-bottom: 0.5rem;">Last Circle Visit: <span id="profile-last-circle-visit">N/A</span></div>
+            <div style="margin-bottom: 0.5rem;">Last Leader Lunch: <span id="profile-last-circle-lunch">N/A</span></div>
             <div style="margin-bottom: 0.5rem;">Status: <span class="profile-status" id="profile-status">Leader</span></div>
             <div style="margin-bottom: 0.5rem;">Phone: <a href="#" class="profile-phone-link" id="profile-phone">972-539-8900</a></div>
             <div style="margin-bottom: 0.5rem;">Email: <a href="mailto:" class="profile-email-link" id="profile-email">cris.linse@gmail.com</a></div>
@@ -4771,6 +4774,46 @@ function populateSearchResultsMobile(results) {
       }
     }
 
+    async function getLastEventDate(leaderId, keyword) {
+      try {
+        const { data, error } = await client
+          .from('circle_comments')
+          .select('comment, created_at')
+          .eq('leader_id', leaderId)
+          .ilike('comment', `%${keyword}%`)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        if (error) {
+          console.error(`Error fetching ${keyword} comment:`, error)
+          return null
+        }
+
+        if (!data || data.length === 0) return null
+
+        const text = data[0].comment || ''
+        const match = text.match(new RegExp(`${keyword} on (\\d{4}-\\d{2}-\\d{2})`))
+        return match ? match[1] : data[0].created_at.split('T')[0]
+      } catch (error) {
+        console.error(`Error fetching ${keyword} date:`, error)
+        return null
+      }
+    }
+
+    async function setLastEventDates(leader) {
+      const events = [
+        { keyword: 'One-on-One', element: 'profile-last-one-on-one' },
+        { keyword: 'Circle Visit', element: 'profile-last-circle-visit' },
+        { keyword: 'Circle Leader Lunch', element: 'profile-last-circle-lunch' }
+      ]
+
+      for (const evt of events) {
+        const date = await getLastEventDate(leader.id, evt.keyword)
+        document.getElementById(evt.element).textContent =
+          date ? formatDateOnly(date) : 'No record'
+      }
+    }
+
     function populateTable(tableId, data) {
       // Store the data for sorting (unless it's being called from sorting function)
       if (!arguments[2]) { // third argument indicates this is called from sorting
@@ -5176,10 +5219,13 @@ function populateSearchResultsMobile(results) {
       emailLink.textContent = leader.email || 'No email'
       emailLink.href = leader.email ? `mailto:${leader.email}` : '#'
       
-      const lastCommText = leader.last_comm_date ? 
-        `${formatDateOnly(leader.last_comm_date)}${leader.last_comm_type ? ` (${leader.last_comm_type})` : ''}` : 
+      const lastCommText = leader.last_comm_date ?
+        `${formatDateOnly(leader.last_comm_date)}${leader.last_comm_type ? ` (${leader.last_comm_type})` : ''}` :
         'No communication recorded'
       document.getElementById('profile-last-comm').textContent = lastCommText
+
+      // Load last event dates for key connection types
+      setLastEventDates(leader)
       
       const statusElement = document.getElementById('profile-status')
       const statusValue = leader.status || 'invite'
