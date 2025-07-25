@@ -366,8 +366,6 @@ body.dark-mode #filter-container option {
   appearance: none !important;
 }
 
-body.dark-mode #summary-month,
-body.dark-mode #summary-year {
   background-color: #232527 !important;
   color: #e0e0e0 !important;
   border: 2px solid #333 !important;
@@ -377,8 +375,6 @@ body.dark-mode #summary-year {
   appearance: none !important;
 }
 
-body.dark-mode #summary-month:focus,
-body.dark-mode #summary-year:focus {
   background: #232527 !important;
   color: #66aaff !important;
   border-color: #66aaff !important;
@@ -1561,6 +1557,7 @@ body.dark-mode .status-container .status {
       <div class="main-action-menu-dropdown" id="main-actions-dropdown">
         <button class="main-action-menu-item" id="search-circles-btn">Search Circles</button>
         <button class="main-action-menu-item" id="add-leader-btn-menu">Add New Leader</button>
+        <button class="main-action-menu-item" onclick="window.location.href='connection_summary.html'">Connection Summary</button>
         <button class="main-action-menu-item" id="dark-mode-toggle">Toggle Dark Mode</button>
       </div>
     </div>
@@ -2619,83 +2616,6 @@ body.dark-mode .status-container .status {
       </tbody>
     </table>
 
-    <!-- Communication Summary Tables -->
-    <div id="communication-summary" style="margin-top: 2rem;">
-      <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Connection Summary</h2>
-      <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
-        <select id="summary-month" style="padding: 0.5rem; flex: 1; min-width: 120px; font-size: 0.9rem;">
-          <option value="0">January</option>
-          <option value="1">February</option>
-          <option value="2">March</option>
-          <option value="3">April</option>
-          <option value="4">May</option>
-          <option value="5">June</option>
-          <option value="6">July</option>
-          <option value="7">August</option>
-          <option value="8">September</option>
-          <option value="9">October</option>
-          <option value="10">November</option>
-          <option value="11">December</option>
-        </select>
-        <select id="summary-year" style="padding: 0.5rem; flex: 1; min-width: 80px; font-size: 0.9rem;">
-          <!-- Years will be populated by JavaScript -->
-        </select>
-        <button id="apply-summary-filter" class="btn-primary" style="padding: 0.75rem 1rem; font-size: 0.9rem; width: auto; min-height: 44px; flex-shrink: 0;">Apply</button>
-      </div>
-      
-      <!-- One-on-One Table -->
-      <div style="margin-bottom: 1.5rem;">
-        <h3>One-on-One Meetings</h3>
-        <table id="one-on-one-table" class="px-4 py-2" style="margin-top: 0.5rem; border-radius: 2px">
-          <thead>
-            <tr>
-              <th class="sortable" data-column="name" data-table="one-on-one-table">Name <span class="sort-indicator"></span></th>
-              <th class="sortable" data-column="date" data-table="one-on-one-table">Date <span class="sort-indicator"></span></th>
-              <th class="sortable" data-column="status" data-table="one-on-one-table">Status <span class="sort-indicator"></span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Data will be populated here -->
-          </tbody>
-        </table>
-      </div>
-
-
-
-      <!-- Circle Leader Lunch Table -->
-      <div style="margin-bottom: 1.5rem;">
-        <h3>Circle Leader Lunch</h3>
-        <table id="lunch-table" class="px-4 py-2" style="margin-top: 0.5rem; border-radius: 2px">
-          <thead>
-            <tr>
-              <th class="sortable" data-column="name" data-table="lunch-table">Name <span class="sort-indicator"></span></th>
-              <th class="sortable" data-column="date" data-table="lunch-table">Date <span class="sort-indicator"></span></th>
-              <th class="sortable" data-column="status" data-table="lunch-table">Status <span class="sort-indicator"></span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Data will be populated here -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Circle Visit Table -->
-      <div style="margin-bottom: 1.5rem;">
-        <h3>Circle Visit</h3>
-        <table id="visit-table" class="px-4 py-2" style="margin-top: 0.5rem; border-radius: 2px">
-          <thead>
-            <tr>
-              <th class="sortable" data-column="name" data-table="visit-table">Name <span class="sort-indicator"></span></th>
-              <th class="sortable" data-column="date" data-table="visit-table">Date <span class="sort-indicator"></span></th>
-              <th class="sortable" data-column="status" data-table="visit-table">Status <span class="sort-indicator"></span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Data will be populated here -->
-          </tbody>
-        </table>
-      </div>
-    </div>
 
     <form id="edit-leader-form" style="display:none;">
       <h2>Edit Leader</h2>
@@ -3367,7 +3287,6 @@ function populateSearchResultsMobile(results) {
               } else {
                 currentLeader.last_comm_date = null;
                 currentLeader.last_comm_type = null;
-                loadCommunicationSummaries();
                 showLeaderProfile(currentLeader);
               }
             } catch (err) {
@@ -4108,7 +4027,6 @@ function populateSearchResultsMobile(results) {
       loadMeetingToday()
     }
 
-    async function loadCommunicationSummaries() {
       await loadOneOnOneMeetings()
       await loadTrainingSessions()
       await loadLunchMeetings()
@@ -4787,7 +4705,6 @@ function populateSearchResultsMobile(results) {
         setTimeout(() => clearStatus(), 3000)
         
         loadCircleLeaders()
-        loadCommunicationSummaries()
         hideAddLeaderPage()
         
       } catch (error) {
@@ -4843,7 +4760,6 @@ function populateSearchResultsMobile(results) {
       
       // Refresh the main list
       loadCircleLeaders()
-      loadCommunicationSummaries()
       
       // If we have a current leader, update their data and show the profile again
       if (currentLeader && currentLeader.id === id) {
@@ -4866,7 +4782,6 @@ function populateSearchResultsMobile(results) {
     let selectedSummaryYear = null
 
     // Initialize date filters
-    function initializeSummaryFilters() {
       const now = new Date()
       const currentMonth = now.getMonth()
       const currentYear = now.getFullYear()
@@ -4876,7 +4791,6 @@ function populateSearchResultsMobile(results) {
       selectedSummaryYear = currentYear
       
       // Populate year dropdown (current year +/- 2 years)
-      const yearSelect = document.getElementById('summary-year')
       for (let year = currentYear - 2; year <= currentYear + 2; year++) {
         const option = document.createElement('option')
         option.value = year
@@ -4886,7 +4800,6 @@ function populateSearchResultsMobile(results) {
       }
       
       // Set default month
-      document.getElementById('summary-month').value = currentMonth
     }
 
     // Action menu functionality
@@ -5056,7 +4969,6 @@ function populateSearchResultsMobile(results) {
         // Refresh the profile display and main list
         showLeaderProfile(currentLeader)
         loadCircleLeaders()
-        loadCommunicationSummaries()
         
         setStatus('Leader updated successfully!')
       } catch (error) {
@@ -5092,7 +5004,6 @@ function populateSearchResultsMobile(results) {
         // Return to the main list
         hideLeaderProfile()
         loadCircleLeaders()
-        loadCommunicationSummaries()
         
       } catch (error) {
         console.error('Error deleting leader:', error)
@@ -5437,7 +5348,6 @@ function populateSearchResultsMobile(results) {
         
         // Also refresh the main list
         loadCircleLeaders()
-        loadCommunicationSummaries()
         
         // Hide the modal
         document.getElementById('update-comm-modal').classList.add('hidden')
@@ -5506,7 +5416,6 @@ function populateSearchResultsMobile(results) {
         
         // Refresh notes and follow-up table
         loadLeaderNotes(currentLeader.id)
-        loadCommunicationSummaries()
         
         // Update button visibility
         checkFollowUpStatus(currentLeader.id)
@@ -5553,7 +5462,6 @@ function populateSearchResultsMobile(results) {
 
         // Refresh notes and follow-up table
         loadLeaderNotes(currentLeader.id)
-        loadCommunicationSummaries()
         
         // Update button visibility
         checkFollowUpStatus(currentLeader.id)
@@ -5574,7 +5482,6 @@ function populateSearchResultsMobile(results) {
 
     document.getElementById('filter-status').addEventListener('change', () => {
       loadCircleLeaders()
-      loadCommunicationSummaries()
     })
 
     // Main action menu functionality
@@ -5748,7 +5655,6 @@ function populateSearchResultsMobile(results) {
     loadCircleLeaders()
 
     // Load communication summaries
-    loadCommunicationSummaries()
 
     // Add sort functionality to table headers
     document.querySelectorAll('.sortable').forEach(header => {
@@ -5808,7 +5714,6 @@ function populateSearchResultsMobile(results) {
         clearStatus()
         setStatus('Seeded successfully!')
         loadCircleLeaders()
-        loadCommunicationSummaries()
       }
     }
 
@@ -5833,23 +5738,9 @@ function populateSearchResultsMobile(results) {
 
       clearStatus()
       setStatus('Database reset and seeded successfully!')
-      loadCommunicationSummaries()
 
       alert('Circle leaders reset successfully!')
     }
-    */
-
-    // Apply summary filter event listener
-    document.getElementById('apply-summary-filter').addEventListener('click', () => {
-      selectedSummaryMonth = parseInt(document.getElementById('summary-month').value)
-      selectedSummaryYear = parseInt(document.getElementById('summary-year').value)
-      loadCommunicationSummaries()
-    })
-
-    // Initialize summary filters on page load
-    initializeSummaryFilters()
-  </script>
-
 
 <!-- Add Logout to main actions dropdown menu -->
 <script>
