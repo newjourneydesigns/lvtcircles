@@ -2644,7 +2644,6 @@ body.dark-mode .status-container .status {
     <!-- Event Summary Tracker -->
     <div id="event-summary-section" class="progress-container" style="margin-bottom: 1rem;">
       <div class="progress-header">
-        <div class="progress-title">Event Summary Tracker</div>
         <div id="summary-count" class="progress-stats">0 out of 0 Summaries Received</div>
       </div>
       <div class="progress-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5em;">
@@ -3999,15 +3998,24 @@ function populateSearchResultsMobile(results) {
 
     async function loadEventSummaryTracker() {
       try {
+        // Check if Supabase client is available
+        if (typeof client === 'undefined' || !client) {
+          console.error('Supabase client is not initialized.');
+          const tbody = document.querySelector('#event-summary-table tbody');
+          if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #c00; font-style: italic;">Database connection error</td></tr>';
+          return;
+        }
         // Get all active leaders
         const { data: leaders, error: leadersError } = await client
           .from('circle_leaders')
           .select('id, full_name, meeting_day, meeting_time, status')
-          .eq('status', 'active')
+          .eq('status', 'active');
 
         if (leadersError) {
-          console.error('Error fetching event summary data:', leadersError)
-          return
+          console.error('Error fetching event summary data:', leadersError);
+          const tbody = document.querySelector('#event-summary-table tbody');
+          if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #c00; font-style: italic;">Error loading leaders</td></tr>';
+          return;
         }
 
         // Get all event_summaries for this week
@@ -4019,6 +4027,8 @@ function populateSearchResultsMobile(results) {
 
         if (summariesError) {
           console.error('Error fetching event summaries:', summariesError);
+          const tbody = document.querySelector('#event-summary-table tbody');
+          if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #c00; font-style: italic;">Error loading summaries</td></tr>';
           return;
         }
 
@@ -4035,19 +4045,21 @@ function populateSearchResultsMobile(results) {
           status: l.status,
           received: receivedMap.get(l.id) || false
         })).sort((a, b) => {
-          const order = { Sunday:0, Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 }
-          const aDay = order[a.day] ?? 7
-          const bDay = order[b.day] ?? 7
+          const order = { Sunday:0, Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 };
+          const aDay = order[a.day] ?? 7;
+          const bDay = order[b.day] ?? 7;
           if (aDay === bDay) {
-            return a.time.localeCompare(b.time)
+            return a.time.localeCompare(b.time);
           }
-          return aDay - bDay
+          return aDay - bDay;
         });
 
         populateEventSummaryTable(trackerData);
         updateSummaryCount();
       } catch (error) {
         console.error('Error loading event summary tracker:', error);
+        const tbody = document.querySelector('#event-summary-table tbody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #c00; font-style: italic;">Unexpected error loading table</td></tr>';
       }
     }
 
