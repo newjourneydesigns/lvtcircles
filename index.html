@@ -1552,12 +1552,13 @@ body.dark-mode .status-container .status {
     </div>
     <div class="main-action-menu">
       <button class="main-action-menu-btn" id="main-actions-btn">
-        Actions ▼
+        Menu ▼
       </button>
       <div class="main-action-menu-dropdown" id="main-actions-dropdown">
         <button class="main-action-menu-item" id="search-circles-btn">Search Circles</button>
         <button class="main-action-menu-item" id="add-leader-btn-menu">Add New Leader</button>
         <button class="main-action-menu-item" id="dark-mode-toggle">Toggle Dark Mode</button>
+        <button class="main-action-menu-item" id="logout-btn">Logout</button>
       </div>
     </div>
   </div>
@@ -5847,6 +5848,23 @@ function populateSearchResultsMobile(results) {
   </script>
 
 <!-- Removed duplicate dark mode toggle script -->
+<script>
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        if (window.supabaseClient && window.supabaseClient.auth) {
+          await window.supabaseClient.auth.signOut();
+        }
+      } catch (_) {}
+      finally {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+      }
+    });
+  }
+</script>
 
 </body>
 </html>
