@@ -2645,6 +2645,7 @@ body.dark-mode .status-container .status {
     <div id="event-summary-section" class="progress-container" style="margin-bottom: 1rem;">
       <div class="progress-header">
         <div class="progress-title">Event Summary Tracker</div>
+        <div id="summary-count" class="progress-stats">0 out of 0 Summaries Received</div>
       </div>
       <div class="progress-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5em;">
         <div class="progress-title" style="font-size:1.2em;font-weight:700;">Event Summary Completion</div>
@@ -3998,22 +3999,41 @@ function populateSearchResultsMobile(results) {
 
     async function loadEventSummaryTracker() {
       try {
-        const { data: leaders, error } = await client
+        // Get all active leaders
+        const { data: leaders, error: leadersError } = await client
           .from('circle_leaders')
           .select('id, full_name, meeting_day, meeting_time, status')
           .eq('status', 'active')
 
-        if (error) {
-          console.error('Error fetching event summary data:', error)
+        if (leadersError) {
+          console.error('Error fetching event summary data:', leadersError)
           return
         }
+
+        // Get all event_summaries for this week
+        const weekStart = getWeekStart();
+        const { data: summaries, error: summariesError } = await client
+          .from('event_summaries')
+          .select('leader_id, received')
+          .eq('week_start', weekStart);
+
+        if (summariesError) {
+          console.error('Error fetching event summaries:', summariesError);
+          return;
+        }
+
+        const receivedMap = new Map();
+        (summaries || []).forEach(s => {
+          receivedMap.set(s.leader_id, !!s.received);
+        });
 
         const trackerData = (leaders || []).map(l => ({
           leader_id: l.id,
           name: l.full_name,
           day: l.meeting_day || '',
           time: formatMeetingTime(l.meeting_time),
-          status: l.status
+          status: l.status,
+          received: receivedMap.get(l.id) || false
         })).sort((a, b) => {
           const order = { Sunday:0, Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 }
           const aDay = order[a.day] ?? 7
@@ -4022,12 +4042,12 @@ function populateSearchResultsMobile(results) {
             return a.time.localeCompare(b.time)
           }
           return aDay - bDay
-        })
+        });
 
-        populateEventSummaryTable(trackerData)
-        updateSummaryCount()
+        populateEventSummaryTable(trackerData);
+        updateSummaryCount();
       } catch (error) {
-        console.error('Error loading event summary tracker:', error)
+        console.error('Error loading event summary tracker:', error);
       }
     }
 
@@ -4055,7 +4075,7 @@ function populateSearchResultsMobile(results) {
           <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name}</a></td>
           <td>${item.day || 'Not set'}</td>
           <td>${item.time}</td>
-          <td style="text-align:center;"><input type="checkbox" class="summary-checkbox" data-leader-id="${item.leader_id}"></td>
+          <td style="text-align:center;"><input type="checkbox" class="summary-checkbox" data-leader-id="${item.leader_id}" ${item.received ? 'checked' : ''}></td>
         `
 
         const nameLink = row.querySelector('.name-link')
@@ -4109,34 +4129,20 @@ function populateSearchResultsMobile(results) {
 
     document.addEventListener('change', async (e) => {
       if (e.target.classList.contains('summary-checkbox')) {
+        const leaderId = e.target.dataset.leaderId;
+        const weekStart = getWeekStart();
         if (e.target.checked) {
-          const timestamp = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
-          await addSummaryNote(e.target.dataset.leaderId, `Event Summary Received at ${timestamp}`)
-          updateWeeklyCount(true)
+          // Upsert received record for this leader/week
+          await client.from('event_summaries').upsert({ leader_id: leaderId, week_start: weekStart, received: true }, { onConflict: ['leader_id', 'week_start'] });
+        } else {
+          // Remove received record for this leader/week
+          await client.from('event_summaries').delete().eq('leader_id', leaderId).eq('week_start', weekStart);
         }
-        updateSummaryCount()
+        updateSummaryCount();
       }
-    })
+    });
 
-    setInterval(async () => {
-      const now = new Date()
-      const cst = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }))
-      const h = cst.getHours()
-      const m = cst.getMinutes()
-      const s = cst.getSeconds()
-      if (h === 23 && m === 58 && s === 59) {
-        document.querySelectorAll('#event-summary-table .summary-checkbox:not(:checked)').forEach(async cb => {
-          const stamp = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
-          await addSummaryNote(cb.dataset.leaderId, `Event Summary Missing ${stamp}`)
-          updateWeeklyCount(false)
-        })
-        updateSummaryCount()
-      }
-      if (cst.getDay() === 6 && h === 23 && m === 59 && s === 59) {
-        document.querySelectorAll('#event-summary-table .summary-checkbox').forEach(cb => { cb.checked = false })
-        updateSummaryCount()
-      }
-    }, 1000)
+
 
     async function searchCircles() {
       const circleType = document.getElementById('search-type').value
@@ -6146,12 +6152,12 @@ function populateSearchResultsMobile(results) {
 
   document.addEventListener('DOMContentLoaded', function () {
     const resetBtn = document.getElementById('reset-summary-btn');
-    resetBtn?.addEventListener('click', () => {
+    resetBtn?.addEventListener('click', async () => {
       const confirmReset = confirm('Are you sure you want to clear all checkboxes in the Event Summary Table?');
       if (!confirmReset) return;
-      const checkboxes = document.querySelectorAll('#event-summary-table input[type="checkbox"]');
-      checkboxes.forEach(cb => cb.checked = false);
-      updateEventSummaryProgress();
+      const weekStart = getWeekStart();
+      await client.from('event_summaries').delete().eq('week_start', weekStart);
+      loadEventSummaryTracker();
     });
 
     // Use event delegation for dynamic checkboxes
