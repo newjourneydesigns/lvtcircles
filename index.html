@@ -237,6 +237,16 @@
     .btn-secondary:hover, .btn-outline:hover {
       background: #e9e9e9;
     }
+    .summary-checkbox {
+      width: 16px;
+      height: 16px;
+      display: block;
+      margin: 0 auto;
+      accent-color: #007aff;
+    }
+    body.dark-mode .summary-checkbox {
+      accent-color: #66aaff;
+    }
     body.dark-mode .btn-primary {
       background: #007aff !important;
       color: #fff !important;
@@ -2588,6 +2598,28 @@ body.dark-mode .status-container .status {
       </div>
     </div>
 
+    <!-- Event Summary Tracker -->
+    <div id="event-summary-section" class="progress-container" style="margin-bottom: 1rem;">
+      <div class="progress-header">
+        <div class="progress-title">Event Summary Tracker</div>
+        <div id="summary-count" class="progress-stats">0 out of 0 Summaries Received</div>
+      </div>
+      <div class="bg-base-200 text-base-content rounded-lg shadow-lg p-6">
+        <table id="event-summary-table" class="table px-4 py-2" style="font-size: 17px; border-radius: 2px">
+          <thead>
+            <tr>
+              <th class="sortable" data-column="name" data-table="event-summary-table">Name <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="day" data-table="event-summary-table">Day <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="time" data-table="event-summary-table">Time <span class="sort-indicator"></span></th>
+              <th style="text-align:center;">Checkbox</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" class="text-base-content" style="text-align: center; font-style: italic;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
     <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.3rem;">Circle Leaders</h2>
 
     <div id="filter-container" style="margin-bottom: 0.75rem; padding: 0 0.25rem;">
@@ -3606,6 +3638,7 @@ function populateSearchResultsMobile(results) {
     let tableData = {
       'leaders-table': [],
       'follow-up-table': [],
+      'event-summary-table': [],
       'one-on-one-table': [],
       'training-table': [],
       'lunch-table': [],
@@ -3622,7 +3655,8 @@ function populateSearchResultsMobile(results) {
       'lunch-table': { column: null, direction: 'asc' },
       'visit-table': { column: null, direction: 'asc' },
       'meeting-today-table': { column: null, direction: 'asc' },
-      'search-results-table': { column: null, direction: 'asc' }
+      'search-results-table': { column: null, direction: 'asc' },
+      'event-summary-table': { column: 'day', direction: 'asc' }
     }
 
     function sortTableData(tableId, column, direction) {
@@ -3636,6 +3670,10 @@ function populateSearchResultsMobile(results) {
         if (tableId === 'follow-up-table' && column === 'date') {
           aVal = a.followUpDate || ''
           bVal = b.followUpDate || ''
+        } else if (tableId === 'event-summary-table' && column === 'day') {
+          const order = { 'sunday':0, 'monday':1, 'tuesday':2, 'wednesday':3, 'thursday':4, 'friday':5, 'saturday':6 }
+          aVal = order[a.day?.toLowerCase()] ?? 7
+          bVal = order[b.day?.toLowerCase()] ?? 7
         } else {
           aVal = a[column] || ''
           bVal = b[column] || ''
@@ -3663,6 +3701,8 @@ function populateSearchResultsMobile(results) {
         populateFollowUpTable(data, true) // true indicates called from sorting
       } else if (tableId === 'meeting-today-table') {
         populateMeetingTodayTable(data, true) // true indicates called from sorting
+      } else if (tableId === 'event-summary-table') {
+        populateEventSummaryTable(data, true)
       } else if (tableId === 'search-results-table') {
         populateSearchResultsTable(data, true) // true indicates called from sorting
       } else {
@@ -3772,6 +3812,7 @@ function populateSearchResultsMobile(results) {
       
       // Load meeting today table
       await loadMeetingToday()
+      await loadEventSummaryTracker()
     }
 
     async function loadMeetingToday() {
@@ -3899,9 +3940,151 @@ function populateSearchResultsMobile(results) {
           })
         }
         
+      tbody.appendChild(row)
+    })
+  }
+
+    async function loadEventSummaryTracker() {
+      try {
+        const { data: leaders, error } = await client
+          .from('circle_leaders')
+          .select('id, full_name, meeting_day, meeting_time, status')
+          .eq('status', 'active')
+
+        if (error) {
+          console.error('Error fetching event summary data:', error)
+          return
+        }
+
+        const trackerData = (leaders || []).map(l => ({
+          leader_id: l.id,
+          name: l.full_name,
+          day: l.meeting_day || '',
+          time: formatMeetingTime(l.meeting_time),
+          status: l.status
+        })).sort((a, b) => {
+          const order = { Sunday:0, Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 }
+          const aDay = order[a.day] ?? 7
+          const bDay = order[b.day] ?? 7
+          if (aDay === bDay) {
+            return a.time.localeCompare(b.time)
+          }
+          return aDay - bDay
+        })
+
+        populateEventSummaryTable(trackerData)
+        updateSummaryCount()
+      } catch (error) {
+        console.error('Error loading event summary tracker:', error)
+      }
+    }
+
+    function populateEventSummaryTable(data) {
+      if (!arguments[1]) {
+        tableData['event-summary-table'] = [...data]
+        const sortState = tableSortStates['event-summary-table']
+        if (sortState && sortState.column) {
+          sortTableData('event-summary-table', sortState.column, sortState.direction)
+          return
+        }
+      }
+
+      const tbody = document.querySelector('#event-summary-table tbody')
+      tbody.innerHTML = ''
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666; font-style: italic;">No circles found</td></tr>'
+        return
+      }
+
+      data.forEach(item => {
+        const row = document.createElement('tr')
+        row.innerHTML = `
+          <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name}</a></td>
+          <td>${item.day || 'Not set'}</td>
+          <td>${item.time}</td>
+          <td style="text-align:center;"><input type="checkbox" class="summary-checkbox" data-leader-id="${item.leader_id}"></td>
+        `
+
+        const nameLink = row.querySelector('.name-link')
+        if (nameLink) {
+          nameLink.addEventListener('click', async (e) => {
+            e.preventDefault()
+            const leaderId = e.target.dataset.leaderId
+            const { data: leader, error } = await client
+              .from('circle_leaders')
+              .select('*')
+              .eq('id', leaderId)
+              .single()
+            if (!error && leader) {
+              showLeaderProfile(leader)
+            }
+          })
+        }
+
         tbody.appendChild(row)
       })
+
+      updateSummaryCount()
     }
+
+    function getWeekStart(date = new Date()) {
+      const d = new Date(date.toLocaleString('en-US', { timeZone: 'America/Chicago' }))
+      d.setHours(0, 0, 0, 0)
+      d.setDate(d.getDate() - d.getDay())
+      return d.toISOString().split('T')[0]
+    }
+
+    function updateWeeklyCount(checked) {
+      const key = getWeekStart()
+      const counts = JSON.parse(localStorage.getItem('summaryWeekCounts') || '{}')
+      if (!counts[key]) counts[key] = { checked: 0, missing: 0 }
+      if (checked) counts[key].checked++
+      else counts[key].missing++
+      localStorage.setItem('summaryWeekCounts', JSON.stringify(counts))
+    }
+
+    function updateSummaryCount() {
+      const total = document.querySelectorAll('#event-summary-table .summary-checkbox').length
+      const checked = document.querySelectorAll('#event-summary-table .summary-checkbox:checked').length
+      const label = document.getElementById('summary-count')
+      if (label) label.textContent = `${checked} out of ${total} Summaries Received`
+    }
+
+    async function addSummaryNote(leaderId, text) {
+      await client.from('circle_comments').insert({ leader_id: leaderId, comment: text })
+    }
+
+    document.addEventListener('change', async (e) => {
+      if (e.target.classList.contains('summary-checkbox')) {
+        if (e.target.checked) {
+          const timestamp = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
+          await addSummaryNote(e.target.dataset.leaderId, `Event Summary Received at ${timestamp}`)
+          updateWeeklyCount(true)
+        }
+        updateSummaryCount()
+      }
+    })
+
+    setInterval(async () => {
+      const now = new Date()
+      const cst = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }))
+      const h = cst.getHours()
+      const m = cst.getMinutes()
+      const s = cst.getSeconds()
+      if (h === 23 && m === 58 && s === 59) {
+        document.querySelectorAll('#event-summary-table .summary-checkbox:not(:checked)').forEach(async cb => {
+          const stamp = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' })
+          await addSummaryNote(cb.dataset.leaderId, `Event Summary Missing ${stamp}`)
+          updateWeeklyCount(false)
+        })
+        updateSummaryCount()
+      }
+      if (cst.getDay() === 6 && h === 23 && m === 59 && s === 59) {
+        document.querySelectorAll('#event-summary-table .summary-checkbox').forEach(cb => { cb.checked = false })
+        updateSummaryCount()
+      }
+    }, 1000)
 
     async function searchCircles() {
       const circleType = document.getElementById('search-type').value
@@ -4106,6 +4289,7 @@ function populateSearchResultsMobile(results) {
       // Show progress bar and meeting today when returning to main view
       updateMonthlyProgress()
       loadMeetingToday()
+      loadEventSummaryTracker()
     }
 
     async function loadCommunicationSummaries() {
@@ -5746,6 +5930,7 @@ function populateSearchResultsMobile(results) {
     }
 
     loadCircleLeaders()
+    loadEventSummaryTracker()
 
     // Load communication summaries
     loadCommunicationSummaries()
