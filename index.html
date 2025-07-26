@@ -5248,11 +5248,13 @@ function populateSearchResultsMobile(results) {
       const ccbRow = document.getElementById('profile-ccb-link-row')
       const ccbLink = document.getElementById('profile-ccb-link')
       if (leader.ccb_link) {
-        ccbLink.textContent = leader.ccb_link
-        ccbLink.href = leader.ccb_link
-        ccbRow.style.display = 'block'
+        ccbLink.textContent = 'CCB Link';
+        ccbLink.href = leader.ccb_link;
+        ccbLink.target = '_blank';
+        ccbLink.rel = 'noopener';
+        ccbRow.style.display = 'block';
       } else {
-        ccbRow.style.display = 'none'
+        ccbRow.style.display = 'none';
       }
       
       const lastCommText = leader.last_comm_date ? 
