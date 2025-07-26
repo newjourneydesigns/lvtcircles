@@ -2659,56 +2659,39 @@ body.dark-mode .status-container .status {
         <div id="event-summary-count" style="font-size:1em;font-weight:500;">0 of 0</div>
       </div>
       <style>
-        /* Event Summary Progress Bar - Light Mode */
+        /* Event Summary Progress Bar - Updated to match Monthly Progress */
         .event-summary-progress-bar {
-          background: #fff;
-          border: 1px solid #e5e7eb;
-          height: 28px;
-          border-radius: 16px;
+          width: 100%;
+          height: 24px;
+          background: #e9ecef;
+          border-radius: 12px;
           overflow: hidden;
-          box-shadow: 0 2px 8px #0001, 0 1.5px 4px #0001;
-          margin-bottom: 18px;
           position: relative;
         }
         .event-summary-progress-bar-fill {
-          background: linear-gradient(90deg, #4ade80 0%, #22d3ee 100%);
           height: 100%;
-          border-radius: 16px 0 0 16px;
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          font-weight: 700;
-          font-size: 1em;
-          color: #fff;
-          text-shadow: 0 1px 2px #0008;
-          box-shadow: 0 1px 4px #22d3ee33;
-          transition: width 0.3s;
-          padding-left: 18px;
-        }
-        .event-summary-progress-bar-label {
-          position: absolute;
-          left: 0;
-          right: 0;
-          top: 0;
-          bottom: 0;
+          background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+          border-radius: 12px;
+          transition: width 0.5s ease-in-out;
+          position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: 700;
-          font-size: 1em;
-          color: #222;
-          pointer-events: none;
+          font-size: 0.875rem;
+          font-weight: bold;
+          color: #fff;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        /* Remove label style as it is no longer needed */
+        .event-summary-progress-bar-label {
+          display: none;
         }
         body.dark-mode .event-summary-progress-bar {
-          background: #23272b;
-          border: none;
-          box-shadow: 0 1px 4px #0002;
+          background: #333 !important;
         }
         body.dark-mode .event-summary-progress-bar-fill {
-          color: #fff;
-        }
-        body.dark-mode .event-summary-progress-bar-label {
-          color: #fff;
+          background: linear-gradient(90deg, #28a745 0%, #20c997 100%) !important;
+          color: #fff !important;
         }
       </style>
         <div class="event-summary-progress-bar">
