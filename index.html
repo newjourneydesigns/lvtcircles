@@ -4019,7 +4019,7 @@ function populateSearchResultsMobile(results) {
         // Get all active leaders
         const { data: leaders, error: leadersError } = await client
           .from('circle_leaders')
-          .select('id, full_name, meeting_day, meeting_time, status')
+          .select('id, full_name, meeting_day, meeting_time, status, ccb_link')
           .eq('status', 'active');
 
         if (leadersError) {
@@ -4054,6 +4054,7 @@ function populateSearchResultsMobile(results) {
           day: l.meeting_day || '',
           time: formatMeetingTime(l.meeting_time),
           status: l.status,
+          ccb_link: l.ccb_link || '',
           received: receivedMap.get(l.id) || false
         })).sort((a, b) => {
           const order = { Sunday:0, Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 };
@@ -4092,52 +4093,59 @@ function populateSearchResultsMobile(results) {
         return
       }
 
-      data.forEach(async item => {
-        const row = document.createElement('tr')
-        // Fetch CCB link for this leader
-        let ccbLink = ''
-        try {
-          const { data: leader, error } = await client
-            .from('circle_leaders')
-            .select('ccb_link')
-            .eq('id', item.leader_id)
-            .single()
-          if (!error && leader && leader.ccb_link) {
-            ccbLink = leader.ccb_link
-          }
-        } catch {}
-        let nameCell = ''
-        if (ccbLink) {
-          nameCell = `<a href="${ccbLink}" class="name-link" target="_blank" rel="noopener" style="color:#22c55e;font-weight:700;">${item.name}</a>`
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        // Name cell with CCB link or profile link
+        const nameCell = document.createElement('td');
+        const link = document.createElement('a');
+        link.textContent = item.name;
+        if (item.ccb_link) {
+          link.href = item.ccb_link;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.style.setProperty('color', '#22c55e', 'important'); // green, force override
+          link.style.fontWeight = '700';
         } else {
-          nameCell = `<a href="#" class="name-link" data-leader-id="${item.leader_id}" style="color:#007aff;font-weight:700;">${item.name}</a>`
+          link.href = '#';
+          link.classList.add('name-link');
+          link.style.color = '#2563eb'; // blue
+          link.style.fontWeight = '700';
+          link.dataset.leaderId = item.leader_id;
+          link.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const leaderId = e.target.dataset.leaderId;
+            const { data: leader, error } = await client
+              .from('circle_leaders')
+              .select('*')
+              .eq('id', leaderId)
+              .single();
+            if (!error && leader) {
+              showLeaderProfile(leader);
+            }
+          });
         }
-        row.innerHTML = `
-          <td>${nameCell}</td>
-          <td>${item.day || 'Not set'}</td>
-          <td>${item.time}</td>
-          <td style="text-align:center;"><input type="checkbox" class="summary-checkbox" data-leader-id="${item.leader_id}" ${item.received ? 'checked' : ''}></td>
-        `
-        // Only add profile link if no CCB link
-        if (!ccbLink) {
-          const nameLink = row.querySelector('.name-link')
-          if (nameLink) {
-            nameLink.addEventListener('click', async (e) => {
-              e.preventDefault()
-              const leaderId = e.target.dataset.leaderId
-              const { data: leader, error } = await client
-                .from('circle_leaders')
-                .select('*')
-                .eq('id', leaderId)
-                .single()
-              if (!error && leader) {
-                showLeaderProfile(leader)
-              }
-            })
-          }
-        }
-        tbody.appendChild(row)
-      })
+        nameCell.appendChild(link);
+
+        // Other columns
+        const dayCell = document.createElement('td');
+        dayCell.textContent = item.day || 'Not set';
+        const timeCell = document.createElement('td');
+        timeCell.textContent = item.time;
+        const checkboxCell = document.createElement('td');
+        checkboxCell.style.textAlign = 'center';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'summary-checkbox';
+        checkbox.dataset.leaderId = item.leader_id;
+        if (item.received) checkbox.checked = true;
+        checkboxCell.appendChild(checkbox);
+
+        row.appendChild(nameCell);
+        row.appendChild(dayCell);
+        row.appendChild(timeCell);
+        row.appendChild(checkboxCell);
+        tbody.appendChild(row);
+      });
 
       updateSummaryCount()
     }
@@ -5323,6 +5331,7 @@ function populateSearchResultsMobile(results) {
       const full_name = document.getElementById('inline-edit-name').value
       const phone = document.getElementById('inline-edit-phone').value
       const email = document.getElementById('inline-edit-email').value
+      const ccb_link = document.getElementById('inline-edit-ccb-link').value || null
       const status = document.getElementById('inline-edit-status').value
       const circle_type = document.getElementById('inline-edit-circle-type').value || null
       const meeting_day = document.getElementById('inline-edit-meeting-day').value || null
@@ -5331,13 +5340,15 @@ function populateSearchResultsMobile(results) {
 
       try {
         const { error } = await client.from('circle_leaders').update({
-          full_name, phone, email, status,
+          full_name, phone, email, ccb_link, status,
           circle_type, meeting_day, meeting_time, meeting_frequency
         }).eq('id', currentLeader.id)
 
         if (error) {
           console.error('Error updating leader:', error)
-          await showAlert('Error updating leader information', 'Error')
+          let errorMsg = 'Error updating leader information';
+          if (error.message) errorMsg += `: ${error.message}`;
+          await showAlert(errorMsg, 'Error')
           return
         }
 
@@ -5345,6 +5356,7 @@ function populateSearchResultsMobile(results) {
         currentLeader.full_name = full_name
         currentLeader.phone = phone
         currentLeader.email = email
+        currentLeader.ccb_link = ccb_link
         currentLeader.status = status
         currentLeader.circle_type = circle_type
         currentLeader.meeting_day = meeting_day
