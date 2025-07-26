@@ -2641,10 +2641,11 @@ body.dark-mode .status-container .status {
             <tr>
               <th class="sortable" data-column="name" data-table="follow-up-table">Name <span class="sort-indicator"></span></th>
               <th class="sortable" data-column="status" data-table="follow-up-table">Status <span class="sort-indicator"></span></th>
+              <th class="sortable" data-column="follow_up_date" data-table="follow-up-table">Follow Up Date <span class="sort-indicator"></span></th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td colspan="2" class="text-base-content" style="text-align: center; font-style: italic;">Loading...</td></tr>
+          <tbody id="follow-up-table-body">
+            <tr><td colspan="3" class="text-base-content" style="text-align: center; font-style: italic;">Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -2876,6 +2877,9 @@ body.dark-mode .status-container .status {
           <option value="">Circle Type</option>
           <option value="Men">Men</option>
           <option value="Women">Women</option>
+          <option value="Couples">Couples</option>
+          <option value="YA Women">YA Women</option>
+          <option value="YA Men">YA Men</option>
           <option value="Mixed">Mixed</option>
           <option value="Young Adults">Young Adults</option>
           <option value="Other">Other</option>
@@ -2973,6 +2977,9 @@ body.dark-mode .status-container .status {
                 <option value="">Select Type</option>
                 <option value="Men">Men</option>
                 <option value="Women">Women</option>
+                <option value="Couples">Couples</option>
+                <option value="YA Women">YA Women</option>
+                <option value="YA Men">YA Men</option>
                 <option value="Mixed">Mixed</option>
                 <option value="Young Adults">Young Adults</option>
                 <option value="Other">Other</option>
@@ -3117,6 +3124,9 @@ body.dark-mode .status-container .status {
             <option value="">Select Type</option>
             <option value="Men">Men</option>
             <option value="Women">Women</option>
+            <option value="Couples">Couples</option>
+            <option value="YA Women">YA Women</option>
+            <option value="YA Men">YA Men</option>
             <option value="Mixed">Mixed</option>
             <option value="Young Adults">Young Adults</option>
             <option value="Other">Other</option>
@@ -3190,10 +3200,9 @@ body.dark-mode .status-container .status {
     <textarea id="comm-note" class="modal-form-input" rows="3" placeholder="Add a note (optional)..."></textarea>
   </div>
   <div class="modal-form-actions">
-    <button type="submit" class="modal-form-btn modal-form-btn-primary">Save</button>
     <button type="button" class="modal-form-btn modal-form-btn-secondary" id="cancel-comm-update">Cancel</button>
+    <button type="submit" class="modal-form-btn modal-form-btn-primary">Save</button>
   </div>
-  <button type="button" class="modal-form-btn modal-form-btn-danger" id="clear-last-comm-btn">Clear Last Connection</button>
 </form>
 
 <style>
@@ -3306,7 +3315,7 @@ body.dark-mode .status-container .status {
 
   <!-- Follow Up Modal -->
   <div id="follow-up-modal" class="modal-overlay hidden">
-    <form id="follow-up-form" class="modal-form-modern">
+    <form id="follow-up-form" class="modal-form-modern" style="max-width: 420px; width: 95%; margin: 0 auto;">
       <h2 class="modal-form-title">Mark for Follow Up</h2>
       <div class="modal-form-row">
         <label for="follow-up-date" class="modal-form-label">Follow Up Date</label>
@@ -3317,9 +3326,8 @@ body.dark-mode .status-container .status {
         <textarea id="follow-up-note" class="modal-form-input" rows="3" placeholder="Add a note about why this follow-up is needed (optional)..."></textarea>
       </div>
       <div class="modal-form-actions">
-        <button type="button" class="btn-secondary modal-form-btn-secondary" id="cancel-follow-up">Cancel</button>
-        <button type="submit" class="btn-danger" id="clear-follow-up-modal-btn" style="display:none;">Clear Follow Up</button>
-        <button type="submit" class="btn-primary" id="mark-follow-up-modal-btn">Mark for Follow Up</button>
+        <button type="button" class="modal-form-btn modal-form-btn-secondary" id="cancel-follow-up">Cancel</button>
+        <button type="submit" class="modal-form-btn modal-form-btn-primary" id="mark-follow-up-modal-btn">Save</button>
       </div>
     </form>
   </div>
@@ -3415,6 +3423,9 @@ body.dark-mode .status-container .status {
                 <option value="">All Types</option>
                 <option value="Women">Women</option>
                 <option value="Men">Men</option>
+                <option value="Couples">Couples</option>
+                <option value="YA Women">YA Women</option>
+                <option value="YA Men">YA Men</option>
                 <option value="Mixed">Mixed</option>
                 <option value="Young Adults">Young Adults</option>
                 <option value="Other">Other</option>
@@ -6565,3 +6576,128 @@ function populateSearchResultsMobile(results) {
       }
     });
   </script>
+<script>
+// Utility function to format a date string as "MMM DD, YYYY"
+function formatDate(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "";
+  // Format as "MMM DD, YYYY"
+  const options = { year: "numeric", month: "short", day: "numeric" };
+  return date.toLocaleDateString(undefined, options);
+}
+
+// Fetch and render data for the Follow Up table
+function loadFollowUpTable() {
+  const tbody = document.querySelector("#follow-up-table tbody");
+  if (!tbody) return;
+  // Show loading row
+  tbody.innerHTML = `<tr><td colspan="3" class="text-base-content" style="text-align: center; font-style: italic;">Loading...</td></tr>`;
+  // Fetch from backend (replace URL with your endpoint)
+  fetch("/api/follow-ups")
+    .then(res => res.json())
+    .then(data => {
+      console.log("Follow Up Data:", data); // ← log the result for debugging
+      if (!Array.isArray(data) || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-base-content" style="text-align: center; font-style: italic;">No follow ups.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        const followUpDate = row.follow_up_date || row.followUpDate || row.date || "";
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+          `<td>${row.name ? row.name : ""}</td>` +
+          `<td>${row.status ? row.status : ""}</td>` +
+          `<td>${formatDate(followUpDate)}</td>`;
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(err => {
+      console.error("Error fetching follow ups:", err);
+      tbody.innerHTML = `<tr><td colspan="3" class="text-base-content" style="text-align: center; font-style: italic;">Error loading follow ups.</td></tr>`;
+    });
+}
+
+// On DOMContentLoaded, load the Follow Up table
+document.addEventListener("DOMContentLoaded", function() {
+  loadFollowUpTable();
+});
+</script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+// Adjust these values or import from a config as needed
+const SUPABASE_URL = window.SUPABASE_URL || ''; // You can set these as globals or inline
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function fetchFollowUps() {
+  const { data, error } = await supabase
+    .from('circle_leaders')
+    .select('id, full_name, status, follow_up_date')
+    .eq('follow_up_needed', true)
+    .order('follow_up_date', { ascending: true });
+  // Remove any existing table
+  const oldTable = document.getElementById('follow-up-table');
+  if (oldTable) oldTable.remove();
+
+  // Create new table
+  const table = document.createElement('table');
+  table.id = 'follow-up-table';
+  table.className = 'min-w-full divide-y divide-gray-200 dark:divide-gray-700 rounded-lg overflow-hidden shadow-lg bg-white dark:bg-gray-900';
+
+  // Table header
+  table.innerHTML = `
+    <thead class="bg-gray-100 dark:bg-gray-800">
+      <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Circle Leader Name</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Status</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Follow Up Date</th>
+      </tr>
+    </thead>
+    <tbody id="follow-up-table-body" class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+  `;
+
+  // Insert table into the DOM (replace or append to a known container)
+  let container = document.getElementById('follow-up-table-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'follow-up-table-container';
+    container.className = 'my-8';
+    document.body.prepend(container);
+  }
+  container.innerHTML = '';
+  container.appendChild(table);
+
+  // Render table body
+  const tbody = document.getElementById('follow-up-table-body');
+  if (!tbody) return;
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="3" class="text-center text-red-600 dark:text-red-400 italic py-4">Error loading follow ups: ${error.message}</td></tr>`;
+    return;
+  }
+  if (!data || data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" class="text-center italic py-4 text-gray-500 dark:text-gray-400">No follow ups needed.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(leader => {
+    let formattedDate = '—';
+    if (leader.follow_up_date) {
+      const d = new Date(leader.follow_up_date);
+      if (!isNaN(d.getTime())) {
+        formattedDate = d.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
+      }
+    }
+    return `
+      <tr class="dark:bg-gray-800">
+        <td class="px-6 py-3 dark:text-gray-100">${leader.full_name ?? ''}</td>
+        <td class="px-6 py-3"><span class="badge badge-warning bg-yellow-600 text-white dark:bg-yellow-500 dark:text-gray-900">${leader.status ?? ''}</span></td>
+        <td class="px-6 py-3 dark:text-gray-100">${formattedDate}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Fetch on load
+document.addEventListener('DOMContentLoaded', fetchFollowUps);
+</script>
