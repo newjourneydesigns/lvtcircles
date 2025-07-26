@@ -5252,7 +5252,14 @@ function populateSearchResultsMobile(results) {
         ccbLink.href = leader.ccb_link;
         ccbLink.target = '_blank';
         ccbLink.rel = 'noopener';
+        ccbLink.style.color = '#22c55e'; // Tailwind green-500
+        ccbLink.style.textDecoration = 'none';
+        ccbLink.style.fontWeight = '700';
         ccbRow.style.display = 'block';
+        // Remove the label if present
+        if (ccbRow.firstChild && ccbRow.firstChild.nodeType === Node.TEXT_NODE) {
+          ccbRow.firstChild.textContent = '';
+        }
       } else {
         ccbRow.style.display = 'none';
       }
