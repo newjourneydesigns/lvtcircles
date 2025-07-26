@@ -2658,9 +2658,62 @@ body.dark-mode .status-container .status {
         <div class="progress-title" style="font-size:1.2em;font-weight:700;">Event Summary Completion</div>
         <div id="event-summary-count" style="font-size:1em;font-weight:500;">0 of 0</div>
       </div>
-      <div class="progress-bar" style="background:#23272b;height:24px;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px #0002;margin-bottom:18px;">
-        <div id="event-summary-progress" class="progress-bar-fill" style="background:linear-gradient(90deg,#4ade80,#22d3ee);height:100%;width:0%;transition:width 0.3s;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1em;color:#fff;text-shadow:0 1px 2px #0008;"></div>
-      </div>
+      <style>
+        /* Event Summary Progress Bar - Light Mode */
+        .event-summary-progress-bar {
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          height: 28px;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px #0001, 0 1.5px 4px #0001;
+          margin-bottom: 18px;
+          position: relative;
+        }
+        .event-summary-progress-bar-fill {
+          background: linear-gradient(90deg, #4ade80 0%, #22d3ee 100%);
+          height: 100%;
+          border-radius: 16px 0 0 16px;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          font-weight: 700;
+          font-size: 1em;
+          color: #fff;
+          text-shadow: 0 1px 2px #0008;
+          box-shadow: 0 1px 4px #22d3ee33;
+          transition: width 0.3s;
+          padding-left: 18px;
+        }
+        .event-summary-progress-bar-label {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 1em;
+          color: #222;
+          pointer-events: none;
+        }
+        body.dark-mode .event-summary-progress-bar {
+          background: #23272b;
+          border: none;
+          box-shadow: 0 1px 4px #0002;
+        }
+        body.dark-mode .event-summary-progress-bar-fill {
+          color: #fff;
+        }
+        body.dark-mode .event-summary-progress-bar-label {
+          color: #fff;
+        }
+      </style>
+        <div class="event-summary-progress-bar">
+          <div id="event-summary-progress" class="event-summary-progress-bar-fill" style="width:0%"></div>
+        </div>
       <div class="bg-base-200 text-base-content rounded-lg shadow-lg p-6">
         <table id="event-summary-table" class="table px-4 py-2" style="font-size: 17px; border-radius: 2px">
           <thead>
