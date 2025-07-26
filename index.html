@@ -3306,28 +3306,22 @@ body.dark-mode .status-container .status {
 
   <!-- Follow Up Modal -->
   <div id="follow-up-modal" class="modal-overlay hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="follow-up-modal-title">Mark for Follow Up</h3>
+    <form id="follow-up-form" class="modal-form-modern">
+      <h2 class="modal-form-title">Mark for Follow Up</h2>
+      <div class="modal-form-row">
+        <label for="follow-up-date" class="modal-form-label">Follow Up Date</label>
+        <input type="date" id="follow-up-date" class="modal-form-input" required />
       </div>
-      <form id="follow-up-form">
-        <div id="follow-up-fields">
-          <div class="form-group">
-            <label for="follow-up-date">Follow Up Date:</label>
-            <input type="date" id="follow-up-date" required />
-          </div>
-          <div class="form-group">
-            <label for="follow-up-note">Follow Up Note (Optional):</label>
-            <textarea id="follow-up-note" placeholder="Add a note about why this follow-up is needed..." style="width: 100%; min-height: 60px; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box; resize: vertical;"></textarea>
-          </div>
-        </div>
-        <div class="modal-buttons">
-          <button type="button" class="btn-secondary" id="cancel-follow-up">Cancel</button>
-          <button type="submit" class="profile-action-btn clear-follow" id="clear-follow-up-modal-btn" style="display:none;">Clear Follow Up</button>
-          <button type="submit" class="btn-primary" id="mark-follow-up-modal-btn">Mark for Follow Up</button>
-        </div>
-      </form>
-    </div>
+      <div class="modal-form-row">
+        <label for="follow-up-note" class="modal-form-label">Note</label>
+        <textarea id="follow-up-note" class="modal-form-input" rows="3" placeholder="Add a note about why this follow-up is needed (optional)..."></textarea>
+      </div>
+      <div class="modal-form-actions">
+        <button type="button" class="btn-secondary modal-form-btn-secondary" id="cancel-follow-up">Cancel</button>
+        <button type="submit" class="btn-danger" id="clear-follow-up-modal-btn" style="display:none;">Clear Follow Up</button>
+        <button type="submit" class="btn-primary" id="mark-follow-up-modal-btn">Mark for Follow Up</button>
+      </div>
+    </form>
   </div>
 
   <!-- Custom Confirmation Modal -->
