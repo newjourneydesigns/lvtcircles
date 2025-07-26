@@ -4176,7 +4176,7 @@ function populateSearchResultsMobile(results) {
         // Get all active leaders
         const { data: leaders, error: leadersError } = await client
           .from('circle_leaders')
-          .select('id, full_name, meeting_day, meeting_time, status, ccb_link')
+          .select('id, full_name, meeting_day, meeting_time, status, ccb_link, meeting_frequency')
           .eq('status', 'active');
 
         if (leadersError) {
@@ -4212,7 +4212,8 @@ function populateSearchResultsMobile(results) {
           time: formatMeetingTime(l.meeting_time),
           status: l.status,
           ccb_link: l.ccb_link || '',
-          received: receivedMap.get(l.id) || false
+          received: receivedMap.get(l.id) || false,
+          meeting_frequency: l.meeting_frequency || ''
         })).sort((a, b) => {
           const order = { Sunday:0, Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 };
           const aDay = order[a.day] ?? 7;
@@ -4250,6 +4251,29 @@ function populateSearchResultsMobile(results) {
         return
       }
 
+
+      // Helper: get week of month (1-based)
+      function getWeekOfMonth(date = new Date()) {
+        const d = new Date(date);
+        d.setHours(0,0,0,0);
+        const first = new Date(d.getFullYear(), d.getMonth(), 1);
+        const dayOfWeek = first.getDay();
+        const offset = (dayOfWeek === 0 ? 6 : dayOfWeek - 1); // Monday=0, Sunday=6
+        return Math.floor((d.getDate() + offset - 1) / 7) + 1;
+      }
+
+      // Helper: is this circle meeting this week?
+      function isMeetingThisWeek(item) {
+        const freq = (item.meeting_frequency || '').trim();
+        if (!freq) return false;
+        const week = getWeekOfMonth();
+        if (freq === 'Weekly') return true;
+        if (freq === '2nd & 4th') return (week === 2 || week === 4);
+        if (freq === '1st, 3rd, and 5th') return (week === 1 || week === 3 || week === 5);
+        // Optionally, add more custom logic for other frequencies
+        return false;
+      }
+
       data.forEach(item => {
         const row = document.createElement('tr');
         // Name cell with CCB link or profile link
@@ -4282,6 +4306,7 @@ function populateSearchResultsMobile(results) {
           });
         }
         nameCell.appendChild(link);
+        // Highlight if meeting this week (on the checkbox cell instead)
 
         // Other columns
         const dayCell = document.createElement('td');
@@ -4296,6 +4321,12 @@ function populateSearchResultsMobile(results) {
         checkbox.dataset.leaderId = item.leader_id;
         if (item.received) checkbox.checked = true;
         checkboxCell.appendChild(checkbox);
+
+        // Move highlight to checkbox cell if meeting this week
+        if (isMeetingThisWeek(item)) {
+          // Use a subtle green highlight (Tailwind green-100) at 20% opacity
+          checkboxCell.style.setProperty('background', 'rgba(209, 250, 229, 0.2)', 'important');
+        }
 
         row.appendChild(nameCell);
         row.appendChild(dayCell);
@@ -5278,7 +5309,13 @@ function populateSearchResultsMobile(results) {
       const circle_type = document.getElementById('edit_circle_type').value || null
       const meeting_day = document.getElementById('edit_meeting_day').value || null
       const meeting_time = document.getElementById('edit_meeting_time').value || null
-      const meeting_frequency = document.getElementById('edit_meeting_frequency').value || null
+
+      let meeting_frequency = document.getElementById('edit_meeting_frequency').value || null;
+      // Store display values directly in the database
+      if (meeting_frequency === 'Other') {
+        const custom = document.getElementById('edit_meeting_frequency_custom').value.trim();
+        if (custom) meeting_frequency = custom;
+      }
 
       const { error } = await client.from('circle_leaders').update({
         full_name, phone, email, ccb_link, status, last_comm_date, last_comm_type,
@@ -5551,9 +5588,7 @@ function populateSearchResultsMobile(results) {
       const meeting_day = document.getElementById('inline-edit-meeting-day').value || null
       const meeting_time = document.getElementById('inline-edit-meeting-time').value || null
       let meeting_frequency = document.getElementById('inline-edit-meeting-frequency').value || null;
-      // Map display values back to stored values for consistency
-      if (meeting_frequency === '1st, 3rd, and 5th') meeting_frequency = '1/3/5';
-      if (meeting_frequency === '2nd & 4th') meeting_frequency = '2/4';
+      // Store display values directly in the database
       if (meeting_frequency === 'Other') {
         const custom = document.getElementById('inline-edit-meeting-frequency-custom').value.trim();
         if (custom) meeting_frequency = custom;
