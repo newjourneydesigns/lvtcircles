@@ -2631,11 +2631,10 @@ body.dark-mode .status-container .status {
             <tr>
               <th class="sortable" data-column="name" data-table="follow-up-table">Name <span class="sort-indicator"></span></th>
               <th class="sortable" data-column="status" data-table="follow-up-table">Status <span class="sort-indicator"></span></th>
-              <th class="sortable" data-column="note" data-table="follow-up-table">Follow Up <span class="sort-indicator"></span></th>
             </tr>
           </thead>
           <tbody>
-            <tr><td colspan="3" class="text-base-content" style="text-align: center; font-style: italic;">Loading...</td></tr>
+            <tr><td colspan="2" class="text-base-content" style="text-align: center; font-style: italic;">Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -2644,11 +2643,10 @@ body.dark-mode .status-container .status {
     <!-- Event Summary Tracker -->
     <div id="event-summary-section" class="progress-container" style="margin-bottom: 1rem;">
       <div class="progress-header">
-        <div id="summary-count" class="progress-stats">0 out of 0 Summaries Received</div>
       </div>
       <div class="progress-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5em;">
         <div class="progress-title" style="font-size:1.2em;font-weight:700;">Event Summary Completion</div>
-        <div id="event-summary-count" style="font-size:1em;font-weight:500;">0 of 0 Summaries</div>
+        <div id="event-summary-count" style="font-size:1em;font-weight:500;">0 of 0</div>
       </div>
       <div class="progress-bar" style="background:#23272b;height:24px;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px #0002;margin-bottom:18px;">
         <div id="event-summary-progress" class="progress-bar-fill" style="background:linear-gradient(90deg,#4ade80,#22d3ee);height:100%;width:0%;transition:width 0.3s;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1em;color:#fff;text-shadow:0 1px 2px #0008;"></div>
@@ -2797,6 +2795,10 @@ body.dark-mode .status-container .status {
         <input type="email" id="edit_email" placeholder="Email" required class="input input-bordered w-full bg-base-100 text-base-content" />
       </div>
       <div class="form-group">
+        <label class="label text-sm font-semibold text-base-content" for="edit_ccb_link">CCB Link (optional):</label>
+        <input type="url" id="edit_ccb_link" placeholder="https://example.com" class="input input-bordered w-full bg-base-100 text-base-content" />
+      </div>
+      <div class="form-group">
         <label class="label text-sm font-semibold text-base-content" for="edit_status">Status:</label>
         <select id="edit_status" class="input input-bordered w-full bg-base-100 text-base-content">
           <option value="invite">Invite</option>
@@ -2887,6 +2889,7 @@ body.dark-mode .status-container .status {
             <div style="margin-bottom: 0.5rem;" id="profile-circle-info">Circle info will be displayed here</div>
             <div style="margin-bottom: 0.5rem;">Last Comm: <span id="profile-last-comm">Sunday 7/13/25</span></div>
             <div style="margin-bottom: 0.5rem;">Status: <span class="profile-status" id="profile-status">Leader</span></div>
+            <div style="margin-bottom: 0.5rem; display:none;" id="profile-ccb-link-row">CCB Link: <a href="#" id="profile-ccb-link" target="_blank" rel="noopener" style="color:#22c55e;font-weight:600;text-decoration:underline;"></a></div>
             <div style="margin-bottom: 0.5rem;">Phone: <a href="#" class="profile-phone-link" id="profile-phone">972-539-8900</a></div>
             <div style="margin-bottom: 0.5rem;">Email: <a href="mailto:" class="profile-email-link" id="profile-email">cris.linse@gmail.com</a></div>
           </div>
@@ -2904,6 +2907,10 @@ body.dark-mode .status-container .status {
             <div style="margin-bottom: 1rem;">
               <label>Email:</label>
               <input type="email" id="inline-edit-email" style="width: 100%; margin: 0.25rem 0;" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label>CCB Link (optional):</label>
+              <input type="url" id="inline-edit-ccb-link" style="width: 100%; margin: 0.25rem 0;" />
             </div>
             <div style="margin-bottom: 1rem;">
               <label>Status:</label>
@@ -3026,6 +3033,10 @@ body.dark-mode .status-container .status {
         <div style="margin-bottom: 1rem;">
           <label>Email:</label>
           <input type="email" id="email" placeholder="Email" required style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;" />
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>CCB Link (optional):</label>
+          <input type="url" id="ccb_link" placeholder="https://example.com" style="width: 100%; margin: 0.25rem 0; padding: 0.5rem;" />
         </div>
         <div style="margin-bottom: 1rem;">
           <label>Status:</label>
@@ -4081,31 +4092,50 @@ function populateSearchResultsMobile(results) {
         return
       }
 
-      data.forEach(item => {
+      data.forEach(async item => {
         const row = document.createElement('tr')
+        // Fetch CCB link for this leader
+        let ccbLink = ''
+        try {
+          const { data: leader, error } = await client
+            .from('circle_leaders')
+            .select('ccb_link')
+            .eq('id', item.leader_id)
+            .single()
+          if (!error && leader && leader.ccb_link) {
+            ccbLink = leader.ccb_link
+          }
+        } catch {}
+        let nameCell = ''
+        if (ccbLink) {
+          nameCell = `<a href="${ccbLink}" class="name-link" target="_blank" rel="noopener" style="color:#22c55e;font-weight:700;">${item.name}</a>`
+        } else {
+          nameCell = `<a href="#" class="name-link" data-leader-id="${item.leader_id}" style="color:#007aff;font-weight:700;">${item.name}</a>`
+        }
         row.innerHTML = `
-          <td><a href="#" class="name-link" data-leader-id="${item.leader_id}">${item.name}</a></td>
+          <td>${nameCell}</td>
           <td>${item.day || 'Not set'}</td>
           <td>${item.time}</td>
           <td style="text-align:center;"><input type="checkbox" class="summary-checkbox" data-leader-id="${item.leader_id}" ${item.received ? 'checked' : ''}></td>
         `
-
-        const nameLink = row.querySelector('.name-link')
-        if (nameLink) {
-          nameLink.addEventListener('click', async (e) => {
-            e.preventDefault()
-            const leaderId = e.target.dataset.leaderId
-            const { data: leader, error } = await client
-              .from('circle_leaders')
-              .select('*')
-              .eq('id', leaderId)
-              .single()
-            if (!error && leader) {
-              showLeaderProfile(leader)
-            }
-          })
+        // Only add profile link if no CCB link
+        if (!ccbLink) {
+          const nameLink = row.querySelector('.name-link')
+          if (nameLink) {
+            nameLink.addEventListener('click', async (e) => {
+              e.preventDefault()
+              const leaderId = e.target.dataset.leaderId
+              const { data: leader, error } = await client
+                .from('circle_leaders')
+                .select('*')
+                .eq('id', leaderId)
+                .single()
+              if (!error && leader) {
+                showLeaderProfile(leader)
+              }
+            })
+          }
         }
-
         tbody.appendChild(row)
       })
 
@@ -4983,6 +5013,7 @@ function populateSearchResultsMobile(results) {
       const full_name = document.getElementById('full_name').value
       const phone = document.getElementById('phone').value
       const email = document.getElementById('email').value
+      const ccb_link = document.getElementById('ccb_link').value || null
       const status = document.getElementById('status').value
       const last_comm_date = document.getElementById('last_comm_date').value || null
       const last_comm_type = document.getElementById('last_comm_type').value || null
@@ -5010,7 +5041,7 @@ function populateSearchResultsMobile(results) {
         console.log('Attempting to add leader:', { full_name, phone, email, status })
         
         const { data, error } = await client.from('circle_leaders').insert([
-          { full_name, phone, email, status, last_comm_date, last_comm_type,
+          { full_name, phone, email, ccb_link, status, last_comm_date, last_comm_type,
             circle_type, meeting_day, meeting_time, meeting_frequency }
         ])
 
@@ -5056,6 +5087,7 @@ function populateSearchResultsMobile(results) {
       document.getElementById('edit_full_name').value = leader.full_name || ''
       document.getElementById('edit_phone').value = leader.phone || ''
       document.getElementById('edit_email').value = leader.email || ''
+      document.getElementById('edit_ccb_link').value = leader.ccb_link || ''
       document.getElementById('edit_status').value = leader.status || 'invite'
       document.getElementById('edit_last_comm_date').value = leader.last_comm_date || ''
       document.getElementById('edit_last_comm_type').value = leader.last_comm_type || ''
@@ -5074,6 +5106,7 @@ function populateSearchResultsMobile(results) {
       const full_name = document.getElementById('edit_full_name').value
       const phone = document.getElementById('edit_phone').value
       const email = document.getElementById('edit_email').value
+      const ccb_link = document.getElementById('edit_ccb_link').value || null
       const status = document.getElementById('edit_status').value
       const last_comm_date = document.getElementById('edit_last_comm_date').value || null
       const last_comm_type = document.getElementById('edit_last_comm_type').value || null
@@ -5083,7 +5116,7 @@ function populateSearchResultsMobile(results) {
       const meeting_frequency = document.getElementById('edit_meeting_frequency').value || null
 
       const { error } = await client.from('circle_leaders').update({
-        full_name, phone, email, status, last_comm_date, last_comm_type,
+        full_name, phone, email, ccb_link, status, last_comm_date, last_comm_type,
         circle_type, meeting_day, meeting_time, meeting_frequency
       }).eq('id', id)
 
@@ -5203,6 +5236,16 @@ function populateSearchResultsMobile(results) {
       const emailLink = document.getElementById('profile-email')
       emailLink.textContent = leader.email || 'No email'
       emailLink.href = leader.email ? `mailto:${leader.email}` : '#'
+      // Handle CCB Link
+      const ccbRow = document.getElementById('profile-ccb-link-row')
+      const ccbLink = document.getElementById('profile-ccb-link')
+      if (leader.ccb_link) {
+        ccbLink.textContent = leader.ccb_link
+        ccbLink.href = leader.ccb_link
+        ccbRow.style.display = 'block'
+      } else {
+        ccbRow.style.display = 'none'
+      }
       
       const lastCommText = leader.last_comm_date ? 
         `${formatDateOnly(leader.last_comm_date)}${leader.last_comm_type ? ` (${leader.last_comm_type})` : ''}` : 
@@ -5262,6 +5305,7 @@ function populateSearchResultsMobile(results) {
       document.getElementById('inline-edit-name').value = currentLeader.full_name || ''
       document.getElementById('inline-edit-phone').value = currentLeader.phone || ''
       document.getElementById('inline-edit-email').value = currentLeader.email || ''
+      document.getElementById('inline-edit-ccb-link').value = currentLeader.ccb_link || ''
       document.getElementById('inline-edit-status').value = currentLeader.status || 'invite'
       document.getElementById('inline-edit-circle-type').value = currentLeader.circle_type || ''
       document.getElementById('inline-edit-meeting-day').value = currentLeader.meeting_day || ''
