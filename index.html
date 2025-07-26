@@ -1580,6 +1580,16 @@ body.dark-mode .status-container .status {
   color: #00e676;
 }
 </style>
+<style>
+  /* Ensure Update Last Connection modal uses correct dark mode background */
+  body.dark-mode #update-comm-modal .modal-form-container,
+  body.dark-mode #update-comm-modal .modal-content {
+    background: #1c1c1e !important;
+    color: #fff !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.45) !important;
+  }
+</style>
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -3117,39 +3127,144 @@ body.dark-mode .status-container .status {
       <div class="modal-header">
         <h3>Update Last Connection</h3>
       </div>
-      <form id="update-comm-form">
-        <div class="form-group">
-          <label for="comm-date">Communication Date:</label>
-          <input type="date" id="comm-date" required />
-        </div>
-        <div class="form-group">
-          <label for="comm-type">Communication Type:</label>
-          <select id="comm-type" required>
-            <option value="">Select Type</option>
-            <option value="Atrium">Atrium</option>
-            <option value="One-on-One">One-on-One</option>
-            <option value="Zoom">Zoom</option>
-            <option value="Text">Text</option>
-            <option value="Phone">Phone</option>
-            <option value="Circle Leader Training">Circle Leader Training</option>
-            <option value="Circle Leader Lunch">Circle Leader Lunch</option>
-            <option value="Circle Visit">Circle Visit</option>
-            <option value="Email">Email</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="comm-note">Note (Optional):</label>
-          <textarea id="comm-note" placeholder="Add a note about this communication..." style="width: 100%; min-height: 60px; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box; resize: vertical;"></textarea>
-        </div>
-        <div class="modal-buttons">
-          <button type="button" class="btn-secondary" id="cancel-comm-update">Cancel</button>
-          <button type="submit" class="btn-primary">Save</button>
-        </div>
-        <div class="modal-buttons" style="margin-top:0.5rem;">
-          <button type="button" class="btn-danger" id="clear-last-comm-btn" style="width:100%;">Clear Last Connection</button>
-        </div>
-      </form>
+<form id="update-comm-form" class="modal-form-modern">
+  <h2 class="modal-form-title">Update Last Connection</h2>
+  <div class="modal-form-row">
+    <label for="comm-date" class="modal-form-label">Date</label>
+    <input type="date" id="comm-date" class="modal-form-input" required />
+  </div>
+  <div class="modal-form-row">
+    <label for="comm-type" class="modal-form-label">Type</label>
+    <select id="comm-type" class="modal-form-input" required>
+      <option value="">Select Type</option>
+      <option value="Atrium">Atrium</option>
+      <option value="One-on-One">One-on-One</option>
+      <option value="Zoom">Zoom</option>
+      <option value="Text">Text</option>
+      <option value="Phone">Phone</option>
+      <option value="Circle Leader Training">Circle Leader Training</option>
+      <option value="Circle Leader Lunch">Circle Leader Lunch</option>
+      <option value="Circle Visit">Circle Visit</option>
+      <option value="Email">Email</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div class="modal-form-row">
+    <label for="comm-note" class="modal-form-label">Note</label>
+    <textarea id="comm-note" class="modal-form-input" rows="3" placeholder="Add a note (optional)..."></textarea>
+  </div>
+  <div class="modal-form-actions">
+    <button type="submit" class="modal-form-btn modal-form-btn-primary">Save</button>
+    <button type="button" class="modal-form-btn modal-form-btn-secondary" id="cancel-comm-update">Cancel</button>
+  </div>
+  <button type="button" class="modal-form-btn modal-form-btn-danger" id="clear-last-comm-btn">Clear Last Connection</button>
+</form>
+
+<style>
+  .modal-form-modern {
+    background: var(--modal-bg, #fff);
+    color: var(--modal-fg, #222);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.18);
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+    max-width: 420px;
+    margin: 0 auto;
+    font-family: inherit;
+  }
+  .modal-form-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    letter-spacing: 0.01em;
+  }
+  .modal-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .modal-form-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--modal-label, #444);
+    margin-bottom: 0.1rem;
+  }
+  .modal-form-input {
+    background: var(--modal-input-bg, #f8fafc);
+    color: var(--modal-input-fg, #222);
+    border: 1px solid var(--modal-input-border, #cbd5e1);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    outline: none;
+    box-shadow: none;
+    width: 100%;
+    resize: vertical;
+  }
+  .modal-form-input:focus {
+    border-color: #2563eb;
+  }
+  .modal-form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-content: flex-end;
+  }
+  .modal-form-btn {
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.65rem 1.5rem;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    margin: 0;
+    outline: none;
+    box-shadow: none;
+  }
+  .modal-form-btn-primary {
+    background: #2563eb;
+    color: #fff;
+  }
+  .modal-form-btn-primary:hover {
+    background: #1d4ed8;
+  }
+  .modal-form-btn-secondary {
+    background: #e5e7eb;
+    color: #222;
+  }
+  .modal-form-btn-secondary:hover {
+    background: #cbd5e1;
+  }
+  .modal-form-btn-danger {
+    background: #dc2626;
+    color: #fff;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.65rem 0;
+  }
+  .modal-form-btn-danger:hover {
+    background: #b91c1c;
+  }
+  /* Dark mode overrides */
+  body.dark-mode .modal-form-modern {
+    --modal-bg: #1c1c1e;
+    --modal-fg: #fff;
+    --modal-label: #b0b0b0;
+    --modal-input-bg: #232326;
+    --modal-input-fg: #fff;
+    --modal-input-border: #4b5563;
+  }
+  body.dark-mode .modal-form-btn-secondary {
+    background: #374151;
+    color: #fff;
+  }
+  body.dark-mode .modal-form-btn-secondary:hover {
+    background: #4b5563;
+  }
+</style>
     </div>
   </div>
 
