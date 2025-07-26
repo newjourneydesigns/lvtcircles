@@ -5318,6 +5318,11 @@ function populateSearchResultsMobile(results) {
       if (notesSection) notesSection.style.display = '';
       const addNoteBtn = document.getElementById('add-note-button');
       if (addNoteBtn) addNoteBtn.style.display = '';
+      // Show Follow Up and Connection Made buttons when not editing
+      const followUpBtn = document.getElementById('follow-up-btn');
+      if (followUpBtn) followUpBtn.style.display = '';
+      const connectionMadeBtn = document.getElementById('update-last-comm-btn');
+      if (connectionMadeBtn) connectionMadeBtn.style.display = '';
     }
 
     function showProfileEdit() {
@@ -5339,6 +5344,11 @@ function populateSearchResultsMobile(results) {
       if (notesSection) notesSection.style.display = 'none';
       const addNoteBtn = document.getElementById('add-note-button');
       if (addNoteBtn) addNoteBtn.style.display = 'none';
+      // Hide Follow Up and Connection Made buttons in edit mode
+      const followUpBtn = document.getElementById('follow-up-btn');
+      if (followUpBtn) followUpBtn.style.display = 'none';
+      const connectionMadeBtn = document.getElementById('update-last-comm-btn');
+      if (connectionMadeBtn) connectionMadeBtn.style.display = 'none';
       // Show edit form, hide display
       document.getElementById('profile-display').classList.add('hidden')
       document.getElementById('profile-edit-form').classList.remove('hidden')
@@ -5778,9 +5788,88 @@ function populateSearchResultsMobile(results) {
       }
     }
 
+
     function hideCommModal() {
       document.getElementById('update-comm-modal').classList.add('hidden')
     }
+
+    // --- Dark mode modal styling (CSS-based) ---
+    const darkModeModalStyles = document.createElement('style');
+    darkModeModalStyles.innerHTML = `
+      body.dark-mode #update-comm-modal .modal-form-container {
+        background: #1c1c1e !important;
+        color: #fff !important;
+        border-radius: 0.75rem !important;
+        box-shadow: 0 8px 32px 0 rgba(0,0,0,0.45) !important;
+        padding: 2rem !important;
+      }
+      body.dark-mode #update-comm-modal label {
+        color: #b0b0b0 !important;
+      }
+      body.dark-mode #update-comm-modal input,
+      body.dark-mode #update-comm-modal select,
+      body.dark-mode #update-comm-modal textarea {
+        background: #232326 !important;
+        color: #fff !important;
+        border: 1px solid #4b5563 !important;
+        border-radius: 0.375rem !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 1rem !important;
+        margin-bottom: 1rem !important;
+        outline: none !important;
+        box-shadow: none !important;
+        transition: border-color 0.2s;
+      }
+      body.dark-mode #update-comm-modal input:focus,
+      body.dark-mode #update-comm-modal select:focus,
+      body.dark-mode #update-comm-modal textarea:focus {
+        border-color: #3b82f6 !important;
+      }
+      body.dark-mode #update-comm-modal .cancel-comm-update,
+      body.dark-mode #update-comm-modal #cancel-comm-update {
+        background: #374151 !important;
+        color: #fff !important;
+        border: none !important;
+        border-radius: 0.375rem !important;
+        padding: 0.5rem 1.25rem !important;
+        font-size: 1rem !important;
+        margin-right: 0.5rem !important;
+        transition: background 0.2s;
+      }
+      body.dark-mode #update-comm-modal .cancel-comm-update:hover,
+      body.dark-mode #update-comm-modal #cancel-comm-update:hover {
+        background: #4b5563 !important;
+      }
+      body.dark-mode #update-comm-modal .save-comm-update,
+      body.dark-mode #update-comm-modal #save-comm-update {
+        background: #2563eb !important;
+        color: #fff !important;
+        border: none !important;
+        border-radius: 0.375rem !important;
+        padding: 0.5rem 1.25rem !important;
+        font-size: 1rem !important;
+        transition: background 0.2s;
+      }
+      body.dark-mode #update-comm-modal .save-comm-update:hover,
+      body.dark-mode #update-comm-modal #save-comm-update:hover {
+        background: #3b82f6 !important;
+      }
+      body.dark-mode #update-comm-modal .clear-last-comm,
+      body.dark-mode #update-comm-modal #clear-last-comm {
+        background: #dc2626 !important;
+        color: #fff !important;
+        border: none !important;
+        border-radius: 0.375rem !important;
+        padding: 0.5rem 1.25rem !important;
+        font-size: 1rem !important;
+        transition: background 0.2s;
+      }
+      body.dark-mode #update-comm-modal .clear-last-comm:hover,
+      body.dark-mode #update-comm-modal #clear-last-comm:hover {
+        background: #ef4444 !important;
+      }
+    `;
+    document.head.appendChild(darkModeModalStyles);
 
     async function markForFollowUp() {
       if (!currentLeader) {
