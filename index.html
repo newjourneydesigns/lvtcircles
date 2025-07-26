@@ -3011,6 +3011,7 @@ body.dark-mode .status-container .status {
                 <option value="2/4">2/4</option>
                 <option value="Other">Other</option>
               </select>
+              <input type="text" id="inline-edit-meeting-frequency-custom" placeholder="Enter custom frequency" style="width:100%;margin:0.25rem 0;display:none;" />
             </div>
             <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
               <button class="btn-primary" id="save-inline-edit">Save</button>
@@ -5493,7 +5494,24 @@ function populateSearchResultsMobile(results) {
       document.getElementById('inline-edit-circle-type').value = currentLeader.circle_type || ''
       document.getElementById('inline-edit-meeting-day').value = currentLeader.meeting_day || ''
       document.getElementById('inline-edit-meeting-time').value = currentLeader.meeting_time || ''
-      document.getElementById('inline-edit-meeting-frequency').value = currentLeader.meeting_frequency || ''
+      // Set meeting frequency, support custom values
+      const freqSelect = document.getElementById('inline-edit-meeting-frequency');
+      const freqCustom = document.getElementById('inline-edit-meeting-frequency-custom');
+      const freqVal = (currentLeader.meeting_frequency || '').trim();
+      const allowed = ["", "Weekly", "1/3/5", "2/4", "Other"];
+      if (allowed.includes(freqVal)) {
+        freqSelect.value = freqVal;
+        freqCustom.style.display = (freqVal === "Other") ? "block" : "none";
+        if (freqVal === "Other") freqCustom.value = '';
+      } else if (freqVal) {
+        freqSelect.value = "Other";
+        freqCustom.style.display = "block";
+        freqCustom.value = freqVal;
+      } else {
+        freqSelect.value = '';
+        freqCustom.style.display = "none";
+        freqCustom.value = '';
+      }
       
       // Hide notes section and add note button in edit mode
       const notesSection = document.querySelector('.notes-section');
@@ -5521,7 +5539,21 @@ function populateSearchResultsMobile(results) {
       const circle_type = document.getElementById('inline-edit-circle-type').value || null
       const meeting_day = document.getElementById('inline-edit-meeting-day').value || null
       const meeting_time = document.getElementById('inline-edit-meeting-time').value || null
-      const meeting_frequency = document.getElementById('inline-edit-meeting-frequency').value || null
+      let meeting_frequency = document.getElementById('inline-edit-meeting-frequency').value || null;
+      if (meeting_frequency === 'Other') {
+        const custom = document.getElementById('inline-edit-meeting-frequency-custom').value.trim();
+        if (custom) meeting_frequency = custom;
+      }
+    // Show/hide custom frequency input on select change
+    document.getElementById('inline-edit-meeting-frequency').addEventListener('change', function() {
+      const customInput = document.getElementById('inline-edit-meeting-frequency-custom');
+      if (this.value === 'Other') {
+        customInput.style.display = 'block';
+      } else {
+        customInput.style.display = 'none';
+        customInput.value = '';
+      }
+    });
 
       try {
         const { error } = await client.from('circle_leaders').update({
