@@ -5304,6 +5304,11 @@ function populateSearchResultsMobile(results) {
     function showProfileDisplay() {
       document.getElementById('profile-display').classList.remove('hidden')
       document.getElementById('profile-edit-form').classList.add('hidden')
+      // Show notes section and add note button when not editing
+      const notesSection = document.querySelector('.notes-section');
+      if (notesSection) notesSection.style.display = '';
+      const addNoteBtn = document.getElementById('add-note-button');
+      if (addNoteBtn) addNoteBtn.style.display = '';
     }
 
     function showProfileEdit() {
@@ -5320,6 +5325,11 @@ function populateSearchResultsMobile(results) {
       document.getElementById('inline-edit-meeting-time').value = currentLeader.meeting_time || ''
       document.getElementById('inline-edit-meeting-frequency').value = currentLeader.meeting_frequency || ''
       
+      // Hide notes section and add note button in edit mode
+      const notesSection = document.querySelector('.notes-section');
+      if (notesSection) notesSection.style.display = 'none';
+      const addNoteBtn = document.getElementById('add-note-button');
+      if (addNoteBtn) addNoteBtn.style.display = 'none';
       // Show edit form, hide display
       document.getElementById('profile-display').classList.add('hidden')
       document.getElementById('profile-edit-form').classList.remove('hidden')
